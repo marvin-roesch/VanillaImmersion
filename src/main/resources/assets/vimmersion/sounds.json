@@ -1,0 +1,10 @@
+{
+  "enchanting.page_turn": {
+    "sounds": [
+      {
+        "name": "vimmersion:enchanting/page_turn"
+      }
+    ],
+    "category": "block"
+  }
+}

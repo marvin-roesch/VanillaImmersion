@@ -1,0 +1,28 @@
+{
+  "forge_marker": 1,
+  "defaults": {
+    "model": "vimmersion:furnace",
+    "textures": {
+      "particle": "blocks/stone",
+      "top": "blocks/furnace_top",
+      "side": "blocks/furnace_side",
+      "front": "blocks/furnace_front_off",
+      "iron_bars": "blocks/iron_block"
+    }
+  },
+  "variants": {
+    "facing": {
+      "north": {
+      },
+      "south": {
+        "y": 180
+      },
+      "west": {
+        "y": 270
+      },
+      "east": {
+        "y": 90
+      }
+    }
+  }
+}

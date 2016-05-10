@@ -1,0 +1,17 @@
+[
+  {
+    "modid": "vimmersion",
+    "name": "Vanilla Immersion",
+    "description": "Immersify everything!",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "",
+    "updateUrl": "",
+    "authorList": [
+      "PaleoCrafter"
+    ],
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": []
+  }
+]
