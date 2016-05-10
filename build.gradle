@@ -21,7 +21,7 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'kotlin'
 apply plugin: 'com.github.johnrengelman.shadow'
 
-version = '1.0'
+version = '1.0.0'
 group= 'de.mineformers.vimmersion'
 archivesBaseName = 'vanilla-immersion'
 
@@ -38,7 +38,14 @@ dependencies {
 shadowJar {
     relocate 'kotlin', 'de.mineformers.vanillaimmersion.kotlin'
     relocate 'org.jetbrains.annotations', 'de.mineformers.vanillaimmersion.jetbrains.annotations'
+    classifier ''
 }
+
+reobf {
+	shadowJar { mappingType = 'SEARGE' }
+}
+
+tasks.build.dependsOn reobfShadowJar
 
 processResources {
     // this will ensure that this task is redone when the versions change.
