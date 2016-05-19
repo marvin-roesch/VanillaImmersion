@@ -4,7 +4,9 @@
 !/gradle*
 !/src/
 !/src/*
-!/build.gradle
+!/*.gradle
+/.gradle/
+!/build.properties
 !/*.md
 !/LICENSE
 !/.gitignore

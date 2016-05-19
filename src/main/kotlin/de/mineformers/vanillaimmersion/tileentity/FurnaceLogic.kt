@@ -3,13 +3,16 @@ package de.mineformers.vanillaimmersion.tileentity
 import de.mineformers.vanillaimmersion.VanillaImmersion.Blocks.FURNACE
 import de.mineformers.vanillaimmersion.VanillaImmersion.Blocks.LIT_FURNACE
 import de.mineformers.vanillaimmersion.util.Inventories
+import net.minecraft.block.BlockFurnace
 import net.minecraft.block.BlockFurnace.FACING
+import net.minecraft.block.state.IBlockState
 import net.minecraft.item.ItemStack
 import net.minecraft.item.crafting.FurnaceRecipes
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.network.NetworkManager
 import net.minecraft.network.play.server.SPacketUpdateTileEntity
 import net.minecraft.tileentity.TileEntityFurnace
+import net.minecraft.util.EnumFacing
 
 /**
  * ${JDOC}
@@ -188,4 +191,10 @@ class FurnaceLogic : TileEntityFurnace() {
     }
 
     override fun getUpdatePacket() = SPacketUpdateTileEntity(this.pos, 0, this.updateTag)
+
+    val facing: EnumFacing
+        get() = blockState.getValue(BlockFurnace.FACING)
+
+    val blockState: IBlockState
+        get() = worldObj.getBlockState(pos)
 }

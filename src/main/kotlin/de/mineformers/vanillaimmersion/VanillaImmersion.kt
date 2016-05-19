@@ -43,13 +43,13 @@ import net.minecraftforge.fml.relauncher.Side
 @Mod(modid = VanillaImmersion.MODID,
      name = VanillaImmersion.MOD_NAME,
      version = VanillaImmersion.VERSION,
-     acceptedMinecraftVersions = "[1.9.4,)",
-     dependencies = "required-after:Forge@[12.17.0.1909,)",
+     acceptedMinecraftVersions = "*",
+     dependencies = "required-after:Forge",
      modLanguageAdapter = "de.mineformers.vanillaimmersion.KotlinAdapter")
 object VanillaImmersion {
     const val MOD_NAME = "Vanilla Immersion"
     const val MODID = "vimmersion"
-    const val VERSION = "1.0.0"
+    const val VERSION = "@VERSION@"
 
     /**
      * Proxy for client- or server-specific code
