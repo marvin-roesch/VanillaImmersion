@@ -93,7 +93,7 @@ curseforge {
     apiKey = priv.cf_api
     project {
         id = priv.cf_project
-        changelog = """See https://github.com/PaleoCrafter/Botania/releases/tag/${version}"""
+        changelog = """See https://github.com/PaleoCrafter/Botania/releases/tag/v${version}"""
         releaseType = priv.cf_type
         addGameVersion config.mc_version
 
