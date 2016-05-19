@@ -62,7 +62,7 @@ object RepairHandler {
         val container = ContainerRepair(player.inventory, world, pos, player)
         container.getSlot(0).putStack(tile[AnvilLogic.Companion.Slot.INPUT_OBJECT])
         container.getSlot(1).putStack(tile[AnvilLogic.Companion.Slot.INPUT_MATERIAL])
-        container.updateItemName(tile.currentName)
+        container.updateItemName(tile.itemName)
         if (container.getSlot(2).hasStack) {
             val result = container.getSlot(2).stack
             (world as WorldServer).spawnParticle(EnumParticleTypes.BLOCK_DUST,
@@ -74,7 +74,7 @@ object RepairHandler {
             tile[AnvilLogic.Companion.Slot.OUTPUT] = result
         } else {
             tile[AnvilLogic.Companion.Slot.OUTPUT] = null
-            tile.currentName = null
+            tile.itemName = null
         }
     }
 
@@ -95,7 +95,7 @@ object RepairHandler {
             val container = ContainerRepair(player.inventory, world, pos, player)
             container.getSlot(0).putStack(tile[AnvilLogic.Companion.Slot.INPUT_OBJECT])
             container.getSlot(1).putStack(tile[AnvilLogic.Companion.Slot.INPUT_MATERIAL])
-            container.updateItemName(tile.currentName)
+            container.updateItemName(tile.itemName)
             if (!container.getSlot(2).canTakeStack(player))
                 return false
             val result = container.getSlot(2).stack
@@ -103,8 +103,8 @@ object RepairHandler {
             tile[AnvilLogic.Companion.Slot.INPUT_OBJECT] = container.getSlot(0).stack
             tile[AnvilLogic.Companion.Slot.INPUT_MATERIAL] = container.getSlot(1).stack
             tile[AnvilLogic.Companion.Slot.OUTPUT] = null
-            tile.currentName = null
-            Inventories.insertOrDrop(player, result.copy())
+            tile.itemName = null
+            Inventories.insertOrDrop(player, result?.copy())
             return true
         } else if (rot.z >= 8) {
             return false

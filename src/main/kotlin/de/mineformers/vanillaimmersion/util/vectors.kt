@@ -1,4 +1,4 @@
-@file:JvmName("TypeExtensions")
+@file:JvmName("VectorExtensions")
 
 package de.mineformers.vanillaimmersion.util
 

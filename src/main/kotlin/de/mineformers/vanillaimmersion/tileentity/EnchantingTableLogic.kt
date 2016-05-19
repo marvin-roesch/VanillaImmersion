@@ -4,13 +4,14 @@ import de.mineformers.vanillaimmersion.VanillaImmersion
 import de.mineformers.vanillaimmersion.VanillaImmersion.Blocks.ENCHANTING_TABLE
 import de.mineformers.vanillaimmersion.client.EnchantingUIHandler
 import de.mineformers.vanillaimmersion.client.particle.EnchantingParticle
-import de.mineformers.vanillaimmersion.network.EnchantingTableUpdate
 import de.mineformers.vanillaimmersion.util.*
 import net.minecraft.client.Minecraft
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.inventory.ContainerEnchantment
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.network.NetworkManager
+import net.minecraft.network.play.server.SPacketUpdateTileEntity
 import net.minecraft.tileentity.TileEntityEnchantmentTable
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumHand
@@ -61,11 +62,11 @@ class EnchantingTableLogic : TileEntityEnchantmentTable() {
     internal val enchantabilities = intArrayOf(0, 0, 0)
     internal val enchantmentIds = intArrayOf(-1, -1, -1)
     internal val enchantmentLevels = intArrayOf(-1, -1, -1)
-    internal var nameSeed = 0L
+    internal var xpSeed = 0L
     internal var page = -1
-    internal var enchantmentProgress = 0
+    internal var progress = 0
     internal var consumedModifiers = 0
-    internal var enchantmentResult: ItemStack? = null
+    internal var result: ItemStack? = null
 
     internal var bobStop = 0f
 
@@ -118,28 +119,28 @@ class EnchantingTableLogic : TileEntityEnchantmentTable() {
         bookSpread = MathHelper.clamp_float(this.bookSpread, 0.0f, 1.0f)
         ++tickCount
 
-        if (enchantmentResult != null) {
-            if (enchantmentProgress == 0 && worldObj.isRemote) {
+        if (result != null) {
+            if (progress == 0 && worldObj.isRemote) {
                 // Super client-safe code, believe me ;)
                 bobStop = tickCount + EnchantingUIHandler.partialTicks
             }
-            enchantmentProgress++
-            if ((40..80).contains(enchantmentProgress) && worldObj.isRemote) {
+            progress++
+            if ((40..80).contains(progress) && worldObj.isRemote) {
                 // Same here
                 val p = Vec3d(Math.random(), 0.75, Math.random()) + pos
                 val d = Vec3d(0.5, 1.75, 0.5) + pos
                 val entity = EnchantingParticle(worldObj, p.x, p.y, p.z, d.x, d.y, d.z)
                 Minecraft.getMinecraft().effectRenderer.addEffect(entity)
             }
-            if (enchantmentProgress > 120 && !worldObj.isRemote) {
-                Inventories.spawn(worldObj, pos, EnumFacing.UP, enchantmentResult)
+            if (progress > 120 && !worldObj.isRemote) {
+                Inventories.spawn(worldObj, pos, EnumFacing.UP, result)
                 this[Slot.OBJECT] = null
                 if (this[Slot.MODIFIERS] != null)
                     this[Slot.MODIFIERS]!!.stackSize -= consumedModifiers
                 consumedModifiers = 0
-                enchantmentProgress = 0
+                progress = 0
                 bobStop = 0f
-                enchantmentResult = null
+                result = null
             }
             markDirty = true
         }
@@ -149,7 +150,7 @@ class EnchantingTableLogic : TileEntityEnchantmentTable() {
             if (stack?.stackSize == 0) {
                 inventory.setStackInSlot(i, null)
                 markDirty = true
-            } else if (enchantmentResult == null && stack != null && bookSpread <= 0.0 && !worldObj.isRemote) {
+            } else if (result == null && stack != null && bookSpread <= 0.0 && !worldObj.isRemote) {
                 Inventories.spawn(worldObj, pos, EnumFacing.UP, inventory.extractItem(i, Int.MAX_VALUE, false))
                 markDirty = true
             }
@@ -170,7 +171,7 @@ class EnchantingTableLogic : TileEntityEnchantmentTable() {
             enchantmentIds[i] = container.enchantClue[i]
             enchantmentLevels[i] = container.worldClue[i]
         }
-        nameSeed = container.xpSeed.toLong()
+        xpSeed = container.xpSeed.toLong()
         if (enchantabilities.any { it > 0 })
             page = 0
         else
@@ -184,8 +185,8 @@ class EnchantingTableLogic : TileEntityEnchantmentTable() {
         container.tableInventory.setInventorySlotContents(0, this[Slot.OBJECT]?.copy())
         container.tableInventory.setInventorySlotContents(1, this[Slot.MODIFIERS]?.copy())
         if (container.enchantItem(player, enchantment)) {
-            enchantmentResult = container.tableInventory.getStackInSlot(0)
-            enchantmentProgress = 0
+            result = container.tableInventory.getStackInSlot(0)
+            progress = 0
             val oldModifiers = this[Slot.MODIFIERS]?.stackSize ?: 0
             val modifiers = container.tableInventory.getStackInSlot(1)?.stackSize ?: 0
             consumedModifiers = oldModifiers - modifiers
@@ -195,7 +196,7 @@ class EnchantingTableLogic : TileEntityEnchantmentTable() {
     }
 
     fun performPageAction(player: EntityPlayer, page: Int, x: Double, y: Double) {
-        if (enchantmentResult != null)
+        if (result != null)
             return
         var sync = false
         if ((page % 2 == 0 && x >= 17 && y >= 98 && x <= 87 && y <= 118)
@@ -226,19 +227,63 @@ class EnchantingTableLogic : TileEntityEnchantmentTable() {
             sync()
     }
 
-    override fun writeToNBT(compound: NBTTagCompound?) {
+    override fun writeToNBT(compound: NBTTagCompound): NBTTagCompound {
         super.writeToNBT(compound)
-        compound!!.setTag("Inventory", ITEM_HANDLER_CAPABILITY.writeNBT(inventory, null))
+        compound.setTag("Inventory", ITEM_HANDLER_CAPABILITY.writeNBT(inventory, null))
+        return compound
     }
 
-    override fun readFromNBT(compound: NBTTagCompound?) {
+    override fun readFromNBT(compound: NBTTagCompound) {
         super.readFromNBT(compound)
-        ITEM_HANDLER_CAPABILITY.readNBT(inventory, null, compound!!.getTagList("Inventory", Constants.NBT.TAG_COMPOUND))
+        ITEM_HANDLER_CAPABILITY.readNBT(inventory, null, compound.getTagList("Inventory", Constants.NBT.TAG_COMPOUND))
+    }
+
+    override fun getUpdateTag(): NBTTagCompound? {
+        val compound = writeToNBT(NBTTagCompound())
+        compound.setIntArray("Enchantabilities", enchantabilities)
+        compound.setIntArray("Enchantments", enchantmentIds)
+        compound.setIntArray("EnchantmentLevels", enchantmentLevels)
+        compound.setLong("XPSeed", xpSeed)
+        compound.setInteger("Page", page)
+        compound.setInteger("Progress", progress)
+        if (result != null) {
+            compound.setTag("Result", result?.writeToNBT(NBTTagCompound()))
+        }
+        compound.setInteger("ConsumedModifiers", consumedModifiers)
+        return compound
+    }
+
+    override fun getUpdatePacket() = SPacketUpdateTileEntity(this.pos, 0, this.updateTag)
+
+    override fun onDataPacket(net: NetworkManager, pkt: SPacketUpdateTileEntity) {
+        Inventories.clear(inventory)
+        val compound = pkt.nbtCompound
+        readFromNBT(compound)
+        val enchantabilities = compound.getIntArray("Enchantabilities")
+        for (i in enchantabilities.indices) {
+            this.enchantabilities[i] = enchantabilities[i]
+        }
+        val enchantmentIds = compound.getIntArray("Enchantments")
+        for (i in enchantmentIds.indices) {
+            this.enchantmentIds[i] = enchantmentIds[i]
+        }
+        val enchantmentLevels = compound.getIntArray("EnchantmentLevels")
+        for (i in enchantmentLevels.indices) {
+            this.enchantmentLevels[i] = enchantmentLevels[i]
+        }
+        xpSeed = compound.getLong("XPSeed")
+        page = compound.getInteger("Page")
+        progress = compound.getInteger("Progress")
+        result =
+            if (compound.hasKey("Result"))
+                ItemStack.loadItemStackFromNBT(compound.getCompoundTag("Result"))
+            else
+                null
+        consumedModifiers = compound.getInteger("ConsumedModifiers")
     }
 
     override fun hasCapability(capability: Capability<*>?, side: EnumFacing?): Boolean {
-        return (enchantmentResult == null && capability == ITEM_HANDLER_CAPABILITY) || super.hasCapability(capability,
-                                                                                                           side)
+        return (result == null && capability == ITEM_HANDLER_CAPABILITY) || super.hasCapability(capability, side)
     }
 
     override fun <T : Any?> getCapability(capability: Capability<T>?, side: EnumFacing?): T {
@@ -248,7 +293,4 @@ class EnchantingTableLogic : TileEntityEnchantmentTable() {
         }
         return super.getCapability(capability, side)
     }
-
-
-    override fun getDescriptionPacket() = VanillaImmersion.NETWORK.getPacketFrom(EnchantingTableUpdate.Message(this))
 }

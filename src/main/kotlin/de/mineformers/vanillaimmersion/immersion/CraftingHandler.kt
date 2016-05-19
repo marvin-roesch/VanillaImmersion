@@ -29,7 +29,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
  */
 object CraftingHandler {
     fun performDrag(table: CraftingTableLogic, player: EntityPlayer, slots: List<Int>) {
-        val stack = player.getHeldItem(EnumHand.MAIN_HAND)
+        val stack = player.getHeldItem(EnumHand.MAIN_HAND) ?: return
         val consumed = slots.fold(0) {
             acc, slot ->
             val amount = splitDrag(table, player, stack, slots, slot)
@@ -129,16 +129,16 @@ object CraftingHandler {
         val angle = -Math.toRadians(180.0 - facing.horizontalAngle).toFloat()
         val rot = (-16 * ((hitVec - Vec3d(0.5, 0.0, 0.5)).rotateYaw(angle) - Vec3d(0.5, 0.0, 0.5))).toBlockPos()
         val x = rot.x - 3
-        val z = rot.z - 4
-        if (!(0..11).contains(x) || !(0..7).contains(z))
+        val y = rot.z - 4
+        if (!(0..11).contains(x) || !(0..7).contains(y))
             return false
         val (slotX, modX) = Pair(x / 3, x % 3)
-        val (slotZ, modZ) = Pair(z / 3, z % 3)
-        if (modX == 2 || modZ == 3)
+        val (slotY, modY) = Pair(y / 3, y % 3)
+        if (modX == 2 || modY == 2)
             return true
-        if (slotX == 3 && slotZ % 2 == 0)
+        if (slotX == 3 && slotY % 2 == 0)
             return true
-        if (slotX == 3 && slotZ == 1) {
+        if (slotX == 3 && slotY == 1) {
             takeCraftingResult(world, pos, player, tile[Slot.OUTPUT])
             if (player.isSneaking && !world.isRemote) {
                 val result = tile[Slot.OUTPUT]
@@ -148,7 +148,7 @@ object CraftingHandler {
             }
             return true
         }
-        val slot = Slot.values()[slotX + slotZ * 3 + 1]
+        val slot = Slot.values()[slotX + slotY * 3 + 1]
         val existing = tile[slot]
         if (stack == null && existing != null) {
             if (!world.isRemote) {
@@ -166,6 +166,6 @@ object CraftingHandler {
             }
             return true
         }
-        return existing == null
+        return true
     }
 }

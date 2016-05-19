@@ -1,6 +1,6 @@
 package de.mineformers.vanillaimmersion.client.particle
 
-import net.minecraft.client.particle.EntityFX
+import net.minecraft.client.particle.Particle
 import net.minecraft.world.World
 
 /**
@@ -10,7 +10,7 @@ import net.minecraft.world.World
 class EnchantingParticle(world: World,
                          private val coordX: Double, private val coordY: Double, private val coordZ: Double,
                          destinationX: Double, destinationY: Double, destinationZ: Double) :
-    EntityFX(world, coordX, coordY, coordZ, 0.0, 0.0, 0.0) {
+    Particle(world, coordX, coordY, coordZ, 0.0, 0.0, 0.0) {
     private val oSize: Float
 
     init {

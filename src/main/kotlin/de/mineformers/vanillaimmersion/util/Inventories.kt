@@ -5,6 +5,7 @@ import net.minecraft.entity.Entity
 import net.minecraft.entity.item.EntityItem
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.init.SoundEvents
+import net.minecraft.inventory.IInventory
 import net.minecraft.inventory.InventoryHelper
 import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
@@ -13,6 +14,7 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.World
 import net.minecraftforge.items.IItemHandler
+import net.minecraftforge.items.IItemHandlerModifiable
 
 /**
  * Various utilities for dealing with inventories and item stacks.
@@ -80,6 +82,22 @@ object Inventories {
         world.playSound(null, offset.x, offset.y, offset.z, SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.BLOCKS, 0.2f,
                         ((world.rand.nextFloat() - world.rand.nextFloat()) * 0.7f + 1.0f) * 2.0f)
 
+    }
+
+    /**
+     * Completely clears out all slots of an [inventory], i.e. setting them to `null`.
+     */
+    fun clear(inventory: IInventory) {
+        for (i in 0..(inventory.sizeInventory - 1))
+            inventory.setInventorySlotContents(i, null)
+    }
+
+    /**
+     * Completely clears out all slots of an [inventory], i.e. setting them to `null`.
+     */
+    fun clear(inventory: IItemHandlerModifiable) {
+        for (i in 0..(inventory.slots - 1))
+            inventory.setStackInSlot(i, null)
     }
 
     /**

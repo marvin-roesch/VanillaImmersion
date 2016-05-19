@@ -41,7 +41,7 @@ class EnchantingTable : BlockEnchantmentTable() {
         if (tile !is EnchantingTableLogic)
             return false
         // Prevent interaction when enchantment is in progress
-        if (tile.enchantmentResult != null)
+        if (tile.result != null)
             return false
         if (stack != null) {
             // Try to insert the stack, preferring the modifiers slot

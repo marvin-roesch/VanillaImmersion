@@ -12,9 +12,9 @@ import net.minecraft.world.WorldServer
 fun TileEntity.sync() {
     if (world !is WorldServer)
         return
-    val packet = descriptionPacket
+    val packet = updatePacket
     val manager = (world as WorldServer).playerChunkMap
     for (player in world.playerEntities)
         if (manager.isPlayerWatchingChunk(player as EntityPlayerMP, pos.x shr 4, pos.z shr 4))
-            player.playerNetServerHandler.sendPacket(packet)
+            player.connection.sendPacket(packet)
 }

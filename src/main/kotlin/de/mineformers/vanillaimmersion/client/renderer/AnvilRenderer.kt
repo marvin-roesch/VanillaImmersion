@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformT
 import net.minecraft.client.renderer.texture.TextureMap
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer
 import net.minecraft.item.ItemBlock
+import org.apache.commons.lang3.StringUtils
 import org.lwjgl.opengl.GL11
 
 /**
@@ -42,18 +43,16 @@ class AnvilRenderer : TileEntitySpecialRenderer<AnvilLogic>() {
         renderItem(te, Slot.OUTPUT, 0.0, -0.25)
         Shaders.ALPHA.deactivate()
         disableBlend()
-
         RenderHelper.disableStandardItemLighting()
         disableRescaleNormal()
-        rotate(te.facing.horizontalAngle - 180, 0f, 1f, 0f)
-        val vec = te.facing.rotateY().directionVec
-        translate(vec.x * 0.32, vec.y * 0.32, vec.z * 0.32)
+        translate(0f, -0.05f, 0f)
+        rotate(90f, 0f, 1f, 0f)
+        translate(0f, 0f, 0.32f)
         scale(0.00625f, -0.00625f, 0.00625f)
-        rotate(180f, 0f, 1f, 0f)
         val font = Minecraft.getMinecraft().fontRendererObj
-        if (te.currentName != null) {
+        if (StringUtils.isNotEmpty(te.itemName)) {
             font.drawString("Item Name:", -font.getStringWidth("Item Name:") / 2, 25 - font.FONT_HEIGHT - 2, 0xFFFFFF)
-            font.drawString(te.currentName, -font.getStringWidth(te.currentName) / 2, 25, 0xFFFFFF)
+            font.drawString(te.itemName, -font.getStringWidth(te.itemName) / 2, 25, 0xFFFFFF)
         }
         popMatrix()
     }

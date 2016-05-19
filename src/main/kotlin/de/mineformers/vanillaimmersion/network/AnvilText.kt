@@ -36,7 +36,7 @@ object AnvilText {
                 val tile = player.worldObj.getTileEntity(msg.pos)
                 if (tile is AnvilLogic && tile.canInteract(player)) {
                     tile.playerLock = null
-                    tile.currentName = msg.text
+                    tile.itemName = msg.text
                     RepairHandler.tryRepair(player.worldObj, msg.pos, player)
                 }
             }

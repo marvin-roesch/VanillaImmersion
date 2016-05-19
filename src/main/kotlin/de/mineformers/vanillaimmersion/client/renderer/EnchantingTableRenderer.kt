@@ -74,23 +74,6 @@ class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
         if (te == null)
             return
         if (te is EnchantingTableLogic) {
-            //            pushMatrix()
-            //            disableTexture2D()
-            //            color(1f, 0f, 0f, 1f)
-            //            val tess = Tessellator.getInstance()
-            //            val buffer = tess.buffer
-            //            if(line != null) {
-            //                translate(x, y, z)
-            //                translate(-te.pos.x.toDouble(), -te.pos.y.toDouble(), -te.pos.z.toDouble())
-            //                buffer.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION)
-            //                val p = Minecraft.getMinecraft().thePlayer.getPositionEyes(partialTicks)
-            //                buffer.pos(p.x, p.y, p.z).endVertex()
-            //                buffer.pos(line!!.x, line!!.y, line!!.z).endVertex()
-            //                tess.draw()
-            //            }
-            //            color(1f, 1f, 1f, 1f)
-            //            enableTexture2D()
-            //            popMatrix()
             pushMatrix()
             val modifiers = te[Slot.MODIFIERS]
             val lapis = modifiers?.stackSize ?: 0
@@ -139,57 +122,59 @@ class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
             enableCull()
             popMatrix()
 
-            EnchantmentNameParts.getInstance().reseedRandomGenerator(te.nameSeed)
-            pushMatrix()
-            disableLighting()
-            val breath = (MathHelper.sin(hover * 0.02f) * 0.1f + 1.25f) * spread
-            val rotation = breath - breath * 2.0f * flipLeft
-            translate(x + 0.5, y + 0.75 + 1.6 * 0.0625f + 0.0001, z + 0.5)
-            translate(0f, MathHelper.sin(hover * 0.1f) * 0.01f, 0f)
-            rotate(-yaw * (180f / Math.PI.toFloat()), 0f, 1f, 0f)
-            rotate(80f, 0f, 0f, 1f)
-            translate(MathHelper.sin(breath) / 16, 0f, 0f)
-            depthMask(false)
+            if(spread > 0) {
+                EnchantmentNameParts.getInstance().reseedRandomGenerator(te.xpSeed)
+                pushMatrix()
+                disableLighting()
+                val breath = (MathHelper.sin(hover * 0.02f) * 0.1f + 1.25f) * spread
+                val rotation = breath - breath * 2.0f * flipLeft
+                translate(x + 0.5, y + 0.75 + 1.6 * 0.0625f + 0.0001, z + 0.5)
+                translate(0f, MathHelper.sin(hover * 0.1f) * 0.01f, 0f)
+                rotate(-yaw * (180f / Math.PI.toFloat()), 0f, 1f, 0f)
+                rotate(80f, 0f, 0f, 1f)
+                translate(MathHelper.sin(breath) / 16, 0f, 0f)
+                depthMask(false)
 
-            pushMatrix()
-            rotate(-rotation * (180f / Math.PI.toFloat()), 0f, 1f, 0f)
-            translate(0.0, 0.25, 0.0)
-            translate(0.375f, 0f, 0f)
-            scale(-0.004, -0.004, 0.004)
-            Gui.drawRect(0, 0, 94, 125, 0xFFF3F3F3.toInt())
-            if (te.page == -1)
-                drawWrappedText("~fa" + generateRandomLore(30..40), 4, 4, 86, 0x685E4A, 125 / 9 - 1)
-            if (te.page == 2)
-                renderPage(te, 1, lapis)
-            if (te.page == 0) {
-                drawWrappedText("~fa" + generateRandomLore(30..40), 4, 4, 86, 0x685E4A, 98 / 9 - 1)
-                if (te.enchantmentResult == null) {
-                    Minecraft.getMinecraft().textureManager.bindTexture(ENCHANTING_LABEL_TEXTURE)
-                    color(1f, 1f, 1f, 1f)
-                    Gui.drawModalRectWithCustomSizedTexture((94 - 70) / 2 + 5, 98, 0f, 0f, 70, 20, 70f, 20f)
-                    val font = Minecraft.getMinecraft().fontRendererObj
-                    val text = I18n.format("gui.cancel")
-                    val width = font.getStringWidth(text)
-                    font.drawString(text, (94 - width) / 2 + 5, 98 + (20 - font.FONT_HEIGHT) / 2 + 1, 0x685E4A)
+                pushMatrix()
+                rotate(-rotation * (180f / Math.PI.toFloat()), 0f, 1f, 0f)
+                translate(0.0, 0.25, 0.0)
+                translate(0.375f, 0f, 0f)
+                scale(-0.004, -0.004, 0.004)
+                Gui.drawRect(0, 0, 94, 125, 0xFFF3F3F3.toInt())
+                if (te.page == -1)
+                    drawWrappedText("~fa" + generateRandomLore(30..40), 4, 4, 86, 0x685E4A, 125 / 9 - 1)
+                if (te.page == 2)
+                    renderPage(te, 1, lapis)
+                if (te.page == 0) {
+                    drawWrappedText("~fa" + generateRandomLore(30..40), 4, 4, 86, 0x685E4A, 98 / 9 - 1)
+                    if (te.result == null) {
+                        Minecraft.getMinecraft().textureManager.bindTexture(ENCHANTING_LABEL_TEXTURE)
+                        color(1f, 1f, 1f, 1f)
+                        Gui.drawModalRectWithCustomSizedTexture((94 - 70) / 2 + 5, 98, 0f, 0f, 70, 20, 70f, 20f)
+                        val font = Minecraft.getMinecraft().fontRendererObj
+                        val text = I18n.format("gui.cancel")
+                        val width = font.getStringWidth(text)
+                        font.drawString(text, (94 - width) / 2 + 5, 98 + (20 - font.FONT_HEIGHT) / 2 + 1, 0x685E4A)
+                    }
                 }
+                popMatrix()
+
+                pushMatrix()
+                rotate(rotation * (180f / Math.PI.toFloat()), 0f, 1f, 0f)
+                translate(0.0, 0.25, 0.0)
+                scale(0.004, -0.004, 0.004)
+                Gui.drawRect(0, 0, 94, 125, 0xFFF3F3F3.toInt())
+                if (te.page == -1)
+                    drawWrappedText("~fa" + generateRandomLore(30..40), 4, 4, 86, 0x685E4A, 125 / 9 - 1)
+                if (te.page == 0)
+                    renderPage(te, 0, lapis)
+                else if (te.page == 2)
+                    renderPage(te, 2, lapis)
+                popMatrix()
+
+                depthMask(true)
+                popMatrix()
             }
-            popMatrix()
-
-            pushMatrix()
-            rotate(rotation * (180f / Math.PI.toFloat()), 0f, 1f, 0f)
-            translate(0.0, 0.25, 0.0)
-            scale(0.004, -0.004, 0.004)
-            Gui.drawRect(0, 0, 94, 125, 0xFFF3F3F3.toInt())
-            if (te.page == -1)
-                drawWrappedText("~fa" + generateRandomLore(30..40), 4, 4, 86, 0x685E4A, 125 / 9 - 1)
-            if (te.page == 0)
-                renderPage(te, 0, lapis)
-            else if (te.page == 2)
-                renderPage(te, 2, lapis)
-            popMatrix()
-
-            depthMask(true)
-            popMatrix()
 
             color(1f, 1f, 1f, 1f)
             translate(x + 0.5, y + 1.4, z + 0.5)
@@ -199,15 +184,15 @@ class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
             val rand = Random(te.pos.toLong())
             val bobRand = rand.nextInt(100)
             val rotRand = rand.nextInt(50)
-            val bobTicks = if (te.enchantmentResult == null) te.tickCount + partialTicks else te.bobStop
+            val bobTicks = if (te.result == null) te.tickCount + partialTicks else te.bobStop
             val bob = MathHelper.sin((bobTicks + bobRand) / 10.0f) * 0.1 + 0.1
             val t =
-                if (te.enchantmentResult == null)
+                if (te.result == null)
                     0.0
                 else
-                    Math.min(te.enchantmentProgress + partialTicks, 40f) / 40.0
+                    Math.min(te.progress + partialTicks, 40f) / 40.0
             val inputAnim =
-                if (te.enchantmentResult != null)
+                if (te.result != null)
                     bob + (0.3 - bob) * t
                 else
                     0.0
@@ -257,7 +242,7 @@ class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
                           "~faLevels ~fn~l${page}_$enchantability"
         drawWrappedText(text, 4, 4, 86, 0x685E4A, 98 / 9 - 3)
         drawWrappedText(information, 4, 76, 86, 0x685E4A, 2)
-        if (te.enchantmentResult != null)
+        if (te.result != null)
             return
         Minecraft.getMinecraft().textureManager.bindTexture(ENCHANTING_LABEL_TEXTURE)
         color(1f, 1f, 1f, 1f)

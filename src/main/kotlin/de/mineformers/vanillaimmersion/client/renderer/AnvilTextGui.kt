@@ -39,7 +39,7 @@ class AnvilTextGui(private val anvil: AnvilLogic) : GuiScreen() {
             return
         }
         if (nameField.textboxKeyTyped(typedChar, keyCode)) {
-            anvil.currentName = nameField.text
+            anvil.itemName = nameField.text
         }
     }
 

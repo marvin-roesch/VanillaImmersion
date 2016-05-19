@@ -3,12 +3,13 @@ package de.mineformers.vanillaimmersion.tileentity
 import de.mineformers.vanillaimmersion.VanillaImmersion
 import de.mineformers.vanillaimmersion.VanillaImmersion.Blocks.FURNACE
 import de.mineformers.vanillaimmersion.VanillaImmersion.Blocks.LIT_FURNACE
-import de.mineformers.vanillaimmersion.network.FurnaceUpdate
 import de.mineformers.vanillaimmersion.util.Inventories
 import net.minecraft.block.BlockFurnace.FACING
 import net.minecraft.item.ItemStack
 import net.minecraft.item.crafting.FurnaceRecipes
 import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.network.NetworkManager
+import net.minecraft.network.play.server.SPacketUpdateTileEntity
 import net.minecraft.tileentity.TileEntityFurnace
 
 /**
@@ -161,6 +162,15 @@ class FurnaceLogic : TileEntityFurnace() {
         this.markDirty()
     }
 
+    override fun writeToNBT(compound: NBTTagCompound): NBTTagCompound {
+        super.writeToNBT(compound)
+
+        compound.setInteger("BurnTime", fuelLeft)
+        compound.setInteger("CookTime", progress)
+        compound.setInteger("CookTimeTotal", requiredTime)
+        return compound
+    }
+
     override fun readFromNBT(compound: NBTTagCompound) {
         super.readFromNBT(compound)
 
@@ -170,13 +180,12 @@ class FurnaceLogic : TileEntityFurnace() {
         this.fuel = getItemBurnTime(this[Slot.FUEL])
     }
 
-    override fun writeToNBT(compound: NBTTagCompound) {
-        super.writeToNBT(compound)
+    override fun getUpdateTag() = writeToNBT(NBTTagCompound())
 
-        compound.setInteger("BurnTime", fuelLeft)
-        compound.setInteger("CookTime", progress)
-        compound.setInteger("CookTimeTotal", requiredTime)
+    override fun onDataPacket(net: NetworkManager, pkt: SPacketUpdateTileEntity) {
+        Inventories.clear(this)
+        readFromNBT(pkt.nbtCompound)
     }
 
-    override fun getDescriptionPacket() = VanillaImmersion.NETWORK.getPacketFrom(FurnaceUpdate.Message(this))
+    override fun getUpdatePacket() = SPacketUpdateTileEntity(this.pos, 0, this.updateTag)
 }

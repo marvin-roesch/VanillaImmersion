@@ -1,12 +1,13 @@
 package de.mineformers.vanillaimmersion.tileentity
 
-import de.mineformers.vanillaimmersion.VanillaImmersion
 import de.mineformers.vanillaimmersion.block.CraftingTable
 import de.mineformers.vanillaimmersion.immersion.CraftingHandler
-import de.mineformers.vanillaimmersion.network.CraftingTableUpdate
+import de.mineformers.vanillaimmersion.util.Inventories
 import net.minecraft.block.state.IBlockState
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.network.NetworkManager
+import net.minecraft.network.play.server.SPacketUpdateTileEntity
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumFacing.*
@@ -94,14 +95,24 @@ class CraftingTableLogic : TileEntity(), ITickable {
         }
     }
 
-    override fun writeToNBT(compound: NBTTagCompound?) {
+    override fun writeToNBT(compound: NBTTagCompound): NBTTagCompound {
         super.writeToNBT(compound)
-        compound!!.setTag("Inventory", ITEM_HANDLER_CAPABILITY.writeNBT(inventory, null))
+        compound.setTag("Inventory", ITEM_HANDLER_CAPABILITY.writeNBT(inventory, null))
+        return compound
     }
 
     override fun readFromNBT(compound: NBTTagCompound?) {
         super.readFromNBT(compound)
         ITEM_HANDLER_CAPABILITY.readNBT(inventory, null, compound!!.getTagList("Inventory", Constants.NBT.TAG_COMPOUND))
+    }
+
+    override fun getUpdateTag() = writeToNBT(NBTTagCompound())
+
+    override fun getUpdatePacket() = SPacketUpdateTileEntity(this.pos, 0, this.updateTag)
+
+    override fun onDataPacket(net: NetworkManager, pkt: SPacketUpdateTileEntity) {
+        Inventories.clear(inventory)
+        readFromNBT(pkt.nbtCompound)
     }
 
     override fun hasCapability(capability: Capability<*>?, side: EnumFacing?): Boolean {
@@ -138,6 +149,4 @@ class CraftingTableLogic : TileEntity(), ITickable {
 
     val blockState: IBlockState
         get() = worldObj.getBlockState(pos)
-
-    override fun getDescriptionPacket() = VanillaImmersion.NETWORK.getPacketFrom(CraftingTableUpdate.Message(this))
 }
