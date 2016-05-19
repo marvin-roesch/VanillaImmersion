@@ -6,7 +6,6 @@ import de.mineformers.vanillaimmersion.tileentity.AnvilLogic
 import io.netty.buffer.ByteBuf
 import net.minecraft.client.Minecraft
 import net.minecraft.util.math.BlockPos
-import net.minecraft.util.text.TextComponentString
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext
@@ -33,8 +32,8 @@ object AnvilLock {
                 if (tile is AnvilLogic && tile.canInteract(player)) {
                     tile.playerLock = player.uniqueID
                     VanillaImmersion.NETWORK.sendTo(AcquiredMessage(msg.pos), player)
-                } else {
-                    player.addChatComponentMessage(TextComponentString("This anvil is currently in use by another player."))
+                } else if (tile is AnvilLogic) {
+                    tile.sendLockMessage(player)
                 }
             }
             return null

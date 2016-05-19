@@ -17,7 +17,6 @@ import net.minecraft.util.EnumParticleTypes
 import net.minecraft.util.SoundCategory
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
-import net.minecraft.util.text.TextComponentString
 import net.minecraft.world.World
 import net.minecraft.world.WorldServer
 import net.minecraftforge.event.entity.player.PlayerInteractEvent
@@ -89,7 +88,7 @@ object RepairHandler {
         val slot = if (rot.x > 8) AnvilLogic.Companion.Slot.INPUT_MATERIAL else AnvilLogic.Companion.Slot.INPUT_OBJECT
         if (rot.z >= 8 && tile[AnvilLogic.Companion.Slot.OUTPUT] != null) {
             if (!tile.canInteract(player)) {
-                player.addChatComponentMessage(TextComponentString("This anvil is currently in use by another player."))
+                tile.sendLockMessage(player)
                 return false
             }
             val container = ContainerRepair(player.inventory, world, pos, player)
@@ -112,7 +111,7 @@ object RepairHandler {
         val existing = tile[slot]
         if (stack == null && existing != null) {
             if (!tile.canInteract(player)) {
-                player.addChatComponentMessage(TextComponentString("This anvil is currently in use by another player."))
+                tile.sendLockMessage(player)
                 return false
             }
             Inventories.spawn(world, pos, EnumFacing.UP, existing.copy())
@@ -120,7 +119,7 @@ object RepairHandler {
             return true
         } else if (stack != null) {
             if (!tile.canInteract(player)) {
-                player.addChatComponentMessage(TextComponentString("This anvil is currently in use by another player."))
+                tile.sendLockMessage(player)
                 return false
             }
             world.playSound(null, pos.x + 0.5, pos.y + 0.5, pos.z + 0.5,

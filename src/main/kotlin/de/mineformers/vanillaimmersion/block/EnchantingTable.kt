@@ -1,5 +1,6 @@
 package de.mineformers.vanillaimmersion.block
 
+import de.mineformers.vanillaimmersion.VanillaImmersion
 import de.mineformers.vanillaimmersion.tileentity.EnchantingTableLogic
 import de.mineformers.vanillaimmersion.tileentity.EnchantingTableLogic.Companion.Slot
 import de.mineformers.vanillaimmersion.util.Inventories
@@ -21,7 +22,8 @@ class EnchantingTable : BlockEnchantmentTable() {
     init {
         setHardness(5.0F)
         setResistance(2000.0F)
-        unlocalizedName = "enchantmentTable"
+        unlocalizedName = "vimmersion.enchantmentTable"
+        setCreativeTab(VanillaImmersion.CREATIVE_TAB)
         registryName = ResourceLocation("vimmersion", "enchanting_table")
     }
 

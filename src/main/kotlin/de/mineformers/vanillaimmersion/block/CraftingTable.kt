@@ -1,5 +1,6 @@
 package de.mineformers.vanillaimmersion.block
 
+import de.mineformers.vanillaimmersion.VanillaImmersion
 import de.mineformers.vanillaimmersion.VanillaImmersion.MODID
 import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic
 import de.mineformers.vanillaimmersion.util.Inventories
@@ -32,7 +33,8 @@ class CraftingTable : BlockWorkbench() {
     init {
         setHardness(2.5f)
         soundType = SoundType.WOOD
-        unlocalizedName = "workbench"
+        unlocalizedName = "vimmersion.workbench"
+        setCreativeTab(VanillaImmersion.CREATIVE_TAB)
         defaultState = blockState.baseState.withProperty(FACING, EnumFacing.NORTH)
         registryName = ResourceLocation(MODID, "crafting_table")
     }

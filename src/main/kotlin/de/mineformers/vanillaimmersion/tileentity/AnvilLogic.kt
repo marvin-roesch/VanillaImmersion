@@ -67,6 +67,10 @@ class AnvilLogic : TileEntity(), ITickable {
         else
             player.uniqueID == playerLock
 
+    fun sendLockMessage(player: EntityPlayer) {
+
+    }
+
     override fun update() {
         var markDirty = false
         for (i in inventory.contents.indices) {

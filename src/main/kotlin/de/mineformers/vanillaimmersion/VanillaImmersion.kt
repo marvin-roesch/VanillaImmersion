@@ -9,13 +9,17 @@ import de.mineformers.vanillaimmersion.client.EnchantingUIHandler
 import de.mineformers.vanillaimmersion.client.renderer.*
 import de.mineformers.vanillaimmersion.immersion.CraftingHandler
 import de.mineformers.vanillaimmersion.immersion.RepairHandler
-import de.mineformers.vanillaimmersion.network.*
+import de.mineformers.vanillaimmersion.network.AnvilLock
+import de.mineformers.vanillaimmersion.network.AnvilText
+import de.mineformers.vanillaimmersion.network.CraftingDrag
+import de.mineformers.vanillaimmersion.network.EnchantingAction
 import de.mineformers.vanillaimmersion.tileentity.AnvilLogic
 import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic
 import de.mineformers.vanillaimmersion.tileentity.EnchantingTableLogic
 import de.mineformers.vanillaimmersion.tileentity.FurnaceLogic
 import net.minecraft.block.Block
 import net.minecraft.client.renderer.block.model.ModelResourceLocation
+import net.minecraft.creativetab.CreativeTabs
 import net.minecraft.item.Item
 import net.minecraft.item.ItemAnvilBlock
 import net.minecraft.item.ItemBlock
@@ -37,9 +41,13 @@ import net.minecraftforge.fml.relauncher.Side
  * Main entry point for Vanilla Immersion
  */
 @Mod(modid = VanillaImmersion.MODID,
+     name = VanillaImmersion.MOD_NAME,
      version = VanillaImmersion.VERSION,
+     acceptedMinecraftVersions = "[1.9.4,)",
+     dependencies = "required-after:Forge@[12.17.0.1909,)",
      modLanguageAdapter = "de.mineformers.vanillaimmersion.KotlinAdapter")
 object VanillaImmersion {
+    const val MOD_NAME = "Vanilla Immersion"
     const val MODID = "vimmersion"
     const val VERSION = "1.0.0"
 
@@ -53,6 +61,13 @@ object VanillaImmersion {
      */
     val NETWORK by lazy {
         SimpleNetworkWrapper(MODID)
+    }
+    /**
+     * Temporary creative tab for the mod
+     * To be removed once substitutions are fixed
+     */
+    val CREATIVE_TAB = object : CreativeTabs(MODID) {
+        override fun getTabIconItem() = Item.getItemFromBlock(Blocks.CRAFTING_TABLE)
     }
 
     /**
@@ -94,7 +109,7 @@ object VanillaImmersion {
             Furnace(false)
         }
         /**
-         * Immersive Furnace - Lit variant (required for Vanilla compability)
+         * Immersive Furnace - Lit variant (required for Vanilla compatibility)
          */
         val LIT_FURNACE by lazy {
             Furnace(true)

@@ -1,5 +1,6 @@
 package de.mineformers.vanillaimmersion.block
 
+import de.mineformers.vanillaimmersion.VanillaImmersion
 import de.mineformers.vanillaimmersion.VanillaImmersion.MODID
 import de.mineformers.vanillaimmersion.tileentity.AnvilLogic
 import de.mineformers.vanillaimmersion.util.Inventories
@@ -24,7 +25,8 @@ class Anvil : BlockAnvil() {
         setHardness(5.0F)
         soundType = SoundType.ANVIL
         setResistance(2000.0F)
-        unlocalizedName = "anvil"
+        setCreativeTab(VanillaImmersion.CREATIVE_TAB)
+        unlocalizedName = "vimmersion.anvil"
         registryName = ResourceLocation(MODID, "anvil")
     }
 
@@ -36,6 +38,7 @@ class Anvil : BlockAnvil() {
     override fun onBlockActivated(world: World, pos: BlockPos, state: IBlockState,
                                   player: EntityPlayer, hand: EnumHand, stack: ItemStack?,
                                   side: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) = true
+
     /**
      * Drops the anvil's contents when it's broken.
      */

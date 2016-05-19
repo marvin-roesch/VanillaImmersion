@@ -122,7 +122,7 @@ class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
             enableCull()
             popMatrix()
 
-            if(spread > 0) {
+            if (spread > 0) {
                 EnchantmentNameParts.getInstance().reseedRandomGenerator(te.xpSeed)
                 pushMatrix()
                 disableLighting()

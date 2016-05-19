@@ -1,6 +1,5 @@
 package de.mineformers.vanillaimmersion.tileentity
 
-import de.mineformers.vanillaimmersion.VanillaImmersion
 import de.mineformers.vanillaimmersion.VanillaImmersion.Blocks.FURNACE
 import de.mineformers.vanillaimmersion.VanillaImmersion.Blocks.LIT_FURNACE
 import de.mineformers.vanillaimmersion.util.Inventories
@@ -103,8 +102,9 @@ class FurnaceLogic : TileEntityFurnace() {
                 markDirty = true
             }
         } else {
+            val oldProgress = progress
             progress = (progress - 2).coerceIn(0, requiredTime)
-            sync = true
+            sync = sync || oldProgress != progress
         }
 
         if (wasBurning != this.isBurning) {

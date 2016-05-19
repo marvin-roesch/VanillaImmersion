@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.RenderHelper
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType.FIXED
 import net.minecraft.client.renderer.texture.TextureMap
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer
+import net.minecraft.client.resources.I18n
 import net.minecraft.item.ItemBlock
 import org.apache.commons.lang3.StringUtils
 import org.lwjgl.opengl.GL11
@@ -51,7 +52,8 @@ class AnvilRenderer : TileEntitySpecialRenderer<AnvilLogic>() {
         scale(0.00625f, -0.00625f, 0.00625f)
         val font = Minecraft.getMinecraft().fontRendererObj
         if (StringUtils.isNotEmpty(te.itemName)) {
-            font.drawString("Item Name:", -font.getStringWidth("Item Name:") / 2, 25 - font.FONT_HEIGHT - 2, 0xFFFFFF)
+            val label = I18n.format("vimmersion.anvil.itemName")
+            font.drawString(label, -font.getStringWidth(label) / 2, 25 - font.FONT_HEIGHT - 2, 0xFFFFFF)
             font.drawString(te.itemName, -font.getStringWidth(te.itemName) / 2, 25, 0xFFFFFF)
         }
         popMatrix()
