@@ -97,6 +97,10 @@ object CraftingHandler {
         if (tile !is CraftingTableLogic)
             return
 
+        // There is no need to craft if there already is a result
+        if (tile[Slot.OUTPUT] != null)
+            return
+
         // Initialize the crafting matrix, either via a real crafting container if there is a player or
         // via a dummy inventory if there is none
         val matrix =
@@ -118,13 +122,14 @@ object CraftingHandler {
     /**
      * Takes the crafting result from a crafting table, optionally with a player.
      */
-    fun takeCraftingResult(world: World, pos: BlockPos, player: EntityPlayer?, result: ItemStack?) {
+    fun takeCraftingResult(world: World, pos: BlockPos, player: EntityPlayer?,
+                           result: ItemStack?, simulate: Boolean): Boolean {
         // Only take the result on the server and if it exists
         if (world.isRemote || result == null)
-            return
+            return true
         val tile = world.getTileEntity(pos)
         if (tile !is CraftingTableLogic)
-            return
+            return false
 
         // Use a fake player if the given one is null
         val craftingPlayer = player ?: FakePlayerFactory.getMinecraft(world as WorldServer)
@@ -133,18 +138,25 @@ object CraftingHandler {
         val craftingSlot = container.getSlot(0)
         for (i in 1..(tile.inventory.slots - 1))
             container.craftMatrix.setInventorySlotContents(i - 1, tile.inventory.getStackInSlot(i)?.copy())
+        if (craftingSlot.stack == null)
+            return false
         // Imitate a player picking up an item from the output slot
         craftingSlot.onPickupFromSlot(craftingPlayer, result)
-        // Change the crafting table's inventory according to the consumed items in the container
-        for (i in 1..container.craftMatrix.sizeInventory) {
-            tile.inventory.setStackInSlot(i, container.craftMatrix.getStackInSlot(i - 1))
-        }
-        if (player != null) {
-            Inventories.insertOrDrop(player, result)
-            tile[Slot.OUTPUT] = null
+        // Only manipulate the table's inventory when we're not simulating the action
+        if(!simulate) {
+            // Change the crafting table's inventory according to the consumed items in the container
+            for (i in 1..container.craftMatrix.sizeInventory) {
+                tile.inventory.setStackInSlot(i, container.craftMatrix.getStackInSlot(i - 1))
+            }
+            // Grant the player the result
+            if (player != null) {
+                Inventories.insertOrDrop(player, result)
+                tile[Slot.OUTPUT] = null
+            }
         }
         // Try to craft a new item right away
         craft(world, pos, player)
+        return true
     }
 
     /**
@@ -191,12 +203,12 @@ object CraftingHandler {
             return true
         // Special case for the output
         if (slotX == 3 && slotY == 1) {
-            takeCraftingResult(world, pos, player, tile[Slot.OUTPUT])
+            takeCraftingResult(world, pos, player, tile[Slot.OUTPUT], false)
             // If the player is sneaking, try to extract as many crafting results from the table as possible
             if (player.isSneaking && !world.isRemote) {
                 val result = tile[Slot.OUTPUT]
                 while (result != null && Inventories.equal(result, tile[Slot.OUTPUT])) {
-                    takeCraftingResult(world, pos, player, tile[Slot.OUTPUT])
+                    takeCraftingResult(world, pos, player, tile[Slot.OUTPUT], false)
                 }
             }
             return true

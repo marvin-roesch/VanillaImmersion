@@ -11,7 +11,6 @@ import net.minecraft.network.play.server.SPacketUpdateTileEntity
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumFacing.*
-import net.minecraft.util.ITickable
 import net.minecraftforge.common.capabilities.Capability
 import net.minecraftforge.common.util.Constants
 import net.minecraftforge.items.CapabilityItemHandler.ITEM_HANDLER_CAPABILITY
@@ -82,16 +81,22 @@ class CraftingTableLogic : TileEntity() {
         }
 
         override fun extractItem(slot: Int, amount: Int, simulate: Boolean): ItemStack? {
-            if (slot == 0) {
-                val extracted = super.extractItem(slot, amount, simulate)
-                if (extracted != null && !simulate)
-                    CraftingHandler.takeCraftingResult(world, pos, null, extracted)
-                return extracted
+            // Items may only be extracted from the output slot if the recipe does not require any player data etc.
+            if (slot == Slot.OUTPUT.ordinal) {
+                // Simulate the extraction first to get the likely result
+                val extracted = super.extractItem(slot, amount, true)
+                // Check the "craftability" again and indicate failure if it was unsuccessful
+                if (!CraftingHandler.takeCraftingResult(world, pos, null, extracted, simulate))
+                    return null
             }
             return super.extractItem(slot, amount, simulate)
         }
 
         override fun onContentsChanged(slot: Int) {
+            // Update the crafting result if the output slot was affected (i.e. the output was extracted)
+            if (slot == Slot.OUTPUT.ordinal) {
+                CraftingHandler.craft(worldObj, pos, null)
+            }
             // Sync any inventories to the client
             markDirty()
             sync()
