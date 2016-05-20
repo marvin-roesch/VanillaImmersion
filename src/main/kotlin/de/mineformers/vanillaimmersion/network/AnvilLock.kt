@@ -1,6 +1,5 @@
 package de.mineformers.vanillaimmersion.network
 
-import de.mineformers.vanillaimmersion.VanillaImmersion
 import de.mineformers.vanillaimmersion.client.renderer.AnvilTextGui
 import de.mineformers.vanillaimmersion.tileentity.AnvilLogic
 import io.netty.buffer.ByteBuf
@@ -11,10 +10,13 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext
 
 /**
- * ${JDOC}
+ * Message and handler for notifying the client that is has acquired the lock on an anvil.
  */
 object AnvilLock {
-    data class AcquireMessage(var pos: BlockPos = BlockPos.ORIGIN) : IMessage {
+    /**
+     * The message simply consists of the anvil's position.
+     */
+    data class Message(var pos: BlockPos = BlockPos.ORIGIN) : IMessage {
         override fun toBytes(buf: ByteBuf?) {
             buf!!.writeLong(pos.toLong())
         }
@@ -24,37 +26,13 @@ object AnvilLock {
         }
     }
 
-    object AcquireHandler : IMessageHandler<AcquireMessage, IMessage> {
-        override fun onMessage(msg: AcquireMessage, ctx: MessageContext): IMessage? {
-            val player = ctx.serverHandler.playerEntity
-            player.serverWorld.addScheduledTask {
-                val tile = player.worldObj.getTileEntity(msg.pos)
-                if (tile is AnvilLogic && tile.canInteract(player)) {
-                    tile.playerLock = player.uniqueID
-                    VanillaImmersion.NETWORK.sendTo(AcquiredMessage(msg.pos), player)
-                } else if (tile is AnvilLogic) {
-                    tile.sendLockMessage(player)
-                }
-            }
-            return null
-        }
-    }
-
-    data class AcquiredMessage(var pos: BlockPos = BlockPos.ORIGIN) : IMessage {
-        override fun toBytes(buf: ByteBuf?) {
-            buf!!.writeLong(pos.toLong())
-        }
-
-        override fun fromBytes(buf: ByteBuf?) {
-            pos = BlockPos.fromLong(buf!!.readLong())
-        }
-    }
-
-    object AcquiredHandler : IMessageHandler<AcquiredMessage, IMessage> {
-        override fun onMessage(msg: AcquiredMessage, ctx: MessageContext): IMessage? {
+    object Handler : IMessageHandler<Message, IMessage> {
+        override fun onMessage(msg: Message, ctx: MessageContext): IMessage? {
+            // We interact with the world, hence schedule our action
             Minecraft.getMinecraft().addScheduledTask {
                 val player = Minecraft.getMinecraft().thePlayer
                 val tile = player.worldObj.getTileEntity(msg.pos)
+                // Ensure the player can interact and "show" them the text "GUI" to insert some text
                 if (tile is AnvilLogic && tile.canInteract(player)) {
                     Minecraft.getMinecraft().displayGuiScreen(AnvilTextGui(tile))
                 }

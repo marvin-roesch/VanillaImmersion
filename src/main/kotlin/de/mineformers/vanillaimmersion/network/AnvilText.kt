@@ -10,9 +10,12 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext
 
 /**
- * ${JDOC}
+ * Message and handler for notifying the server about a text change in an anvil.
  */
 object AnvilText {
+    /**
+     * The message simply holds the anvil's position and the text to be set.
+     */
     data class Message(var pos: BlockPos = BlockPos.ORIGIN,
                        var text: String? = null) : IMessage {
         override fun toBytes(buf: ByteBuf?) {
@@ -32,9 +35,12 @@ object AnvilText {
     object Handler : IMessageHandler<Message, IMessage> {
         override fun onMessage(msg: Message, ctx: MessageContext): IMessage? {
             val player = ctx.serverHandler.playerEntity
+            // We interact with the world, hence schedule our action
             player.serverWorld.addScheduledTask {
                 val tile = player.worldObj.getTileEntity(msg.pos)
+                // Ensure the player has acquired the lock on the anvil
                 if (tile is AnvilLogic && tile.canInteract(player)) {
+                    // Release the lock, change the name and try to "repair"
                     tile.playerLock = null
                     tile.itemName = msg.text
                     RepairHandler.tryRepair(player.worldObj, msg.pos, player)

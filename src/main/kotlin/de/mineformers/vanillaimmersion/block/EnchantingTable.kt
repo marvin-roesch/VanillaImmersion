@@ -52,7 +52,10 @@ class EnchantingTable : BlockEnchantmentTable() {
         } else {
             // Extract the first stack from the table, preferring the object slot
             val extracted = tile.inventory.extractItem(0, 1, false) ?: tile.inventory.extractItem(1, 3, false)
-            player.setHeldItem(hand, extracted)
+            Inventories.insertOrDrop(player, extracted)
+        }
+        if (stack?.stackSize == 0) {
+            player.setHeldItem(hand, null)
         }
         return false
     }

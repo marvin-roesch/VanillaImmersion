@@ -36,13 +36,13 @@ class EnchantingParticle(world: World,
     }
 
     override fun getBrightnessForRender(p_189214_1_: Float): Int {
-        val i = super.getBrightnessForRender(p_189214_1_)
-        var f = this.particleAge.toFloat() / this.particleMaxAge.toFloat()
-        f *= f
-        f *= f
-        val j = i and 255
-        var k = i shr 16 and 255
-        k += (f * 15.0f * 16.0f).toInt()
+        val brightness = super.getBrightnessForRender(p_189214_1_)
+        var t = this.particleAge.toFloat() / this.particleMaxAge.toFloat()
+        t *= t
+        t *= t
+        val j = brightness and 255
+        var k = brightness shr 16 and 255
+        k += (t * 15.0f * 16.0f).toInt()
 
         if (k > 240) {
             k = 240
@@ -55,11 +55,11 @@ class EnchantingParticle(world: World,
         this.prevPosX = this.posX
         this.prevPosY = this.posY
         this.prevPosZ = this.posZ
-        var f = this.particleAge.toFloat() / this.particleMaxAge.toFloat()
-        var f1 = f * f
-        this.posX = this.coordX + this.motionX * f1.toDouble()
-        this.posY = this.coordY + this.motionY * f1.toDouble()
-        this.posZ = this.coordZ + this.motionZ * f1.toDouble()
+        val t = this.particleAge / this.particleMaxAge.toFloat()
+        val t2 = t * t
+        this.posX = this.coordX + this.motionX * t2
+        this.posY = this.coordY + this.motionY * t2
+        this.posZ = this.coordZ + this.motionZ * t2
 
         if (this.particleAge++ >= this.particleMaxAge) {
             this.setExpired()

@@ -223,9 +223,8 @@ object CraftingDragHandler {
                     // coordinate space
                     val facing = state.getValue(CraftingTable.FACING)
                     val angle = -Math.toRadians(180.0 - facing.horizontalAngle).toFloat()
-                    val localPos =
-                        (-16 * ((hovered.hitVec - hovered.blockPos - Vec3d(0.5, 0.0, 0.5))
-                                    .rotateYaw(angle) - Vec3d(0.5, 0.0, 0.5))).toBlockPos()
+                    val localPos = (-16 * ((hovered.hitVec - hovered.blockPos - Vec3d(0.5, 0.0, 0.5))
+                                               .rotateYaw(angle) - Vec3d(0.5, 0.0, 0.5))).toBlockPos()
                     // The crafting grid starts at (3|4) and covers a 7x7 pixel area
                     val x = localPos.x - 3
                     val y = localPos.z - 4

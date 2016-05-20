@@ -97,24 +97,6 @@ object EnchantingUIHandler {
             // Try to hit the left page first, then the right one
             if (tryHit(te, player, origin, direction, hoverDistance, partialTicks, false, key)) return
             if (tryHit(te, player, origin, direction, hoverDistance, partialTicks, true, key)) return
-//            val rightPage = listOf(Vector4f(0f, 0f, 0f, 1f), Vector4f(6f * 0.0625f, 0f, 0f, 1f),
-//                                   Vector4f(6f * 0.0625f, 8f * 0.0625f, 0f, 1f), Vector4f(0f, 8f * 0.0625f, 0f, 1f))
-//            val rightMatrix = calculateMatrix(te, partialTicks, true)
-//            rightPage.forEach { rightMatrix.transform(it) }
-//            val right = rightPage.map { Vec3d(it.x.toDouble(), it.y.toDouble(), it.z.toDouble()) + te.pos }
-//            val rightHit = moellerTrumbore(origin, direction, right[0], right[1], right[2]) ?:
-//                           moellerTrumbore(origin, direction, right[0], right[2], right[3])
-//            rightMatrix.invert()
-//            if (rightHit != null && origin.squareDistanceTo(rightHit) < hoverDistance) {
-//                val h = rightHit - te.pos
-//                val v = Vector4f(h.x.toFloat(), h.y.toFloat(), h.z.toFloat(), 1f)
-//                rightMatrix.transform(v)
-//                val hitVec = Vec3d(0.0, 125.0, 0.0) - Vec3d(-v.x.toDouble(), v.y.toDouble(), 0.0) / 0.004
-//                handleUIHit(te, true, player, hitVec.x, hitVec.y)
-//                player.swingArm(EnumHand.MAIN_HAND)
-//                event.isCanceled = true
-//                return
-//            }
         }
     }
 
@@ -165,13 +147,20 @@ object EnchantingUIHandler {
     }
 
     /**
-     *
+     * Handles a click on the enchantment table's "GUI", performing the appropriate action.
      */
     private fun handleUIHit(table: EnchantingTableLogic, right: Boolean, player: EntityPlayer, x: Double, y: Double) {
+        // Just send it off to the server, the client does not have any control
         VanillaImmersion.NETWORK.sendToServer(EnchantingAction.PageHitMessage(table.pos, right, x, y))
     }
 
+    /**
+     * Calculates the transformation matrix for the left or right page of an enchantment table.
+     * The inverse can be multiplied with any point in the table's local coordinate space to get its position relative
+     * to the respective page.
+     */
     private fun calculateMatrix(te: EnchantingTableLogic, partialTicks: Float, right: Boolean): Matrix4f {
+        // See the enchantment table's renderer, we need to reproduce the transformations exactly
         val hover = te.tickCount + partialTicks
         var dYaw: Float = te.bookRotation - te.bookRotationPrev
         while (dYaw >= Math.PI) {
@@ -196,6 +185,7 @@ object EnchantingUIHandler {
         val breath = (MathHelper.sin(hover * 0.02f) * 0.1f + 1.25f) * spread
         val rotation = breath - breath * 2.0f * flipLeft
 
+        // Again, see the renderer, the transformations are applied in the same order
         val result = Matrix4f()
         result.setIdentity()
         val tmp = Matrix4f()
@@ -215,27 +205,40 @@ object EnchantingUIHandler {
         return result
     }
 
+    /**
+     * Performs a Möller-Trumbore intersection on a triangle and returns the position on the vector that was hit,
+     * or `null` if there is no intersection.
+     * Ignores the winding of the triangle, i.e. does not support backface culling.
+     */
     private fun moellerTrumbore(origin: Vec3d, dir: Vec3d, v1: Vec3d, v2: Vec3d, v3: Vec3d,
                                 epsilon: Double = 1e-6): Vec3d? {
+        // Edges with v1 adjacent to them
         val e1 = v2 - v1
         val e2 = v3 - v1
+        // Required for determinant and calculation of u
         val p = dir.crossProduct(e2)
         val det = e1.dotProduct(p)
+        // Make sure determinant isn't near zero, otherwise we lie in the triangle's plane
         if (det > -epsilon && det < epsilon) {
             return null
         }
+        // Distance from v1 to origin
         val t = origin - v1
+        // Calculate u parameter and check whether it's in the triangle's bounds
         val u = t.dotProduct(p) / det
         if (u < 0 || u > 1) {
             return null
         }
+        // Calculate v parameter and check whether it's in the triangle's bounds
         val q = t.crossProduct(e1)
         val v = dir.dotProduct(q) / det
         if (v < 0 || u + v > 1) {
             return null
         }
+        // Actual intersection test
         val d = e2.dotProduct(q) / det
         if (d > epsilon) {
+            // u and v are barycentric coordinates on the triangle, convert them to "normal" ones
             return v1 + u * e1 + v * e2
         }
         return null

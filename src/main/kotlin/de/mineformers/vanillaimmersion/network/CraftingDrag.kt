@@ -9,9 +9,12 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext
 
 /**
- * ${JDOC}
+ * Message and handler for notifying the server about a dragging operation on a crafting table.
  */
 object CraftingDrag {
+    /**
+     * The message just holds the table's position and the list of slots affected by the operation.
+     */
     data class Message(var pos: BlockPos = BlockPos.ORIGIN,
                        var slots: MutableList<Int> = mutableListOf()) : IMessage {
         override fun toBytes(buf: ByteBuf?) {
@@ -32,9 +35,11 @@ object CraftingDrag {
     object Handler : IMessageHandler<Message, IMessage> {
         override fun onMessage(msg: Message, ctx: MessageContext): IMessage? {
             val player = ctx.serverHandler.playerEntity
+            // We interact with the world, hence schedule our action
             player.serverWorld.addScheduledTask {
                 val tile = player.worldObj.getTileEntity(msg.pos)
                 if (tile is CraftingTableLogic) {
+                    // Delegate the dragging to the dedicated method
                     CraftingHandler.performDrag(tile, player, msg.slots)
                 }
             }

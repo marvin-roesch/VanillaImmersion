@@ -8,9 +8,13 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext
 
 /**
- * ${JDOC}
+ * Messages and handlers to deal with actions on the enchantment table. Currently only deals with page hits.
  */
 object EnchantingAction {
+    /**
+     * The page hit message just holds a reference to the enchantment table's position, the affected page and
+     * the position that was clicked.
+     */
     data class PageHitMessage(var pos: BlockPos = BlockPos.ORIGIN,
                               var right: Boolean = false,
                               var x: Double = 0.0,
@@ -33,9 +37,11 @@ object EnchantingAction {
     object PageHitHandler : IMessageHandler<PageHitMessage, IMessage> {
         override fun onMessage(msg: PageHitMessage, ctx: MessageContext): IMessage? {
             val player = ctx.serverHandler.playerEntity
+            // We interact with the world, hence schedule our action
             player.serverWorld.addScheduledTask {
                 val tile = player.worldObj.getTileEntity(msg.pos)
                 if (tile is EnchantingTableLogic) {
+                    // Delegate the actual logic to the tile entity
                     tile.performPageAction(player, tile.page + if (msg.right) 1 else 0, msg.x, msg.y)
                 }
             }

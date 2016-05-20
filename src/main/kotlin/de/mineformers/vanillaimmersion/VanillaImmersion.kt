@@ -83,16 +83,14 @@ object VanillaImmersion {
         MinecraftForge.EVENT_BUS.register(RepairHandler)
 
         // Register messages and handlers
-        NETWORK.registerMessage(AnvilLock.AcquireHandler, AnvilLock.AcquireMessage::class.java,
-                                0, Side.SERVER)
-        NETWORK.registerMessage(AnvilLock.AcquiredHandler, AnvilLock.AcquiredMessage::class.java,
-                                1, Side.CLIENT)
+        NETWORK.registerMessage(AnvilLock.Handler, AnvilLock.Message::class.java,
+                                0, Side.CLIENT)
         NETWORK.registerMessage(AnvilText.Handler, AnvilText.Message::class.java,
-                                2, Side.SERVER)
+                                1, Side.SERVER)
         NETWORK.registerMessage(CraftingDrag.Handler, CraftingDrag.Message::class.java,
-                                3, Side.SERVER)
+                                2, Side.SERVER)
         NETWORK.registerMessage(EnchantingAction.PageHitHandler, EnchantingAction.PageHitMessage::class.java,
-                                4, Side.SERVER)
+                                3, Side.SERVER)
 
         PROXY.preInit(event)
     }
