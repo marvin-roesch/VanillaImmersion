@@ -5,18 +5,15 @@ import de.mineformers.vanillaimmersion.network.EnchantingAction
 import de.mineformers.vanillaimmersion.tileentity.EnchantingTableLogic
 import de.mineformers.vanillaimmersion.util.*
 import net.minecraft.client.Minecraft
-import net.minecraft.client.settings.KeyBinding
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.util.EnumHand
 import net.minecraft.util.Timer
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.MathHelper
 import net.minecraft.util.math.Vec3d
+import net.minecraftforge.event.entity.player.PlayerInteractEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import net.minecraftforge.fml.common.gameevent.InputEvent
 import net.minecraftforge.fml.relauncher.ReflectionHelper
-import org.lwjgl.input.Keyboard
-import org.lwjgl.input.Mouse
 import javax.vecmath.Matrix4f
 import javax.vecmath.Vector3f
 import javax.vecmath.Vector4f
@@ -44,20 +41,19 @@ object EnchantingUIHandler {
         get() = (TIMER_FIELD.get(Minecraft.getMinecraft()) as Timer).renderPartialTicks
 
     /**
-     * Handles mouse clicks for UI interaction.
+     * Handles interaction with enchantment tables when a right click with an empty hand happens.
      */
     @SubscribeEvent
-    fun onMouseInput(event: InputEvent.MouseInputEvent?) {
-        // Subtract 100 because Minecraft handles mouse buttons as negative key codes
-        onInteract(Mouse.getEventButton() - 100, Mouse.getEventButtonState())
+    fun onRightClickEmpty(event: PlayerInteractEvent.RightClickEmpty) {
+        onInteract(event, Minecraft.getMinecraft().objectMouseOver?.hitVec ?: Vec3d.ZERO)
     }
 
     /**
-     * Handles key presses for UI interaction.
+     * Handles interaction with enchantment tables when a right click on a block happens.
      */
     @SubscribeEvent
-    fun onKeyboardInput(event: InputEvent.KeyInputEvent?) {
-        onInteract(Keyboard.getEventKey(), Keyboard.getEventKeyState())
+    fun onRightClickBlock(event: PlayerInteractEvent.RightClickBlock) {
+        onInteract(event, event.hitVec)
     }
 
     /**
@@ -65,14 +61,8 @@ object EnchantingUIHandler {
      * Will scan a 7x7x7 cube around the player to check against since we can't rely
      * on the currently hovered block being the enchantment table.
      */
-    private fun onInteract(keyCode: Int, keyDown: Boolean) {
-        val key = Minecraft.getMinecraft().gameSettings.keyBindUseItem
-        if (Minecraft.getMinecraft().theWorld == null || // Covers things like the main menu
-            Minecraft.getMinecraft().currentScreen != null || // We do not want this to happen when a GUI is open
-            keyCode != key.keyCode ||
-            !keyDown)
-            return
-        val player = Minecraft.getMinecraft().thePlayer
+    private fun onInteract(event: PlayerInteractEvent, hovered: Vec3d) {
+        val player = event.entityPlayer
         val surroundingBlocks = BlockPos.getAllInBox(player.position - BlockPos(3, 3, 3),
                                                      player.position + BlockPos(3, 3, 3))
         // Filter all enchantment tables out of the surrounding blocks and sort them by distance to the player
@@ -85,29 +75,40 @@ object EnchantingUIHandler {
         if (enchantingTables.isEmpty())
             return
 
-        val partialTicks = this.partialTicks
+        val partialTicks =
+            if (event.world.isRemote)
+                this.partialTicks
+            else
+                1f
         val origin = player.getPositionEyes(partialTicks)
         val direction = player.getLook(partialTicks)
-        val hovered = Minecraft.getMinecraft().objectMouseOver?.hitVec ?: Vec3d.ZERO
         val hoverDistance = origin.squareDistanceTo(hovered)
         for (te in enchantingTables) {
             // If the active page is smaller than 0 (normally -1), the book is closed.
             if (te.page < 0)
                 continue
             // Try to hit the left page first, then the right one
-            if (tryHit(te, player, origin, direction, hoverDistance, partialTicks, false, key)) return
-            if (tryHit(te, player, origin, direction, hoverDistance, partialTicks, true, key)) return
+            if (tryHit(te, player, origin, direction, hoverDistance, partialTicks, false)) {
+                if (event.isCancelable)
+                    event.isCanceled = true
+                return
+            }
+            if (tryHit(te, player, origin, direction, hoverDistance, partialTicks, true)) {
+                if (event.isCancelable)
+                    event.isCanceled = true
+                return
+            }
         }
     }
 
     /**
      * Sends a ray through the specified enchantment table's left or right page.
-     * Will invoke the desired action for the appropriate page if the ray intersected it.
+     * Returns the hit vector (if the intersection was successful) and a matrix to transform the point
+     * to one local to the page.
      */
-    private fun tryHit(te: EnchantingTableLogic,
-                       player: EntityPlayer, origin: Vec3d,
-                       direction: Vec3d, hoverDistance: Double,
-                       partialTicks: Float, right: Boolean, key: KeyBinding): Boolean {
+    private fun intersectPage(te: EnchantingTableLogic,
+                              origin: Vec3d, direction: Vec3d,
+                              partialTicks: Float, right: Boolean): Pair<Vec3d?, Matrix4f> {
         // Based on ModelBook's flippingPageRight/flippingPageLeft size
         val quad = listOf(Vector4f(0f, 0f, 0f, 1f), Vector4f(6f * 0.0625f, 0f, 0f, 1f),
                           Vector4f(6f * 0.0625f, 8f * 0.0625f, 0f, 1f), Vector4f(0f, 8f * 0.0625f, 0f, 1f))
@@ -121,6 +122,17 @@ object EnchantingUIHandler {
                   moellerTrumbore(origin, direction, page[0], page[2], page[3])
         // Invert the transformation matrix to retrieve local coordinates from the hit again
         matrix.invert()
+        return Pair(hit, matrix)
+    }
+
+    /**
+     * Sends a ray through the specified enchantment table's left or right page.
+     * Will invoke the desired action for the appropriate page if the ray intersected it.
+     */
+    private fun tryHit(te: EnchantingTableLogic,
+                       player: EntityPlayer, origin: Vec3d, direction: Vec3d, hoverDistance: Double,
+                       partialTicks: Float, right: Boolean): Boolean {
+        val (hit, matrix) = intersectPage(te, origin, direction, partialTicks, right)
         if (hit != null && origin.squareDistanceTo(hit) < hoverDistance) {
             val localHit = hit - te.pos
             val transformed = Vector4f(localHit.x.toFloat(), localHit.y.toFloat(), localHit.z.toFloat(), 1f)
@@ -133,13 +145,9 @@ object EnchantingUIHandler {
                     Vec3d(0.0, 125.0, 0.0) - Vec3d(-transformed.x.toDouble(), transformed.y.toDouble(), 0.0) / 0.004
                 else
                     Vec3d(94.0, 125.0, 0.0) - Vec3d(transformed.x.toDouble(), transformed.y.toDouble(), 0.0) / 0.004
-            handleUIHit(te, right, player, pixelHit.x, pixelHit.y)
-            player.swingArm(EnumHand.MAIN_HAND)
-
-            // Hack to prevent usual key binding action from happening
-            // Required since the used events do not support cancelling
-            KeyBinding.setKeyBindState(key.keyCode, false)
-            while (key.isPressed) {
+            if (player.worldObj.isRemote) {
+                handleUIHit(te, right, player, pixelHit.x, pixelHit.y)
+                player.swingArm(EnumHand.MAIN_HAND)
             }
             return true
         }

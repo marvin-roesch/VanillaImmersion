@@ -2,7 +2,6 @@ package de.mineformers.vanillaimmersion.tileentity
 
 import de.mineformers.vanillaimmersion.VanillaImmersion.Blocks.FURNACE
 import de.mineformers.vanillaimmersion.VanillaImmersion.Blocks.LIT_FURNACE
-import de.mineformers.vanillaimmersion.block.CraftingTable
 import de.mineformers.vanillaimmersion.util.Inventories
 import net.minecraft.block.BlockFurnace
 import net.minecraft.block.BlockFurnace.FACING

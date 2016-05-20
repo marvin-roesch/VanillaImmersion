@@ -143,7 +143,7 @@ object CraftingHandler {
         // Imitate a player picking up an item from the output slot
         craftingSlot.onPickupFromSlot(craftingPlayer, result)
         // Only manipulate the table's inventory when we're not simulating the action
-        if(!simulate) {
+        if (!simulate) {
             // Change the crafting table's inventory according to the consumed items in the container
             for (i in 1..container.craftMatrix.sizeInventory) {
                 tile.inventory.setStackInSlot(i, container.craftMatrix.getStackInSlot(i - 1))
