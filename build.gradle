@@ -50,6 +50,8 @@ minecraft {
     replace '@VERSION@', config.mod_version
     replace 'acceptedMinecraftVersions = "*"', "[${config.mc_version}]"
     replace 'required-after:Forge', "required-after:Forge@[${config.forge_version},)"
+    if (file('private.properties').exists())
+        replace '@UPDATE_URL@', priv.update_url
 
     replaceIn 'VanillaImmersion.kt'
 }
@@ -81,6 +83,8 @@ processResources {
 
         // replace version and mcversion
         expand 'version': project.version, 'mcversion': project.minecraft.version
+        if (file('private.properties').exists())
+            expand 'updateUrl': priv.update_url
     }
 
     // copy everything else, thats not the mcmod.info
@@ -93,7 +97,7 @@ curseforge {
     apiKey = priv.cf_api
     project {
         id = priv.cf_project
-        changelog = """See https://github.com/PaleoCrafter/Botania/releases/tag/v${version}"""
+        changelog = """See <a title="GitHub Changelog" href="https://github.com/PaleoCrafter/VanillaImmersion/releases/tag/v${version}">GitHub</a>"""
         releaseType = priv.cf_type
         addGameVersion config.mc_version
 

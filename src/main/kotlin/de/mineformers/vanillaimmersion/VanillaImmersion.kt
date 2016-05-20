@@ -45,6 +45,7 @@ import net.minecraftforge.fml.relauncher.Side
      version = VanillaImmersion.VERSION,
      acceptedMinecraftVersions = "*",
      dependencies = "required-after:Forge",
+     updateJSON = "@UPDATE_URL@",
      modLanguageAdapter = "de.mineformers.vanillaimmersion.KotlinAdapter")
 object VanillaImmersion {
     const val MOD_NAME = "Vanilla Immersion"

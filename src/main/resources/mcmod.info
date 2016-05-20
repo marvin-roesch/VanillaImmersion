@@ -5,12 +5,12 @@
     "description": "Immersify everything!",
     "version": "${version}",
     "mcversion": "${mcversion}",
-    "url": "",
-    "updateUrl": "",
+    "url": "http://minecraft.curseforge.com/projects/vanilla-immersion",
+    "updateUrl": "${updateUrl}",
     "authorList": [
       "PaleoCrafter"
     ],
-    "logoFile": "",
+    "logoFile": "assets/vimmersion/logo.png",
     "screenshots": [],
     "dependencies": []
   }
