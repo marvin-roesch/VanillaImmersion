@@ -81,13 +81,16 @@ processResources {
     from(sourceSets.main.resources.srcDirs) {
         include 'mcmod.info'
 
-        // replace version and mcversion
-        expand 'version': project.version, 'mcversion': project.minecraft.version
-        if (file('private.properties').exists())
-            expand 'updateUrl': priv.update_url
+        if (file('private.properties').exists()) {
+            // replace version, mcversion and updateUrl
+            expand 'version': project.version, 'mcversion': project.minecraft.version, 'updateUrl': priv.update_url
+        } else {
+            // replace version and mcversion
+            expand 'version': project.version, 'mcversion': project.minecraft.version
+        }
     }
 
-    // copy everything else, thats not the mcmod.info
+    // copy everything else other than the mcmod.info
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
     }
