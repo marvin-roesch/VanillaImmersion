@@ -97,10 +97,6 @@ object CraftingHandler {
         if (tile !is CraftingTableLogic)
             return
 
-        // There is no need to craft if there already is a result
-        if (tile[Slot.OUTPUT] != null)
-            return
-
         // Initialize the crafting matrix, either via a real crafting container if there is a player or
         // via a dummy inventory if there is none
         val matrix =
@@ -116,6 +112,9 @@ object CraftingHandler {
         for (i in 1..(tile.inventory.slots - 1))
             matrix.setInventorySlotContents(i - 1, tile.inventory.getStackInSlot(i))
         val result = CraftingManager.getInstance().findMatchingRecipe(matrix, world)
+        // There is no need to craft if there already is the same result
+        if (Inventories.equal(tile[Slot.OUTPUT], result))
+            return
         tile[Slot.OUTPUT] = result
     }
 
