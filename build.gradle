@@ -104,7 +104,7 @@ curseforge {
         releaseType = priv.cf_type
         addGameVersion config.mc_version
 
-        mainArtifact(shadowJar) {
+        mainArtifact(reobfShadowJar) {
             displayName = "Vanilla Immersion - ${config.mod_version}"
         }
     }
