@@ -20,9 +20,11 @@ import de.mineformers.vanillaimmersion.tileentity.FurnaceLogic
 import net.minecraft.block.Block
 import net.minecraft.client.renderer.block.model.ModelResourceLocation
 import net.minecraft.creativetab.CreativeTabs
+import net.minecraft.init.Blocks as VBlocks
 import net.minecraft.item.Item
 import net.minecraft.item.ItemAnvilBlock
 import net.minecraft.item.ItemBlock
+import net.minecraft.item.ItemStack
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.SoundEvent
 import net.minecraftforge.client.model.ModelLoader
@@ -32,6 +34,7 @@ import net.minecraftforge.fml.client.registry.ClientRegistry
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.Mod.EventHandler
 import net.minecraftforge.fml.common.SidedProxy
+import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper
 import net.minecraftforge.fml.common.registry.GameRegistry
@@ -93,6 +96,29 @@ object VanillaImmersion {
                                 3, Side.SERVER)
 
         PROXY.preInit(event)
+    }
+
+    /**
+     * Runs during the initialization phase of mod loading, registers recipes etc.
+     */
+    @EventHandler
+    fun init(event: FMLInitializationEvent) {
+        // Add immersive -> Vanilla block conversion recipes
+        GameRegistry.addShapelessRecipe(ItemStack(Blocks.FURNACE), ItemStack(VBlocks.FURNACE))
+        GameRegistry.addShapelessRecipe(ItemStack(Blocks.CRAFTING_TABLE), ItemStack(VBlocks.CRAFTING_TABLE))
+        // Fully intact, slightly damaged and very damaged anvils
+        GameRegistry.addShapelessRecipe(ItemStack(Blocks.ANVIL, 1, 0), ItemStack(VBlocks.ANVIL, 1, 0))
+        GameRegistry.addShapelessRecipe(ItemStack(Blocks.ANVIL, 1, 1), ItemStack(VBlocks.ANVIL, 1, 1))
+        GameRegistry.addShapelessRecipe(ItemStack(Blocks.ANVIL, 1, 2), ItemStack(VBlocks.ANVIL, 1, 2))
+        GameRegistry.addShapelessRecipe(ItemStack(Blocks.ENCHANTING_TABLE), ItemStack(VBlocks.ENCHANTING_TABLE))
+        // Add Vanilla -> immersive block conversion recipes
+        GameRegistry.addShapelessRecipe(ItemStack(VBlocks.FURNACE), ItemStack(Blocks.FURNACE))
+        GameRegistry.addShapelessRecipe(ItemStack(VBlocks.CRAFTING_TABLE), ItemStack(Blocks.CRAFTING_TABLE))
+        // Fully intact, slightly damaged and very damaged anvils
+        GameRegistry.addShapelessRecipe(ItemStack(VBlocks.ANVIL, 1, 0), ItemStack(Blocks.ANVIL, 1, 0))
+        GameRegistry.addShapelessRecipe(ItemStack(VBlocks.ANVIL, 1, 1), ItemStack(Blocks.ANVIL, 1, 1))
+        GameRegistry.addShapelessRecipe(ItemStack(VBlocks.ANVIL, 1, 2), ItemStack(Blocks.ANVIL, 1, 2))
+        GameRegistry.addShapelessRecipe(ItemStack(VBlocks.ENCHANTING_TABLE), ItemStack(Blocks.ENCHANTING_TABLE))
     }
 
     /**
