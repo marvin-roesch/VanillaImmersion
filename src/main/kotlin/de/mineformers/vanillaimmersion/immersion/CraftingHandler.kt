@@ -9,7 +9,6 @@ import de.mineformers.vanillaimmersion.util.times
 import de.mineformers.vanillaimmersion.util.toBlockPos
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.inventory.Container
-import net.minecraft.inventory.ContainerWorkbench
 import net.minecraft.inventory.InventoryCrafting
 import net.minecraft.item.ItemStack
 import net.minecraft.item.crafting.CraftingManager
@@ -101,16 +100,17 @@ object CraftingHandler {
         // via a dummy inventory if there is none
         val matrix =
             if (player != null)
-                ContainerWorkbench(player.inventory, world, pos).craftMatrix
+                tile.createContainer(player, false).craftMatrix
             else {
                 val container = object : Container() {
                     override fun canInteractWith(playerIn: EntityPlayer?) = true
                 }
-                InventoryCrafting(container, 3, 3)
+                val inventory = InventoryCrafting(container, 3, 3)
+                // Fill the matrix with ingredients
+                for (i in 1..(tile.inventory.slots - 1))
+                    inventory.setInventorySlotContents(i - 1, tile.inventory.getStackInSlot(i))
+                inventory
             }
-        // Fill the matrix with ingredients
-        for (i in 1..(tile.inventory.slots - 1))
-            matrix.setInventorySlotContents(i - 1, tile.inventory.getStackInSlot(i))
         val result = CraftingManager.getInstance().findMatchingRecipe(matrix, world)
         // There is no need to craft if there already is the same result
         if (Inventories.equal(tile[Slot.OUTPUT], result))
@@ -133,20 +133,14 @@ object CraftingHandler {
         // Use a fake player if the given one is null
         val craftingPlayer = player ?: FakePlayerFactory.getMinecraft(world as WorldServer)
         // Create a crafting container and fill it with ingredients
-        val container = ContainerWorkbench(craftingPlayer.inventory, world, pos)
+        val container = tile.createContainer(craftingPlayer, simulate)
         val craftingSlot = container.getSlot(0)
-        for (i in 1..(tile.inventory.slots - 1))
-            container.craftMatrix.setInventorySlotContents(i - 1, tile.inventory.getStackInSlot(i)?.copy())
         if (craftingSlot.stack == null)
             return false
         // Imitate a player picking up an item from the output slot
         craftingSlot.onPickupFromSlot(craftingPlayer, result)
         // Only manipulate the table's inventory when we're not simulating the action
         if (!simulate) {
-            // Change the crafting table's inventory according to the consumed items in the container
-            for (i in 1..container.craftMatrix.sizeInventory) {
-                tile.inventory.setStackInSlot(i, container.craftMatrix.getStackInSlot(i - 1))
-            }
             // Grant the player the result
             if (player != null) {
                 Inventories.insertOrDrop(player, result)

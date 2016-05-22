@@ -1,6 +1,6 @@
 package de.mineformers.vanillaimmersion.network
 
-import de.mineformers.vanillaimmersion.client.renderer.AnvilTextGui
+import de.mineformers.vanillaimmersion.client.gui.AnvilTextGui
 import de.mineformers.vanillaimmersion.tileentity.AnvilLogic
 import io.netty.buffer.ByteBuf
 import net.minecraft.client.Minecraft
@@ -17,12 +17,12 @@ object AnvilLock {
      * The message simply consists of the anvil's position.
      */
     data class Message(var pos: BlockPos = BlockPos.ORIGIN) : IMessage {
-        override fun toBytes(buf: ByteBuf?) {
-            buf!!.writeLong(pos.toLong())
+        override fun toBytes(buf: ByteBuf) {
+            buf.writeLong(pos.toLong())
         }
 
-        override fun fromBytes(buf: ByteBuf?) {
-            pos = BlockPos.fromLong(buf!!.readLong())
+        override fun fromBytes(buf: ByteBuf) {
+            pos = BlockPos.fromLong(buf.readLong())
         }
     }
 

@@ -40,12 +40,12 @@ class CraftingTable : BlockWorkbench() {
     }
 
     /**
-     * Handles right clicks for the anvil.
+     * Handles right clicks for the crafting table.
      * Does not do anything since interaction is handled through
      * [CraftingHandler][de.mineformers.vanillaimmersion.immersion.CraftingHandler].
      */
-    override fun onBlockActivated(worldIn: World, pos: BlockPos, state: IBlockState,
-                                  playerIn: EntityPlayer, hand: EnumHand, heldItem: ItemStack?,
+    override fun onBlockActivated(world: World, pos: BlockPos, state: IBlockState,
+                                  player: EntityPlayer, hand: EnumHand, heldItem: ItemStack?,
                                   side: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) = true
 
     /**

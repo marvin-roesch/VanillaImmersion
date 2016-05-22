@@ -18,15 +18,15 @@ object AnvilText {
      */
     data class Message(var pos: BlockPos = BlockPos.ORIGIN,
                        var text: String? = null) : IMessage {
-        override fun toBytes(buf: ByteBuf?) {
-            buf!!.writeLong(pos.toLong())
+        override fun toBytes(buf: ByteBuf) {
+            buf.writeLong(pos.toLong())
             buf.writeBoolean(text != null)
             if (text != null)
                 ByteBufUtils.writeUTF8String(buf, text)
         }
 
-        override fun fromBytes(buf: ByteBuf?) {
-            pos = BlockPos.fromLong(buf!!.readLong())
+        override fun fromBytes(buf: ByteBuf) {
+            pos = BlockPos.fromLong(buf.readLong())
             if (buf.readBoolean())
                 text = ByteBufUtils.readUTF8String(buf)
         }

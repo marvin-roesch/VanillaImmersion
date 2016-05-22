@@ -1,7 +1,6 @@
 package de.mineformers.vanillaimmersion.network
 
-import de.mineformers.vanillaimmersion.immersion.CraftingHandler
-import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic
+import de.mineformers.vanillaimmersion.VanillaImmersion
 import io.netty.buffer.ByteBuf
 import net.minecraft.util.math.BlockPos
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage
@@ -9,26 +8,23 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext
 
 /**
- * Message and handler for notifying the server about a dragging operation on a crafting table.
+ * Messages and handlers to deal with GUIs for JEI integration.
  */
-object CraftingDrag {
+object JEIGuis {
     /**
-     * The message just holds the table's position and the list of slots affected by the operation.
+     * The page hit message just holds a reference to the enchantment table's position, the affected page and
+     * the position that was clicked.
      */
     data class Message(var pos: BlockPos = BlockPos.ORIGIN,
-                       var slots: MutableList<Int> = mutableListOf()) : IMessage {
+                       var id: Int = 0) : IMessage {
         override fun toBytes(buf: ByteBuf) {
             buf.writeLong(pos.toLong())
-            buf.writeInt(slots.size)
-            for (i in slots)
-                buf.writeInt(i)
+            buf.writeInt(id)
         }
 
         override fun fromBytes(buf: ByteBuf) {
             pos = BlockPos.fromLong(buf.readLong())
-            val count = buf.readInt()
-            for (i in 1..count)
-                slots.add(buf.readInt())
+            id = buf.readInt()
         }
     }
 
@@ -37,11 +33,7 @@ object CraftingDrag {
             val player = ctx.serverHandler.playerEntity
             // We interact with the world, hence schedule our action
             player.serverWorld.addScheduledTask {
-                val tile = player.worldObj.getTileEntity(msg.pos)
-                if (tile is CraftingTableLogic) {
-                    // Delegate the dragging to the dedicated method
-                    CraftingHandler.performDrag(tile, player, msg.slots)
-                }
+                player.openGui(VanillaImmersion, msg.id, player.worldObj, msg.pos.x, msg.pos.y, msg.pos.z)
             }
             return null
         }

@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformT
 import net.minecraft.client.renderer.texture.TextureMap
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer
 import net.minecraft.item.ItemBlock
+import net.minecraftforge.fml.common.Loader
 
 /**
  * Renders the items on top of a crafting table.
@@ -54,6 +55,15 @@ class CraftingTableRenderer : TileEntitySpecialRenderer<CraftingTableLogic>() {
 
         RenderHelper.disableStandardItemLighting()
         disableRescaleNormal()
+
+        if (Loader.isModLoaded("JEI")) {
+            val font = Minecraft.getMinecraft().fontRendererObj
+            translate(0f, 0.001f, 0f)
+            scale(0.025f, -0.025f, 0.025f)
+            rotate(180f, 0f, 1f, 0f)
+            rotate(90f, 1f, 0f, 0f)
+            font.drawString("?", -font.getStringWidth("?") / 2 + 17, 5, 0xFFFFFF)
+        }
 
         popMatrix()
     }

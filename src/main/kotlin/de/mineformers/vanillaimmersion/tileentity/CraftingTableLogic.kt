@@ -4,6 +4,8 @@ import de.mineformers.vanillaimmersion.block.CraftingTable
 import de.mineformers.vanillaimmersion.immersion.CraftingHandler
 import de.mineformers.vanillaimmersion.util.Inventories
 import net.minecraft.block.state.IBlockState
+import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.inventory.*
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.network.NetworkManager
@@ -159,6 +161,99 @@ class CraftingTableLogic : TileEntity() {
     private val outputInventory by lazy {
         RangedWrapper(inventory, 0, 1)
     }
+
+    inner class CraftingTableContainer(player: EntityPlayer, simulate: Boolean) :
+        ContainerWorkbench(player.inventory, worldObj, pos) {
+        init {
+            if (!simulate) {
+                craftMatrix = object : InventoryCrafting(this, 3, 3) {
+                    override fun getStackInSlot(index: Int) =
+                        this@CraftingTableLogic.inventory.getStackInSlot(index + 1)
+
+                    override fun setInventorySlotContents(index: Int, stack: ItemStack?) {
+                        this@CraftingTableLogic.inventory.setStackInSlot(index + 1, stack)
+                        onCraftMatrixChanged(this)
+                    }
+
+                    override fun removeStackFromSlot(index: Int): ItemStack? {
+                        val result = this@CraftingTableLogic.inventory.extractItem(index + 1, Integer.MAX_VALUE, false)
+                        onCraftMatrixChanged(this)
+                        return result
+                    }
+
+                    override fun decrStackSize(index: Int, count: Int): ItemStack? {
+                        val result = this@CraftingTableLogic.inventory.extractItem(index + 1, count, false)
+                        onCraftMatrixChanged(this)
+                        return result
+                    }
+
+                    override fun clear() {
+                        for (i in 1..sizeInventory)
+                            this@CraftingTableLogic.inventory.setStackInSlot(i, null)
+                    }
+                }
+                craftResult = object : InventoryCraftResult() {
+                    override fun getStackInSlot(index: Int) =
+                        this@CraftingTableLogic.inventory.getStackInSlot(0)
+
+                    override fun setInventorySlotContents(index: Int, stack: ItemStack?) {
+                        this@CraftingTableLogic.inventory.contents[0] = stack
+                        this@CraftingTableLogic.markDirty()
+                        sync()
+                    }
+
+                    override fun removeStackFromSlot(index: Int): ItemStack? {
+                        val result = this@CraftingTableLogic.inventory.getStackInSlot(0)
+                        this@CraftingTableLogic.inventory.contents[0] = null
+                        this@CraftingTableLogic.markDirty()
+                        sync()
+                        return result
+                    }
+
+                    override fun decrStackSize(index: Int, count: Int) =
+                        removeStackFromSlot(0)
+
+                    override fun clear() {
+                        removeStackFromSlot(0)
+                    }
+                }
+                inventorySlots.clear()
+                inventoryItemStacks.clear()
+                this.addSlotToContainer(SlotCrafting(player, this.craftMatrix, this.craftResult, 0, 124, 35))
+
+                for (y in 0..2) {
+                    for (x in 0..2) {
+                        this.addSlotToContainer(Slot(this.craftMatrix, x + y * 3, 30 + x * 18, 17 + y * 18))
+                    }
+                }
+
+                for (row in 0..2) {
+                    for (col in 0..8) {
+                        this.addSlotToContainer(Slot(player.inventory, col + row * 9 + 9, 8 + col * 18, 84 + row * 18))
+                    }
+                }
+
+                for (slot in 0..8) {
+                    this.addSlotToContainer(Slot(player.inventory, slot, 8 + slot * 18, 142))
+                }
+                onCraftMatrixChanged(craftMatrix)
+            }
+        }
+
+        override fun onContainerClosed(player: EntityPlayer) {
+            val inventory = player.inventory
+
+            if (inventory.itemStack != null) {
+                player.dropItem(inventory.itemStack, false)
+                inventory.itemStack = null
+            }
+        }
+
+        override fun canInteractWith(playerIn: EntityPlayer) = true
+    }
+
+    fun createContainer(player: EntityPlayer, simulate: Boolean): ContainerWorkbench =
+        CraftingTableContainer(player, simulate)
 
     /**
      * Gets the ItemStack in a given slot.

@@ -5,6 +5,7 @@ import de.mineformers.vanillaimmersion.block.CraftingTable
 import de.mineformers.vanillaimmersion.client.renderer.Shaders
 import de.mineformers.vanillaimmersion.immersion.CraftingHandler.splitDrag
 import de.mineformers.vanillaimmersion.network.CraftingDrag
+import de.mineformers.vanillaimmersion.network.JEIGuis
 import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic
 import de.mineformers.vanillaimmersion.util.minus
 import de.mineformers.vanillaimmersion.util.times
@@ -26,6 +27,7 @@ import net.minecraft.util.math.RayTraceResult
 import net.minecraft.util.math.Vec3d
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.entity.player.PlayerInteractEvent
+import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.InputEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
@@ -38,6 +40,10 @@ import org.lwjgl.opengl.GL11
  * Mimics Vanilla GUI mechanics.
  */
 object CraftingDragHandler {
+    /**
+     * The position on the crafting table's top that was hit.
+     */
+    private var dragHit: BlockPos? = null
     /**
      * The position currently hovered on the crafting grid.
      */
@@ -94,20 +100,26 @@ object CraftingDragHandler {
         updateDragTarget()
 
         val heldItem = Minecraft.getMinecraft().thePlayer.getHeldItem(EnumHand.MAIN_HAND)
+        var cancelEvent = false
         // If we have a valid drag target and weren't dragging before: Start dragging
-        if (!wasDragging && dragTarget != null && keyDown) {
-            startDragging()
-            // Hack to prevent usual key binding action from happening
-            // Required since the used events do not support cancelling
-            KeyBinding.setKeyBindState(key.keyCode, false)
-            while (key.isPressed) {
+        if (!wasDragging && dragTarget != null && dragHit != null && keyDown) {
+            if (dragHit!!.x in 3..10 && dragHit!!.z in 3..10) {
+                startDragging()
+                cancelEvent = true
+            } else if (dragHit!!.x in 12..14 && dragHit!!.z in 9..11 && Loader.isModLoaded("JEI")) {
+                VanillaImmersion.NETWORK.sendToServer(JEIGuis.Message(dragTarget!!, 0))
+                cancelEvent = true
             }
         }
         // If we were dragging and either don't have a valid target anymore, the button isn't held anymore or
         // the player's held stack has changed: Stop dragging
         if (wasDragging && (dragTarget == null || !keyDown || dragStack != heldItem)) {
             stopDragging(target)
-            // Hack, see above
+            cancelEvent = true
+        }
+        if (cancelEvent) {
+            // Hack to prevent usual key binding action from happening
+            // Required since the used events do not support cancelling
             KeyBinding.setKeyBindState(key.keyCode, false)
             while (key.isPressed) {
             }
@@ -196,6 +208,7 @@ object CraftingDragHandler {
         dragging = false
         dragTarget = null
         dragPosition = null
+        dragHit = null
         dragStack = null
     }
 
@@ -223,11 +236,11 @@ object CraftingDragHandler {
                     // coordinate space
                     val facing = state.getValue(CraftingTable.FACING)
                     val angle = -Math.toRadians(180.0 - facing.horizontalAngle).toFloat()
-                    val localPos = (-16 * ((hovered.hitVec - hovered.blockPos - Vec3d(0.5, 0.0, 0.5))
-                                               .rotateYaw(angle) - Vec3d(0.5, 0.0, 0.5))).toBlockPos()
+                    dragHit = (-16 * ((hovered.hitVec - hovered.blockPos - Vec3d(0.5, 0.0, 0.5))
+                                          .rotateYaw(angle) - Vec3d(0.5, 0.0, 0.5))).toBlockPos()
                     // The crafting grid starts at (3|4) and covers a 7x7 pixel area
-                    val x = localPos.x - 3
-                    val y = localPos.z - 4
+                    val x = dragHit!!.x - 3
+                    val y = dragHit!!.z - 4
                     if (!(0..7).contains(x) || !(0..7).contains(y)) {
                         dragPosition = null
                         return

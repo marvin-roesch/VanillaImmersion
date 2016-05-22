@@ -9,10 +9,7 @@ import de.mineformers.vanillaimmersion.client.EnchantingUIHandler
 import de.mineformers.vanillaimmersion.client.renderer.*
 import de.mineformers.vanillaimmersion.immersion.CraftingHandler
 import de.mineformers.vanillaimmersion.immersion.RepairHandler
-import de.mineformers.vanillaimmersion.network.AnvilLock
-import de.mineformers.vanillaimmersion.network.AnvilText
-import de.mineformers.vanillaimmersion.network.CraftingDrag
-import de.mineformers.vanillaimmersion.network.EnchantingAction
+import de.mineformers.vanillaimmersion.network.*
 import de.mineformers.vanillaimmersion.tileentity.AnvilLogic
 import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic
 import de.mineformers.vanillaimmersion.tileentity.EnchantingTableLogic
@@ -20,7 +17,6 @@ import de.mineformers.vanillaimmersion.tileentity.FurnaceLogic
 import net.minecraft.block.Block
 import net.minecraft.client.renderer.block.model.ModelResourceLocation
 import net.minecraft.creativetab.CreativeTabs
-import net.minecraft.init.Blocks as VBlocks
 import net.minecraft.item.Item
 import net.minecraft.item.ItemAnvilBlock
 import net.minecraft.item.ItemBlock
@@ -36,9 +32,11 @@ import net.minecraftforge.fml.common.Mod.EventHandler
 import net.minecraftforge.fml.common.SidedProxy
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
+import net.minecraftforge.fml.common.network.NetworkRegistry
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper
 import net.minecraftforge.fml.common.registry.GameRegistry
 import net.minecraftforge.fml.relauncher.Side
+import net.minecraft.init.Blocks as VBlocks
 
 /**
  * Main entry point for Vanilla Immersion
@@ -94,6 +92,9 @@ object VanillaImmersion {
                                 2, Side.SERVER)
         NETWORK.registerMessage(EnchantingAction.PageHitHandler, EnchantingAction.PageHitMessage::class.java,
                                 3, Side.SERVER)
+        NETWORK.registerMessage(JEIGuis.Handler, JEIGuis.Message::class.java,
+                                4, Side.SERVER)
+        NetworkRegistry.INSTANCE.registerGuiHandler(this, GuiHandler())
 
         PROXY.preInit(event)
     }

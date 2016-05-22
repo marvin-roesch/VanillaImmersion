@@ -19,15 +19,15 @@ object EnchantingAction {
                               var right: Boolean = false,
                               var x: Double = 0.0,
                               var y: Double = 0.0) : IMessage {
-        override fun toBytes(buf: ByteBuf?) {
-            buf!!.writeLong(pos.toLong())
+        override fun toBytes(buf: ByteBuf) {
+            buf.writeLong(pos.toLong())
             buf.writeBoolean(right)
             buf.writeDouble(x)
             buf.writeDouble(y)
         }
 
-        override fun fromBytes(buf: ByteBuf?) {
-            pos = BlockPos.fromLong(buf!!.readLong())
+        override fun fromBytes(buf: ByteBuf) {
+            pos = BlockPos.fromLong(buf.readLong())
             right = buf.readBoolean()
             x = buf.readDouble()
             y = buf.readDouble()

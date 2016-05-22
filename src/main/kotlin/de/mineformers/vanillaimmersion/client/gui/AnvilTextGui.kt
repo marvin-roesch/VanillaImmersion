@@ -1,4 +1,4 @@
-package de.mineformers.vanillaimmersion.client.renderer
+package de.mineformers.vanillaimmersion.client.gui
 
 import de.mineformers.vanillaimmersion.VanillaImmersion
 import de.mineformers.vanillaimmersion.network.AnvilText
