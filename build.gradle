@@ -49,6 +49,7 @@ minecraft {
     version = "${config.mc_version}-${config.forge_version}${config.forge_branch != '' ? '-' : ''}${config.forge_branch}"
     runDir = 'run'
     mappings = config.mappings
+    useDepAts = true
 
     replace '@VERSION@', config.mod_version
     replace 'acceptedMinecraftVersions = "*",', """acceptedMinecraftVersions = "[${config.mc_version}]","""
@@ -59,8 +60,15 @@ minecraft {
     replaceIn 'VanillaImmersion.kt'
 }
 
+repositories {
+    maven {
+        url "http://dvs1.progwml6.com/files/maven"
+    }
+}
+
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    deobfCompile "mezz.jei:jei_${config.mc_version}:${config.jei_version}"
 }
 
 shadowJar {
