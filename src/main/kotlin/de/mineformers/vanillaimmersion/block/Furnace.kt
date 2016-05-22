@@ -4,6 +4,7 @@ import de.mineformers.vanillaimmersion.VanillaImmersion
 import de.mineformers.vanillaimmersion.VanillaImmersion.MODID
 import de.mineformers.vanillaimmersion.tileentity.FurnaceLogic
 import de.mineformers.vanillaimmersion.tileentity.FurnaceLogic.Companion.Slot
+import de.mineformers.vanillaimmersion.tileentity.sync
 import de.mineformers.vanillaimmersion.util.Inventories
 import net.minecraft.block.BlockFurnace
 import net.minecraft.block.SoundType
@@ -39,6 +40,8 @@ class Furnace(val lit: Boolean) : BlockFurnace(lit) {
         }
     }
 
+    override fun isOpaqueCube(state: IBlockState) = false
+
     override fun createNewTileEntity(worldIn: World, meta: Int) = FurnaceLogic() // Return our own implementation
 
     /**
@@ -61,10 +64,12 @@ class Furnace(val lit: Boolean) : BlockFurnace(lit) {
                     // Extract item
                     Inventories.spawn(world, pos, state.getValue(FACING), existing)
                     tile[slot] = null
+                    tile.sync()
                     player.addStat(StatList.FURNACE_INTERACTION)
                 } else if (stack != null && tile.isItemValidForSlot(slot.ordinal, stack)) {
                     // Insert item
                     tile[slot] = Inventories.merge(stack, existing)
+                    tile.sync()
                     player.addStat(StatList.FURNACE_INTERACTION)
                 }
             }

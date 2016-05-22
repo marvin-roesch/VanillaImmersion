@@ -20,13 +20,13 @@ class FurnaceRenderer : TileEntitySpecialRenderer<FurnaceLogic>() {
         pushMatrix()
         color(1f, 1f, 1f, 1f)
 
-        // Use the lighting of the block directly in front of the furnace
-        val light = te.world.getCombinedLight(te.pos.offset(te.facing), 0)
+        // Use the lighting of the furnace
+        val light = te.world.getCombinedLight(te.pos, 0)
         val bX = light % 65536
         val bY = light / 65536
         OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, bX.toFloat(), bY.toFloat())
 
-        // Translate to the furance's center and rotate according to its orientation
+        // Translate to the furnace's center and rotate according to its orientation
         translate(x + 0.5, y, z + 0.5)
         rotate(180f - te.facing.horizontalAngle, 0f, 1f, 0f)
 
