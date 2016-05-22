@@ -1,10 +1,8 @@
 package de.mineformers.vanillaimmersion.integration.jei
 
-import de.mineformers.vanillaimmersion.client.gui.CraftingTableGui
 import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic
 import mezz.jei.Internal
 import mezz.jei.api.*
-import mezz.jei.api.gui.IAdvancedGuiHandler
 import mezz.jei.api.gui.IRecipeLayout
 import mezz.jei.api.recipe.VanillaRecipeCategoryUid
 import mezz.jei.api.recipe.transfer.IRecipeTransferError
@@ -19,7 +17,6 @@ import net.minecraft.inventory.ContainerWorkbench
 import net.minecraft.util.math.BlockPos
 import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.common.Optional
-import java.awt.Rectangle
 
 /**
  * Vanilla Immersion JEI Integration plugin
@@ -33,13 +30,6 @@ class JEIIntegration : BlankModPlugin() {
 
     override fun register(registry: IModRegistry) {
         registry.recipeTransferRegistry.addRecipeTransferHandler(CraftingTransferHandler())
-        registry.addAdvancedGuiHandlers(object : IAdvancedGuiHandler<CraftingTableGui> {
-            override fun getGuiContainerClass() =
-                CraftingTableGui::class.java
-
-            override fun getGuiExtraAreas(guiContainer: CraftingTableGui) =
-                listOf(Rectangle(0, 0, 10, 10))
-        })
     }
 
     override fun onRuntimeAvailable(jeiRuntime: IJeiRuntime) {
