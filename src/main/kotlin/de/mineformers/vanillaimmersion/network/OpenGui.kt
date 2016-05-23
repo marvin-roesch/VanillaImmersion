@@ -10,7 +10,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext
 /**
  * Messages and handlers to deal with GUIs for JEI integration.
  */
-object JEIGuis {
+object OpenGui {
     /**
      * The page hit message just holds a reference to the enchantment table's position, the affected page and
      * the position that was clicked.

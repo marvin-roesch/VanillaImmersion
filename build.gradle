@@ -131,6 +131,7 @@ curseforge {
     apiKey = priv.cf_api
     project {
         id = priv.cf_project
+        changelogType = 'html'
         changelog = """See <a title="GitHub Changelog" href="https://github.com/PaleoCrafter/VanillaImmersion/releases/tag/v${version}">GitHub</a>"""
         releaseType = priv.cf_type
         addGameVersion config.mc_version

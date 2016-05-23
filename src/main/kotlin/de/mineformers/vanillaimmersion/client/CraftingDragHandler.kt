@@ -1,15 +1,13 @@
 package de.mineformers.vanillaimmersion.client
 
 import de.mineformers.vanillaimmersion.VanillaImmersion
-import de.mineformers.vanillaimmersion.block.CraftingTable
 import de.mineformers.vanillaimmersion.client.renderer.Shaders
+import de.mineformers.vanillaimmersion.immersion.CraftingHandler
 import de.mineformers.vanillaimmersion.immersion.CraftingHandler.splitDrag
 import de.mineformers.vanillaimmersion.network.CraftingDrag
-import de.mineformers.vanillaimmersion.network.JEIGuis
+import de.mineformers.vanillaimmersion.network.OpenGui
 import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic
 import de.mineformers.vanillaimmersion.util.minus
-import de.mineformers.vanillaimmersion.util.times
-import de.mineformers.vanillaimmersion.util.toBlockPos
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.GlStateManager.*
 import net.minecraft.client.renderer.OpenGlHelper
@@ -17,19 +15,15 @@ import net.minecraft.client.renderer.RenderHelper
 import net.minecraft.client.renderer.RenderHelper.enableStandardItemLighting
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms
 import net.minecraft.client.renderer.texture.TextureMap
-import net.minecraft.client.settings.KeyBinding
 import net.minecraft.item.ItemBlock
 import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumHand
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.RayTraceResult
-import net.minecraft.util.math.Vec3d
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.entity.player.PlayerInteractEvent
-import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import net.minecraftforge.fml.common.gameevent.InputEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import org.lwjgl.input.Keyboard
 import org.lwjgl.input.Mouse
@@ -40,10 +34,6 @@ import org.lwjgl.opengl.GL11
  * Mimics Vanilla GUI mechanics.
  */
 object CraftingDragHandler {
-    /**
-     * The position on the crafting table's top that was hit.
-     */
-    private var dragHit: BlockPos? = null
     /**
      * The position currently hovered on the crafting grid.
      */
@@ -70,65 +60,21 @@ object CraftingDragHandler {
     private val dragAmounts = mutableMapOf<Int, Int>()
 
     /**
-     * Handles mouse clicks starting/stopping a dragging process.
-     */
-    @SubscribeEvent
-    fun onMouseInput(event: InputEvent.MouseInputEvent?) {
-        // Subtract 100 because Minecraft handles mouse buttons as negative key codes
-        onDragStartStop(Mouse.getEventButton() - 100, Mouse.getEventButtonState())
-    }
-
-    /**
-     * Handles key presses starting/stopping a dragging process.
-     */
-    @SubscribeEvent
-    fun onKeyboardInput(event: InputEvent.KeyInputEvent?) {
-        onDragStartStop(Keyboard.getEventKey(), Keyboard.getEventKeyState())
-    }
-
-    /**
-     * Starts/Stop dragging for a given key code if "Use Item" is bound to it (right click by default).
-     */
-    private fun onDragStartStop(keyCode: Int, keyDown: Boolean) {
-        val key = Minecraft.getMinecraft().gameSettings.keyBindUseItem
-        if (Minecraft.getMinecraft().theWorld == null || // Covers things like the main menu
-            Minecraft.getMinecraft().currentScreen != null || // We do not want this to happen when a GUI is open
-            keyCode != key.keyCode)
-            return
-        val wasDragging = dragging
-        val target = dragTarget
-        updateDragTarget()
-
-        val heldItem = Minecraft.getMinecraft().thePlayer.getHeldItem(EnumHand.MAIN_HAND)
-        var cancelEvent = false
-        // If we have a valid drag target and weren't dragging before: Start dragging
-        if (!wasDragging && dragTarget != null && dragHit != null && keyDown) {
-            if (dragHit!!.x in 3..10 && dragHit!!.z in 3..10) {
-                startDragging()
-                cancelEvent = true
-            } else if (dragHit!!.x in 12..14 && dragHit!!.z in 9..11 && Loader.isModLoaded("JEI")) {
-                VanillaImmersion.NETWORK.sendToServer(JEIGuis.Message(dragTarget!!, 0))
-                cancelEvent = true
-            }
-        }
-        // If we were dragging and either don't have a valid target anymore, the button isn't held anymore or
-        // the player's held stack has changed: Stop dragging
-        if (wasDragging && (dragTarget == null || !keyDown || dragStack != heldItem)) {
-            stopDragging(target)
-            cancelEvent = true
-        }
-        if (cancelEvent) {
-            // Hack to prevent usual key binding action from happening
-            // Required since the used events do not support cancelling
-            KeyBinding.setKeyBindState(key.keyCode, false)
-            while (key.isPressed) {
-            }
-        }
-    }
-
-    /**
      * Prevents Vanilla from handling right clicks if they happen to slip through.
      */
+    fun onStartDragging() {
+        if (dragging)
+            return
+        updateDragTarget()
+        // If we have a valid drag target and weren't dragging before: Start dragging
+        if (dragTarget != null && dragPosition != null) {
+            val (x, y) = dragPosition!!
+            if (x in 0..7 && y in 0..7) {
+                startDragging()
+            }
+        }
+    }
+
     @SubscribeEvent
     fun onRightClick(event: PlayerInteractEvent.RightClickBlock) {
         if (dragging)
@@ -208,7 +154,6 @@ object CraftingDragHandler {
         dragging = false
         dragTarget = null
         dragPosition = null
-        dragHit = null
         dragStack = null
     }
 
@@ -216,10 +161,11 @@ object CraftingDragHandler {
      * Analyses the block under the user's cursor and checks if its viable for dragging.
      */
     fun updateDragTarget() {
+        val world = Minecraft.getMinecraft().theWorld
         val hovered = Minecraft.getMinecraft().objectMouseOver
         // We're only interested in blocks, although a crafting table entity might be interesting
         if (hovered != null && hovered.typeOfHit == RayTraceResult.Type.BLOCK) {
-            val state = Minecraft.getMinecraft().theWorld.getBlockState(hovered.blockPos)
+            val state = world.getBlockState(hovered.blockPos)
             if (state.block == VanillaImmersion.Blocks.CRAFTING_TABLE) {
                 if (dragTarget == null) {
                     // If the crafting process was just initiated, the block is definitely valid
@@ -231,17 +177,8 @@ object CraftingDragHandler {
                 }
                 // Dragging may only work on the top face of the crafting table
                 if (hovered.sideHit == EnumFacing.UP) {
-                    // Rotate the hit vector of the game's ray tracing result to be able to ignore the block's rotation
-                    // Then, convert the vector to the "local" position on the table's face in the [0;15] (i.e. pixel)
-                    // coordinate space
-                    val facing = state.getValue(CraftingTable.FACING)
-                    val angle = -Math.toRadians(180.0 - facing.horizontalAngle).toFloat()
-                    dragHit = (-16 * ((hovered.hitVec - hovered.blockPos - Vec3d(0.5, 0.0, 0.5))
-                                          .rotateYaw(angle) - Vec3d(0.5, 0.0, 0.5))).toBlockPos()
-                    // The crafting grid starts at (3|4) and covers a 7x7 pixel area
-                    val x = dragHit!!.x - 3
-                    val y = dragHit!!.z - 4
-                    if (!(0..7).contains(x) || !(0..7).contains(y)) {
+                    val (x, y) = CraftingHandler.getLocalPos(world, dragTarget!!, hovered.hitVec - dragTarget!!)
+                    if (x !in 0..7 || y !in 0..7) {
                         dragPosition = null
                         return
                     }
@@ -269,7 +206,6 @@ object CraftingDragHandler {
             return
         }
         val te = Minecraft.getMinecraft().theWorld.getTileEntity(dragTarget) as CraftingTableLogic
-        val player = Minecraft.getMinecraft().thePlayer
 
         // The camera is the origin when this event is called, get its position to translate to the world origin
         val camera = Minecraft.getMinecraft().renderViewEntity
@@ -357,5 +293,11 @@ object CraftingDragHandler {
         scale(0.140625, 0.140625, 0.140625)
         Minecraft.getMinecraft().renderItem.renderItem(stack, ItemCameraTransforms.TransformType.FIXED)
         popMatrix()
+    }
+
+    fun openRecipeGui() {
+        if (!dragging) {
+            VanillaImmersion.NETWORK.sendToServer(OpenGui.Message(dragTarget!!, 0))
+        }
     }
 }

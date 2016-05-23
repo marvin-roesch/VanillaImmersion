@@ -92,7 +92,7 @@ object VanillaImmersion {
                                 2, Side.SERVER)
         NETWORK.registerMessage(EnchantingAction.PageHitHandler, EnchantingAction.PageHitMessage::class.java,
                                 3, Side.SERVER)
-        NETWORK.registerMessage(JEIGuis.Handler, JEIGuis.Message::class.java,
+        NETWORK.registerMessage(OpenGui.Handler, OpenGui.Message::class.java,
                                 4, Side.SERVER)
         NetworkRegistry.INSTANCE.registerGuiHandler(this, GuiHandler())
 
