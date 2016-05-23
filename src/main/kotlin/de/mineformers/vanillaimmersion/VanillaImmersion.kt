@@ -1,14 +1,12 @@
 package de.mineformers.vanillaimmersion
 
-import de.mineformers.vanillaimmersion.block.Anvil
-import de.mineformers.vanillaimmersion.block.CraftingTable
-import de.mineformers.vanillaimmersion.block.EnchantingTable
-import de.mineformers.vanillaimmersion.block.Furnace
+import de.mineformers.vanillaimmersion.block.*
 import de.mineformers.vanillaimmersion.client.CraftingDragHandler
 import de.mineformers.vanillaimmersion.client.EnchantingUIHandler
 import de.mineformers.vanillaimmersion.client.renderer.*
 import de.mineformers.vanillaimmersion.immersion.CraftingHandler
 import de.mineformers.vanillaimmersion.immersion.RepairHandler
+import de.mineformers.vanillaimmersion.item.SpecialBlockItem
 import de.mineformers.vanillaimmersion.network.*
 import de.mineformers.vanillaimmersion.tileentity.AnvilLogic
 import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic
@@ -160,6 +158,12 @@ object VanillaImmersion {
         val ENCHANTING_TABLE by lazy {
             EnchantingTable()
         }
+        /**
+         * Immersive Brewing Stand
+         */
+        val BREWING_STAND by lazy {
+            BrewingStand()
+        }
 
         /**
          * Initializes and registers blocks and related data
@@ -171,6 +175,7 @@ object VanillaImmersion {
             register(CRAFTING_TABLE)
             register(ANVIL, ::ItemAnvilBlock)
             register(ENCHANTING_TABLE)
+            register(BREWING_STAND, ::SpecialBlockItem)
 
             GameRegistry.registerTileEntity(FurnaceLogic::class.java, "$MODID:furnace")
             GameRegistry.registerTileEntity(CraftingTableLogic::class.java, "$MODID:crafting_table")
@@ -192,6 +197,7 @@ object VanillaImmersion {
                 item.registryName = block.registryName
                 GameRegistry.register(item)
             }
+            println("$block: ${Item.getItemFromBlock(block)}")
         }
     }
 
@@ -239,6 +245,7 @@ object VanillaImmersion {
             setItemModel(Blocks.ANVIL, 1, "minecraft:anvil_slightly_damaged")
             setItemModel(Blocks.ANVIL, 2, "minecraft:anvil_very_damaged")
             setItemModel(Blocks.ENCHANTING_TABLE, 0, "minecraft:enchanting_table")
+            setItemModel(Blocks.BREWING_STAND, 0, "minecraft:brewing_stand")
 
             // Register TESRs
             ClientRegistry.bindTileEntitySpecialRenderer(FurnaceLogic::class.java, FurnaceRenderer())

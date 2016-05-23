@@ -1,8 +1,6 @@
-import net.minecraftforge.gradle.user.TaskSourceCopy
-
 // For those who want the bleeding edge
 buildscript {
-    ext.kotlin_version = '1.0.1-2'
+    ext.kotlin_version = '1.0.2'
 
     repositories {
         jcenter()
@@ -73,13 +71,14 @@ configurations {
 
 dependencies {
     shade "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    shade "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     deobfCompile "mezz.jei:jei_${config.mc_version}:${config.jei_version}"
 }
 
 shadowJar {
     relocate 'kotlin', 'de.mineformers.vanillaimmersion.kotlin'
     relocate 'org.jetbrains.annotations', 'de.mineformers.vanillaimmersion.jetbrains.annotations'
-    configurations = [ project.configurations.shade ]
+    configurations = [project.configurations.shade]
     classifier ''
 }
 
@@ -88,8 +87,8 @@ reobf {
 }
 tasks.build.dependsOn reobfShadowJar
 
-// Mad hacks to make source replacements work for Kotlin
 import net.minecraftforge.gradle.user.TaskSourceCopy
+// Mad hacks to make source replacements work for Kotlin
 for (set in sourceSets) {
     def taskName = "source${set.name.capitalize()}Kotlin"
     def dir = new File(project.getBuildDir(), "sources/${set.name}/kotlin")

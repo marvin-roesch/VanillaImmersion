@@ -7,39 +7,18 @@ import de.mineformers.vanillaimmersion.util.*
 import net.minecraft.client.Minecraft
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.util.EnumHand
-import net.minecraft.util.Timer
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.MathHelper
 import net.minecraft.util.math.Vec3d
 import net.minecraftforge.event.entity.player.PlayerInteractEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import net.minecraftforge.fml.relauncher.ReflectionHelper
 import javax.vecmath.Matrix4f
 import javax.vecmath.Vector3f
-import javax.vecmath.Vector4f
 
 /**
  * Handles interaction with the enchantment table's book "GUI".
  */
 object EnchantingUIHandler {
-    /**
-     * Holds a reference to the Minecraft timer, required since we need access to partial ticks in places where
-     * you usually don't have it.
-     */
-    private val TIMER_FIELD by lazy {
-        ReflectionHelper.findField(Minecraft::class.java, "field_71428_T", "timer")
-    }
-
-    init {
-        TIMER_FIELD.isAccessible = true
-    }
-
-    /**
-     * Property holding the current partial ticks.
-     */
-    val partialTicks: Float
-        get() = (TIMER_FIELD.get(Minecraft.getMinecraft()) as Timer).renderPartialTicks
-
     /**
      * Handles interaction with enchantment tables when a right click with an empty hand happens.
      */
@@ -77,14 +56,11 @@ object EnchantingUIHandler {
         if (enchantingTables.isEmpty())
             return
 
-        val partialTicks =
-            if (event.world.isRemote)
-                this.partialTicks
-            else
-                1f
+        val partialTicks = Rendering.partialTicks
         val origin = player.getPositionEyes(partialTicks)
         val direction = player.getLook(partialTicks)
         val hoverDistance = origin.squareDistanceTo(hovered)
+        println("$hoverDistance - $hovered - ${Minecraft.getMinecraft().objectMouseOver.hitVec}")
         for (te in enchantingTables) {
             // If the active page is smaller than 0 (normally -1), the book is closed.
             if (te.page < 0)
@@ -105,48 +81,23 @@ object EnchantingUIHandler {
 
     /**
      * Sends a ray through the specified enchantment table's left or right page.
-     * Returns the hit vector (if the intersection was successful) and a matrix to transform the point
-     * to one local to the page.
-     */
-    private fun intersectPage(te: EnchantingTableLogic,
-                              origin: Vec3d, direction: Vec3d,
-                              partialTicks: Float, right: Boolean): Pair<Vec3d?, Matrix4f> {
-        // Based on ModelBook's flippingPageRight/flippingPageLeft size
-        val quad = listOf(Vector4f(0f, 0f, 0f, 1f), Vector4f(6f * 0.0625f, 0f, 0f, 1f),
-                          Vector4f(6f * 0.0625f, 8f * 0.0625f, 0f, 1f), Vector4f(0f, 8f * 0.0625f, 0f, 1f))
-        val matrix = calculateMatrix(te, partialTicks, right)
-        // Transform the quad according to the TE's current status
-        quad.forEach { matrix.transform(it) }
-        // Translate the local space coordinates to world space
-        val page = quad.map { Vec3d(it.x.toDouble(), it.y.toDouble(), it.z.toDouble()) + te.pos }
-        // Perform a Möller-Trumbore intersection for both triangles the quad can be split into
-        val hit = moellerTrumbore(origin, direction, page[0], page[1], page[2]) ?:
-                  moellerTrumbore(origin, direction, page[0], page[2], page[3])
-        // Invert the transformation matrix to retrieve local coordinates from the hit again
-        matrix.invert()
-        return Pair(hit, matrix)
-    }
-
-    /**
-     * Sends a ray through the specified enchantment table's left or right page.
      * Will invoke the desired action for the appropriate page if the ray intersected it.
      */
     private fun tryHit(te: EnchantingTableLogic,
                        player: EntityPlayer, origin: Vec3d, direction: Vec3d, hoverDistance: Double,
                        partialTicks: Float, right: Boolean): Boolean {
-        val (hit, matrix) = intersectPage(te, origin, direction, partialTicks, right)
-        if (hit != null && origin.squareDistanceTo(hit) < hoverDistance) {
-            val localHit = hit - te.pos
-            val transformed = Vector4f(localHit.x.toFloat(), localHit.y.toFloat(), localHit.z.toFloat(), 1f)
-            matrix.transform(transformed)
-
+        val quad = listOf(Vec3d(.0, .0, .0), Vec3d(6 * 0.0625, .0, .0),
+                          Vec3d(6 * 0.0625, 8 * 0.0625, .0), Vec3d(.0, 8 * 0.0625, .0))
+        val matrix = calculateMatrix(te, partialTicks, right)
+        val hit = Rays.rayTraceQuad(origin, direction, quad, matrix)
+        if (hit != null && origin.squareDistanceTo(hit + te.pos + Vec3d(.0, 0.75, .0)) < hoverDistance) {
             // The "GUI" pixel position of the hit depends on the clicked page since we have two different
             // reference corners
             val pixelHit =
                 if (right)
-                    Vec3d(0.0, 125.0, 0.0) - Vec3d(-transformed.x.toDouble(), transformed.y.toDouble(), 0.0) / 0.004
+                    Vec3d(0.0, 125.0, 0.0) - Vec3d(-hit.x.toDouble(), hit.y.toDouble(), 0.0) / 0.004
                 else
-                    Vec3d(94.0, 125.0, 0.0) - Vec3d(transformed.x.toDouble(), transformed.y.toDouble(), 0.0) / 0.004
+                    Vec3d(94.0, 125.0, 0.0) - Vec3d(hit.x.toDouble(), hit.y.toDouble(), 0.0) / 0.004
             if (player.worldObj.isRemote) {
                 handleUIHit(te, right, player, pixelHit.x, pixelHit.y)
                 player.swingArm(EnumHand.MAIN_HAND)
@@ -199,6 +150,8 @@ object EnchantingUIHandler {
         val result = Matrix4f()
         result.setIdentity()
         val tmp = Matrix4f()
+        tmp.set(Vector3f(te.pos.x.toFloat(), te.pos.y.toFloat(), te.pos.z.toFloat()))
+        result.mul(tmp)
         tmp.set(Vector3f(0.5f, 0.75f + 1.6f * 0.0625f + 0.0001f + MathHelper.sin(hover * 0.1f) * 0.01f, 0.5f))
         result.mul(tmp)
         tmp.rotY(-yaw)
@@ -213,44 +166,5 @@ object EnchantingUIHandler {
         result.mul(tmp)
 
         return result
-    }
-
-    /**
-     * Performs a Möller-Trumbore intersection on a triangle and returns the position on the vector that was hit,
-     * or `null` if there is no intersection.
-     * Ignores the winding of the triangle, i.e. does not support backface culling.
-     */
-    private fun moellerTrumbore(origin: Vec3d, dir: Vec3d, v1: Vec3d, v2: Vec3d, v3: Vec3d,
-                                epsilon: Double = 1e-6): Vec3d? {
-        // Edges with v1 adjacent to them
-        val e1 = v2 - v1
-        val e2 = v3 - v1
-        // Required for determinant and calculation of u
-        val p = dir.crossProduct(e2)
-        val det = e1.dotProduct(p)
-        // Make sure determinant isn't near zero, otherwise we lie in the triangle's plane
-        if (det > -epsilon && det < epsilon) {
-            return null
-        }
-        // Distance from v1 to origin
-        val t = origin - v1
-        // Calculate u parameter and check whether it's in the triangle's bounds
-        val u = t.dotProduct(p) / det
-        if (u < 0 || u > 1) {
-            return null
-        }
-        // Calculate v parameter and check whether it's in the triangle's bounds
-        val q = t.crossProduct(e1)
-        val v = dir.dotProduct(q) / det
-        if (v < 0 || u + v > 1) {
-            return null
-        }
-        // Actual intersection test
-        val d = e2.dotProduct(q) / det
-        if (d > epsilon) {
-            // u and v are barycentric coordinates on the triangle, convert them to "normal" ones
-            return v1 + u * e1 + v * e2
-        }
-        return null
     }
 }

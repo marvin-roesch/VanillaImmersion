@@ -89,7 +89,7 @@ class AnvilLogic : TileEntity() {
      * The anvil's orientation.
      */
     val facing: EnumFacing
-        get() = blockState.getValue(BlockAnvil.FACING)
+         get() = blockState.getValue(BlockAnvil.FACING)
     /**
      * The anvil's inventory.
      */

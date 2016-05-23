@@ -2,11 +2,18 @@
 
 package de.mineformers.vanillaimmersion.util
 
+import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import net.minecraft.util.math.Vec3i
 
 // Various extensions to do with Minecraft's vector types, should be all fairly self explanatory
+
+val AxisAlignedBB.min: Vec3d
+    get() = Vec3d(this.minX, this.minY, this.minZ)
+
+val AxisAlignedBB.max: Vec3d
+    get() = Vec3d(this.maxX, this.maxY, this.maxZ)
 
 val Vec3d.x: Double
     get() = this.xCoord
@@ -18,6 +25,13 @@ val Vec3d.z: Double
     get() = this.zCoord
 
 fun Vec3d.toBlockPos() = BlockPos(this)
+
+operator fun Vec3d.get(coord: Int) =
+    when(coord) {
+        0 -> this.x
+        1 -> this.y
+        else -> this.z
+    }
 
 operator fun Vec3d.unaryPlus() = this
 

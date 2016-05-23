@@ -42,6 +42,7 @@ class Furnace(val lit: Boolean) : BlockFurnace(lit) {
         }
     }
 
+    @Deprecated("Vanilla")
     override fun isOpaqueCube(state: IBlockState) = false
 
     override fun createNewTileEntity(worldIn: World, meta: Int) = FurnaceLogic() // Return our own implementation

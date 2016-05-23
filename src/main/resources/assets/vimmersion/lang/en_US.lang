@@ -5,6 +5,7 @@ tile.vimmersion.anvil.veryDamaged.name=Very Damaged Immersive Anvil
 tile.vimmersion.enchantmentTable.name=Immersive Enchantment Table
 tile.vimmersion.furnace.name=Immersive Furnace
 tile.vimmersion.workbench.name=Immersive Crafting Table
+item.vimmersion.brewingStand.name=Immersive Brewing Stand
 
 vimmersion.anvil.itemName=Item Name:
 vimmersion.anvil.inUse=This anvil is currently in use by another player.

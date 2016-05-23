@@ -29,30 +29,28 @@ import java.lang.reflect.Method
  * The Kotlin language adapter is required for this mod to be loadable by MinecraftForge.
  * Based on Forgelin's implementation with modified error handling (more descriptive exception names).
  *
- * @see <a href="https://github.com/Emberwalker/Forgelin">Forgelin on GitHub</a>
+ * @see [Forgelin on GitHub](https://github.com/Emberwalker/Forgelin)
  */
 class KotlinAdapter : ILanguageAdapter {
     private val logger = LogManager.getLogger("ILanguageAdapter/Kotlin")
 
     override fun setProxy(target: Field, proxyTarget: Class<*>, proxy: Any) {
         logger.debug("Setting proxy on target: {}.{} -> {}", target.declaringClass.simpleName, target.name, proxy)
-
-        val instanceField = findInstanceFieldOrThrow(proxyTarget)
-        val modObject = findModObjectOrThrow(instanceField)
-
-        target.set(modObject, proxy)
+        target.set(proxyTarget.kotlin.objectInstance, proxy)
     }
 
     override fun getNewInstance(container: FMLModContainer?,
                                 objectClass: Class<*>,
                                 classLoader: ClassLoader,
-                                factoryMarkedAnnotation: Method?): Any? {
+                                factoryMarkedMethod: Method?): Any? {
         logger.debug("Constructing new instance of {}", objectClass.simpleName)
 
-        val instanceField = findInstanceFieldOrThrow(objectClass)
-        val modObject = findModObjectOrThrow(instanceField)
-
-        return modObject
+        val kotlinClass = objectClass.kotlin
+        if (factoryMarkedMethod != null) {
+            return factoryMarkedMethod.invoke(null)
+        } else {
+            return kotlinClass.objectInstance ?: objectClass.newInstance()
+        }
     }
 
     override fun supportsStatics() = false

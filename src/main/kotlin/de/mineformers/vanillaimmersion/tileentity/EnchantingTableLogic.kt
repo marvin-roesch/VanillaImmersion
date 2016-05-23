@@ -146,7 +146,7 @@ class EnchantingTableLogic : TileEntityEnchantmentTable() {
             // As soon as the client knows about the result, stop bobbing
             if (progress == 0 && worldObj.isRemote) {
                 // Super client-safe code, believe me ;)
-                bobStop = tickCount + EnchantingUIHandler.partialTicks
+                bobStop = tickCount + Rendering.partialTicks
             }
             progress++
             // Start spawning particles between second 2 and 4 of the process
