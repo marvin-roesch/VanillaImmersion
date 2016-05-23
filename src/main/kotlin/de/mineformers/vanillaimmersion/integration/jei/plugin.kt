@@ -68,7 +68,6 @@ class CraftingTransferHandler : IRecipeTransferHandler {
         val result = transferHandler.transferRecipe(container, recipeLayout, player, maxTransfer, doTransfer)
         if (doTransfer && result == null) {
             player.closeScreen()
-//            (player as EntityPlayerSP).connection.sendPacket(CPacketCloseWindow(player.openContainer.windowId))
         }
         return result
     }

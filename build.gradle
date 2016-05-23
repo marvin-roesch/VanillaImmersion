@@ -66,17 +66,20 @@ repositories {
     }
 }
 
+configurations {
+    shade
+    compile.extendsFrom shade
+}
+
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    shade "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     deobfCompile "mezz.jei:jei_${config.mc_version}:${config.jei_version}"
 }
 
 shadowJar {
     relocate 'kotlin', 'de.mineformers.vanillaimmersion.kotlin'
     relocate 'org.jetbrains.annotations', 'de.mineformers.vanillaimmersion.jetbrains.annotations'
-    dependencies {
-        exclude(dependency("mezz.jei:jei_${config.mc_version}:${config.jei_version}"))
-    }
+    configurations = [ project.configurations.shade ]
     classifier ''
 }
 
@@ -131,6 +134,10 @@ curseforge {
         changelog = """See <a title="GitHub Changelog" href="https://github.com/PaleoCrafter/VanillaImmersion/releases/tag/v${version}">GitHub</a>"""
         releaseType = priv.cf_type
         addGameVersion config.mc_version
+
+        relations {
+            optionalLibrary 'just-enough-items-jei'
+        }
 
         mainArtifact(shadowJar) {
             displayName = "Vanilla Immersion - ${config.mod_version}"
