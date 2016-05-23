@@ -15,6 +15,7 @@ import net.minecraft.init.SoundEvents
 import net.minecraft.inventory.ContainerRepair
 import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
+import net.minecraft.util.EnumHand
 import net.minecraft.util.EnumParticleTypes
 import net.minecraft.util.SoundCategory
 import net.minecraft.util.math.BlockPos
@@ -33,6 +34,8 @@ object RepairHandler {
      */
     @SubscribeEvent
     fun onRightClick(event: PlayerInteractEvent.RightClickBlock) {
+        if (event.hand == EnumHand.OFF_HAND)
+            return
         val state = event.world.getBlockState(event.pos)
         val tile = event.world.getTileEntity(event.pos)
         if (tile !is AnvilLogic || event.world.isRemote)

@@ -82,6 +82,8 @@ object VanillaImmersion {
 
         MinecraftForge.EVENT_BUS.register(CraftingHandler)
         MinecraftForge.EVENT_BUS.register(RepairHandler)
+        MinecraftForge.EVENT_BUS.register(Blocks.FURNACE)
+        MinecraftForge.EVENT_BUS.register(Blocks.LIT_FURNACE)
 
         // Register messages and handlers
         NETWORK.registerMessage(AnvilLock.Handler, AnvilLock.Message::class.java,

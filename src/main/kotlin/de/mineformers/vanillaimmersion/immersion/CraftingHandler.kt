@@ -34,7 +34,7 @@ object CraftingHandler {
      */
     @SubscribeEvent
     fun onRightClick(event: PlayerInteractEvent.RightClickBlock) {
-        if (event.face != EnumFacing.UP)
+        if (event.face != EnumFacing.UP || event.hand != EnumHand.MAIN_HAND)
             return
         val tile = event.world.getTileEntity(event.pos)
         if (tile !is CraftingTableLogic)

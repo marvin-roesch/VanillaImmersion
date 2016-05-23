@@ -53,6 +53,8 @@ object EnchantingUIHandler {
      */
     @SubscribeEvent
     fun onRightClickBlock(event: PlayerInteractEvent.RightClickBlock) {
+        if (event.hand == EnumHand.OFF_HAND)
+            return
         onInteract(event, event.hitVec)
     }
 
