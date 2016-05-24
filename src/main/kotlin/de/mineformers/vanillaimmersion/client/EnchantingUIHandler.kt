@@ -60,7 +60,6 @@ object EnchantingUIHandler {
         val origin = player.getPositionEyes(partialTicks)
         val direction = player.getLook(partialTicks)
         val hoverDistance = origin.squareDistanceTo(hovered)
-        println("$hoverDistance - $hovered - ${Minecraft.getMinecraft().objectMouseOver.hitVec}")
         for (te in enchantingTables) {
             // If the active page is smaller than 0 (normally -1), the book is closed.
             if (te.page < 0)

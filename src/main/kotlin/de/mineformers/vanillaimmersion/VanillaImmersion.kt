@@ -8,10 +8,7 @@ import de.mineformers.vanillaimmersion.immersion.CraftingHandler
 import de.mineformers.vanillaimmersion.immersion.RepairHandler
 import de.mineformers.vanillaimmersion.item.SpecialBlockItem
 import de.mineformers.vanillaimmersion.network.*
-import de.mineformers.vanillaimmersion.tileentity.AnvilLogic
-import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic
-import de.mineformers.vanillaimmersion.tileentity.EnchantingTableLogic
-import de.mineformers.vanillaimmersion.tileentity.FurnaceLogic
+import de.mineformers.vanillaimmersion.tileentity.*
 import net.minecraft.block.Block
 import net.minecraft.client.renderer.block.model.ModelResourceLocation
 import net.minecraft.creativetab.CreativeTabs
@@ -35,6 +32,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper
 import net.minecraftforge.fml.common.registry.GameRegistry
 import net.minecraftforge.fml.relauncher.Side
 import net.minecraft.init.Blocks as VBlocks
+import net.minecraft.init.Items as VItems
 
 /**
  * Main entry point for Vanilla Immersion
@@ -112,6 +110,7 @@ object VanillaImmersion {
         GameRegistry.addShapelessRecipe(ItemStack(Blocks.ANVIL, 1, 1), ItemStack(VBlocks.ANVIL, 1, 1))
         GameRegistry.addShapelessRecipe(ItemStack(Blocks.ANVIL, 1, 2), ItemStack(VBlocks.ANVIL, 1, 2))
         GameRegistry.addShapelessRecipe(ItemStack(Blocks.ENCHANTING_TABLE), ItemStack(VBlocks.ENCHANTING_TABLE))
+        GameRegistry.addShapelessRecipe(ItemStack(Blocks.BREWING_STAND), ItemStack(VItems.BREWING_STAND))
         // Add Vanilla -> immersive block conversion recipes
         GameRegistry.addShapelessRecipe(ItemStack(VBlocks.FURNACE), ItemStack(Blocks.FURNACE))
         GameRegistry.addShapelessRecipe(ItemStack(VBlocks.CRAFTING_TABLE), ItemStack(Blocks.CRAFTING_TABLE))
@@ -120,6 +119,7 @@ object VanillaImmersion {
         GameRegistry.addShapelessRecipe(ItemStack(VBlocks.ANVIL, 1, 1), ItemStack(Blocks.ANVIL, 1, 1))
         GameRegistry.addShapelessRecipe(ItemStack(VBlocks.ANVIL, 1, 2), ItemStack(Blocks.ANVIL, 1, 2))
         GameRegistry.addShapelessRecipe(ItemStack(VBlocks.ENCHANTING_TABLE), ItemStack(Blocks.ENCHANTING_TABLE))
+        GameRegistry.addShapelessRecipe(ItemStack(VItems.BREWING_STAND), ItemStack(Blocks.BREWING_STAND))
     }
 
     /**
@@ -181,6 +181,7 @@ object VanillaImmersion {
             GameRegistry.registerTileEntity(CraftingTableLogic::class.java, "$MODID:crafting_table")
             GameRegistry.registerTileEntity(AnvilLogic::class.java, "$MODID:anvil")
             GameRegistry.registerTileEntity(EnchantingTableLogic::class.java, "$MODID:enchanting_table")
+            GameRegistry.registerTileEntity(BrewingStandLogic::class.java, "$MODID:brewing_stand")
         }
 
         /**
@@ -197,7 +198,6 @@ object VanillaImmersion {
                 item.registryName = block.registryName
                 GameRegistry.register(item)
             }
-            println("$block: ${Item.getItemFromBlock(block)}")
         }
     }
 
@@ -252,6 +252,7 @@ object VanillaImmersion {
             ClientRegistry.bindTileEntitySpecialRenderer(CraftingTableLogic::class.java, CraftingTableRenderer())
             ClientRegistry.bindTileEntitySpecialRenderer(AnvilLogic::class.java, AnvilRenderer())
             ClientRegistry.bindTileEntitySpecialRenderer(EnchantingTableLogic::class.java, EnchantingTableRenderer())
+            ClientRegistry.bindTileEntitySpecialRenderer(BrewingStandLogic::class.java, BrewingStandRenderer())
 
             // Register client-specific event handlers
             MinecraftForge.EVENT_BUS.register(CraftingDragHandler)

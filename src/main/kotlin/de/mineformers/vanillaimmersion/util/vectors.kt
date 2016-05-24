@@ -27,7 +27,7 @@ val Vec3d.z: Double
 fun Vec3d.toBlockPos() = BlockPos(this)
 
 operator fun Vec3d.get(coord: Int) =
-    when(coord) {
+    when (coord) {
         0 -> this.x
         1 -> this.y
         else -> this.z

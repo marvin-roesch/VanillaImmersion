@@ -19,6 +19,11 @@
       "apply": {
         "model": "brewing_stand_empty2"
       }
+    },
+    {
+      "apply": {
+        "model": "vimmersion:brewing_stand_bowl"
+      }
     }
   ]
 }

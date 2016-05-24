@@ -1,7 +1,6 @@
 package de.mineformers.vanillaimmersion.tileentity
 
 import de.mineformers.vanillaimmersion.VanillaImmersion
-import de.mineformers.vanillaimmersion.client.EnchantingUIHandler
 import de.mineformers.vanillaimmersion.client.particle.EnchantingParticle
 import de.mineformers.vanillaimmersion.util.*
 import net.minecraft.client.Minecraft
