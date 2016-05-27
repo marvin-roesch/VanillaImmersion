@@ -22,15 +22,15 @@ class BrewingStandLogic : TileEntityBrewingStand() {
             /**
              * The first bottle to be modified.
              */
-            INPUT1,
+            BOTTLE1,
             /**
              * The second bottle to be modified.
              */
-            INPUT2,
+            BOTTLE2,
             /**
              * The third bottle to be modified.
              */
-            INPUT3,
+            BOTTLE3,
             /**
              * The ingredient to be infused into each bottle.
              */
@@ -61,6 +61,26 @@ class BrewingStandLogic : TileEntityBrewingStand() {
     operator fun set(slot: Slot, stack: ItemStack?) = setInventorySlotContents(slot.ordinal, stack)
 
     /**
+     * Checks whether a given item stack may be inserted as fuel into this brewing stand.
+     */
+    fun canInsertFuel(stack: ItemStack?): Boolean {
+        // Only actual fuel can be inserted, obviously
+        if (stack == null || !isItemValidForSlot(4, stack))
+            return false
+        val existingIngredient = get(Slot.INPUT_INGREDIENT)
+        val existingFuel = get(Slot.INPUT_POWDER)
+        // Prefer the ingredient slot, if the stack is a valid ingredient
+        if (existingIngredient == null && isItemValidForSlot(3, stack))
+            return false
+        // Prefer the ingredient slot, if it still has space for the stack
+        if (existingIngredient != null && existingIngredient.item === stack.item)
+            return existingIngredient.stackSize == existingIngredient.maxStackSize
+        // Only allow insertion if there is no fuel already or there is more space
+        return existingFuel == null ||
+               (existingFuel.item === stack.item && existingFuel.stackSize != existingFuel.maxStackSize)
+    }
+
+    /**
      * Composes a tag for updates of the TE (both initial chunk data and later updates).
      */
     override fun getUpdateTag(): NBTTagCompound? {
@@ -80,7 +100,7 @@ class BrewingStandLogic : TileEntityBrewingStand() {
      * Reads data from the update packet.
      */
     override fun onDataPacket(net: NetworkManager, pkt: SPacketUpdateTileEntity) {
-//        Inventories.clear(this)
+        Inventories.clear(this)
         val compound = pkt.nbtCompound
         readFromNBT(compound)
     }
