@@ -13,6 +13,8 @@ import net.minecraft.network.NetworkManager
 import net.minecraft.network.play.server.SPacketUpdateTileEntity
 import net.minecraft.tileentity.TileEntityFurnace
 import net.minecraft.util.EnumFacing
+import net.minecraftforge.items.IItemHandlerModifiable
+import net.minecraftforge.items.wrapper.InvWrapper
 
 /**
  * Implements all logic and data storage for the furnace.
@@ -54,6 +56,10 @@ class FurnaceLogic : TileEntityFurnace() {
      */
     val facing: EnumFacing
         get() = blockState.getValue(BlockFurnace.FACING)
+    /**
+     * The furnace's inventory.
+     */
+    val inventory: IItemHandlerModifiable = InvWrapper(this)
     /**
      * Amount of "heat" left from the current fuel item.
      */

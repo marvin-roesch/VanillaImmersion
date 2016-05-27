@@ -33,7 +33,7 @@ import java.util.*
 class BrewingStand : BlockBrewingStand() {
     companion object {
         val BOTTLE1_AABB = AxisAlignedBB(10.0 * 0.0625, .0, 6 * 0.0625,
-                                         14.0 * 0.0625, .0, 10 * 0.0625)
+                                         14.0 * 0.0625, 12 * 0.0625, 10 * 0.0625)
         val BOTTLE2_AABB = AxisAlignedBB(3.0 * 0.0625, .0, 2 * 0.0625,
                                          7.0 * 0.0625, 12 * 0.0625, 6 * 0.0625)
         val BOTTLE3_AABB = AxisAlignedBB(3.0 * 0.0625, .0, 10 * 0.0625,
@@ -71,14 +71,15 @@ class BrewingStand : BlockBrewingStand() {
             val existing = tile.getStackInSlot(slot)
             if (stack == null && existing != null) {
                 // Extract item
-                Inventories.insertOrDrop(player, existing)
-                tile.setInventorySlotContents(slot, null)
+                val extracted = tile.inventory.extractItem(slot, Int.MAX_VALUE, false)
+                Inventories.insertOrDrop(player, extracted)
                 tile.sync()
                 player.addStat(StatList.BREWINGSTAND_INTERACTION)
                 return true
-            } else if (stack != null && tile.isItemValidForSlot(slot, stack)) {
+            } else if (stack != null) {
                 // Insert item
-                tile.setInventorySlotContents(slot, Inventories.merge(stack, existing))
+                val remaining = tile.inventory.insertItem(slot, stack, false)
+                player.setHeldItem(hand, remaining)
                 tile.sync()
                 player.addStat(StatList.BREWINGSTAND_INTERACTION)
                 return true

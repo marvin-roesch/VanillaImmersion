@@ -80,24 +80,27 @@ class Furnace(val lit: Boolean) : BlockFurnace(lit) {
                 val existing = tile[slot]
                 if (stack == null && existing != null) {
                     // Extract item
-                    Inventories.insertOrDrop(player, existing)
-                    tile[slot] = null
+                    val extracted = tile.inventory.extractItem(slot.ordinal, Int.MAX_VALUE, false)
+                    Inventories.insertOrDrop(player, extracted)
                     tile.sync()
                     player.addStat(StatList.FURNACE_INTERACTION)
                     return true
-                } else if (stack != null && tile.isItemValidForSlot(slot.ordinal, stack)) {
+                } else if (stack != null) {
                     // Insert item
-                    if (player.isSneaking) {
-                        // Insert all when sneaking
-                        tile[slot] = Inventories.merge(stack, existing)
-                    } else {
-                        val single = stack.copy()
-                        single.stackSize = 1
-                        // Only insert one by default
-                        tile[slot] = Inventories.merge(single, existing)
-                        if (single.stackSize == 0)
-                            stack.stackSize--
-                    }
+                    val remaining =
+                        if (player.isSneaking) {
+                            // Insert all when sneaking
+                            tile.inventory.insertItem(slot.ordinal, stack, false)
+                        } else {
+                            val single = stack.copy()
+                            single.stackSize = 1
+                            // Only insert one by default
+                            val consumed = tile.inventory.insertItem(slot.ordinal, single, false) == null
+                            if (consumed)
+                                stack.stackSize--
+                            stack
+                        }
+                    player.setHeldItem(hand, remaining)
                     tile.sync()
                     player.addStat(StatList.FURNACE_INTERACTION)
                     return true

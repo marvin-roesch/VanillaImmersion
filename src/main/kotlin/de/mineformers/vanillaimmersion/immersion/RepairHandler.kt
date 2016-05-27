@@ -126,8 +126,8 @@ object RepairHandler {
                 tile.sendLockMessage(player)
                 return false
             }
-            Inventories.insertOrDrop(player, existing)
-            tile[slot] = null
+            val extracted = tile.inventory.extractItem(slot.ordinal, Int.MAX_VALUE, false)
+            Inventories.insertOrDrop(player, extracted)
             return true
         } else if (stack != null) {
             // If the anvil is locked, notify the player
@@ -138,7 +138,8 @@ object RepairHandler {
             // Insert the item
             world.playSound(null, pos.x + 0.5, pos.y + 0.5, pos.z + 0.5,
                             SoundEvents.BLOCK_ANVIL_HIT, SoundCategory.BLOCKS, 1f, 1f)
-            tile[slot] = Inventories.merge(stack, existing)
+            val remaining = tile.inventory.insertItem(slot.ordinal, stack, false)
+            player.setHeldItem(EnumHand.MAIN_HAND, remaining)
             return true
         }
         return false

@@ -53,6 +53,9 @@ class BrewingStandLogic : TileEntityBrewingStand() {
      */
     val blockState: IBlockState
         get() = worldObj.getBlockState(pos)
+    /**
+     * The brewing stand's inventory.
+     */
     val inventory: IItemHandlerModifiable = InvWrapper(this)
 
     /**
