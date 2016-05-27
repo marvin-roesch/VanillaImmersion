@@ -11,6 +11,7 @@ import net.minecraft.block.BlockBrewingStand
 import net.minecraft.block.state.IBlockState
 import net.minecraft.client.Minecraft
 import net.minecraft.entity.Entity
+import net.minecraft.entity.item.EntityItem
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.stats.StatList
@@ -30,6 +31,17 @@ import java.util.*
  * Derives from the Vanilla brewing stand to allow substitution later on.
  */
 class BrewingStand : BlockBrewingStand() {
+    companion object {
+        val BOTTLE1_AABB = AxisAlignedBB(10.0 * 0.0625, .0, 6 * 0.0625,
+                                         14.0 * 0.0625, .0, 10 * 0.0625)
+        val BOTTLE2_AABB = AxisAlignedBB(3.0 * 0.0625, .0, 2 * 0.0625,
+                                         7.0 * 0.0625, 12 * 0.0625, 6 * 0.0625)
+        val BOTTLE3_AABB = AxisAlignedBB(3.0 * 0.0625, .0, 10 * 0.0625,
+                                         7.0 * 0.0625, 12 * 0.0625, 14 * 0.0625)
+        val BOWL_AABB = AxisAlignedBB(5.0 * 0.0625, 13.5 * 0.0625, 5 * 0.0625,
+                                      11.0 * 0.0625, 15.5 * 0.0625, 11 * 0.0625)
+    }
+
     init {
         setHardness(0.5F)
         setLightLevel(0.125F)
@@ -45,14 +57,7 @@ class BrewingStand : BlockBrewingStand() {
             return false
         // Check the various boxes of the brewing stand
         val boxes = listOf(
-            AxisAlignedBB(pos.x + 10.0 * 0.0625, pos.y.toDouble(), pos.z + 6 * 0.0625,
-                          pos.x + 14.0 * 0.0625, pos.y + 12 * 0.0625, pos.z + 10 * 0.0625),
-            AxisAlignedBB(pos.x + 3.0 * 0.0625, pos.y.toDouble(), pos.z + 2 * 0.0625,
-                          pos.x + 7.0 * 0.0625, pos.y + 12 * 0.0625, pos.z + 6 * 0.0625),
-            AxisAlignedBB(pos.x + 3.0 * 0.0625, pos.y.toDouble(), pos.z + 10 * 0.0625,
-                          pos.x + 7.0 * 0.0625, pos.y + 12 * 0.0625, pos.z + 14 * 0.0625),
-            AxisAlignedBB(pos.x + 5.0 * 0.0625, pos.y + 13.5 * 0.0625, pos.z + 5 * 0.0625,
-                          pos.x + 11.0 * 0.0625, pos.y + 15.5 * 0.0625, pos.z + 11 * 0.0625)
+            BOTTLE1_AABB.offset(pos), BOTTLE2_AABB.offset(pos), BOTTLE3_AABB.offset(pos), BOWL_AABB.offset(pos)
         )
         val tile = world.getTileEntity(pos)
         val hit = Rays.rayTraceBoxes(player, boxes)
@@ -82,15 +87,19 @@ class BrewingStand : BlockBrewingStand() {
         return true
     }
 
+    /**
+     * Triggers whenever an entity collides with this block.
+     */
     override fun onEntityCollidedWithBlock(world: World, pos: BlockPos, state: IBlockState, entity: Entity) {
-//        if(entity is EntityItem) {
-//            (world.getTileEntity(pos) as BrewingStandLogic).onItemCollision()
-//        }
+        if (entity is EntityItem) {
+            (world.getTileEntity(pos) as BrewingStandLogic).onItemCollision(entity)
+        }
     }
 
     override fun randomDisplayTick(state: IBlockState, world: World, pos: BlockPos, rand: Random) {
         val tile = world.getTileEntity(pos)
         if (tile is TileEntityBrewingStand) {
+            // If brewing is in progress, spawn bubbles out of all "tubes"
             if (tile.getField(0) > 0) {
                 val x = pos.x + 0.5
                 val y = pos.y + 1.0
@@ -105,6 +114,7 @@ class BrewingStand : BlockBrewingStand() {
                     Minecraft.getMinecraft().effectRenderer.addEffect(
                         BubbleParticle(world, x - 3.25 * 0.0625, y, z + 3.25 * 0.0625, .0, .0, .0))
             }
+            // If there is fuel, smoke a little bit
             if (tile.getField(1) > 0) {
                 val x = pos.x + 0.4 + rand.nextFloat() * 0.2
                 val y = pos.y + 0.7 + rand.nextFloat() * 0.3
@@ -112,6 +122,15 @@ class BrewingStand : BlockBrewingStand() {
                 world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, x, y, z, 0.0, 0.0, 0.0)
             }
         }
+    }
+
+    @Deprecated("Vanilla")
+    override fun addCollisionBoxToList(state: IBlockState, world: World, pos: BlockPos, mask: AxisAlignedBB,
+                                       collidingBoxes: MutableList<AxisAlignedBB>, entity: Entity?) {
+        super.addCollisionBoxToList(state, world, pos, mask, collidingBoxes, entity)
+        // Add the bowl for correct collisions
+        addCollisionBoxToList(pos, mask, collidingBoxes,
+                              BOWL_AABB.expand(.0, -0.0625 * 0.5, .0).offset(.0, -0.0625 * 0.5, .0))
     }
 
     @Deprecated("Vanilla")

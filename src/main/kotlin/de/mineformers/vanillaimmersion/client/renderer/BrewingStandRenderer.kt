@@ -1,6 +1,10 @@
 package de.mineformers.vanillaimmersion.client.renderer
 
 import de.mineformers.vanillaimmersion.VanillaImmersion
+import de.mineformers.vanillaimmersion.block.BrewingStand.Companion.BOTTLE1_AABB
+import de.mineformers.vanillaimmersion.block.BrewingStand.Companion.BOTTLE2_AABB
+import de.mineformers.vanillaimmersion.block.BrewingStand.Companion.BOTTLE3_AABB
+import de.mineformers.vanillaimmersion.block.BrewingStand.Companion.BOWL_AABB
 import de.mineformers.vanillaimmersion.tileentity.BrewingStandLogic
 import de.mineformers.vanillaimmersion.tileentity.BrewingStandLogic.Companion.Slot
 import de.mineformers.vanillaimmersion.util.Rays
@@ -13,7 +17,6 @@ import net.minecraft.client.renderer.block.model.ItemCameraTransforms
 import net.minecraft.client.renderer.texture.TextureMap
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer
 import net.minecraft.item.ItemBlock
-import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.RayTraceResult
 import net.minecraftforge.client.event.DrawBlockHighlightEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -33,14 +36,7 @@ class BrewingStandRenderer : TileEntitySpecialRenderer<BrewingStandLogic>() {
                 return
             val pos = event.target.blockPos
             val boxes = listOf(
-                AxisAlignedBB(pos.x + 10.0 * 0.0625, pos.y.toDouble(), pos.z + 6 * 0.0625,
-                              pos.x + 14.0 * 0.0625, pos.y + 12 * 0.0625, pos.z + 10 * 0.0625),
-                AxisAlignedBB(pos.x + 3.0 * 0.0625, pos.y.toDouble(), pos.z + 2 * 0.0625,
-                              pos.x + 7.0 * 0.0625, pos.y + 12 * 0.0625, pos.z + 6 * 0.0625),
-                AxisAlignedBB(pos.x + 3.0 * 0.0625, pos.y.toDouble(), pos.z + 10 * 0.0625,
-                              pos.x + 7.0 * 0.0625, pos.y + 12 * 0.0625, pos.z + 14 * 0.0625),
-                AxisAlignedBB(pos.x + 5.0 * 0.0625, pos.y + 13.5 * 0.0625, pos.z + 5 * 0.0625,
-                              pos.x + 11.0 * 0.0625, pos.y + 15.5 * 0.0625, pos.z + 11 * 0.0625)
+                BOTTLE1_AABB.offset(pos), BOTTLE2_AABB.offset(pos), BOTTLE3_AABB.offset(pos), BOWL_AABB.offset(pos)
             )
             val hit = Rays.rayTraceBoxes(player, boxes)
             if (hit >= 0) {
