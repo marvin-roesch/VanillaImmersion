@@ -1,7 +1,9 @@
 package de.mineformers.vanillaimmersion.util
 
 import net.minecraft.client.Minecraft
+import net.minecraft.entity.Entity
 import net.minecraft.util.Timer
+import net.minecraft.util.math.Vec3d
 import net.minecraftforge.fml.common.SidedProxy
 import net.minecraftforge.fml.relauncher.ReflectionHelper
 
@@ -34,6 +36,9 @@ internal interface RenderingProxy {
              */
             override val partialTicks: Float
                 get() = (TIMER_FIELD.get(Minecraft.getMinecraft()) as Timer).renderPartialTicks
+
+            override fun getEyePosition(entity: Entity, partialTicks: Float): Vec3d =
+                entity.getPositionEyes(partialTicks)
         }
 
         class ServerProxy : RenderingProxy {
@@ -42,6 +47,10 @@ internal interface RenderingProxy {
              */
             override val partialTicks: Float
                 get() = 1f
+
+            override fun getEyePosition(entity: Entity, partialTicks: Float): Vec3d {
+                return entity.positionVector + Vec3d(.0, entity.eyeHeight.toDouble(), .0)
+            }
         }
     }
 
@@ -50,4 +59,9 @@ internal interface RenderingProxy {
      */
     val partialTicks: Float
         get
+
+    /**
+     * Gets the eye position of an entity in a safe manner.
+     */
+    fun getEyePosition(entity: Entity, partialTicks: Float): Vec3d
 }

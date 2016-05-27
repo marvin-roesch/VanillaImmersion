@@ -2,7 +2,7 @@ package de.mineformers.vanillaimmersion
 
 import de.mineformers.vanillaimmersion.block.*
 import de.mineformers.vanillaimmersion.client.CraftingDragHandler
-import de.mineformers.vanillaimmersion.client.EnchantingUIHandler
+import de.mineformers.vanillaimmersion.immersion.EnchantingHandler
 import de.mineformers.vanillaimmersion.client.renderer.*
 import de.mineformers.vanillaimmersion.immersion.CraftingHandler
 import de.mineformers.vanillaimmersion.immersion.RepairHandler
@@ -78,6 +78,7 @@ object VanillaImmersion {
 
         MinecraftForge.EVENT_BUS.register(CraftingHandler)
         MinecraftForge.EVENT_BUS.register(RepairHandler)
+        MinecraftForge.EVENT_BUS.register(EnchantingHandler)
         MinecraftForge.EVENT_BUS.register(Blocks.FURNACE)
         MinecraftForge.EVENT_BUS.register(Blocks.LIT_FURNACE)
 
@@ -256,7 +257,6 @@ object VanillaImmersion {
 
             // Register client-specific event handlers
             MinecraftForge.EVENT_BUS.register(CraftingDragHandler)
-            MinecraftForge.EVENT_BUS.register(EnchantingUIHandler)
             MinecraftForge.EVENT_BUS.register(BrewingStandRenderer.Highlight)
         }
 

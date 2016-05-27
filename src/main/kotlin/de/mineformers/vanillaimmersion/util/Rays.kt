@@ -15,7 +15,8 @@ object Rays {
      * returns the index of the first one hit, `-1` otherwise.
      */
     fun rayTraceBoxes(entity: Entity, boxes: List<AxisAlignedBB>) =
-        rayTraceBoxes(entity.getPositionEyes(Rendering.partialTicks), entity.getLook(Rendering.partialTicks), boxes)
+        rayTraceBoxes(Rendering.getEyePosition(entity, Rendering.partialTicks), entity.getLook(Rendering.partialTicks),
+                      boxes)
 
     /**
      * Performs a ray trace on a collection of boxes, returns the index of the first one hit, `-1` otherwise.
@@ -29,7 +30,8 @@ object Rays {
      * Performs a ray-box intersection from an entity's eyes.
      */
     fun rayTraceBox(entity: Entity, box: AxisAlignedBB) =
-        rayTraceBox(entity.getPositionEyes(Rendering.partialTicks), entity.getLook(Rendering.partialTicks), box)
+        rayTraceBox(Rendering.getEyePosition(entity, Rendering.partialTicks), entity.getLook(Rendering.partialTicks),
+                    box)
 
     /**
      * Fast Ray-Box Intersection
@@ -103,7 +105,7 @@ object Rays {
      * of the transformations applied.
      */
     fun rayTraceQuad(entity: Entity, vertices: List<Vec3d>, transformations: Matrix4f? = null, epsilon: Double = 1e-6) =
-        rayTraceQuad(entity.getPositionEyes(Rendering.partialTicks), entity.getLook(Rendering.partialTicks),
+        rayTraceQuad(Rendering.getEyePosition(entity, Rendering.partialTicks), entity.getLook(Rendering.partialTicks),
                      vertices, transformations, epsilon)
 
     /**
@@ -145,7 +147,8 @@ object Rays {
      * Ignores the winding of the triangle, i.e. does not support backface culling.
      */
     fun moellerTrumbore(entity: Entity, v1: Vec3d, v2: Vec3d, v3: Vec3d, epsilon: Double = 1e-6) =
-        moellerTrumbore(entity.getPositionEyes(Rendering.partialTicks), entity.getLook(Rendering.partialTicks),
+        moellerTrumbore(Rendering.getEyePosition(entity, Rendering.partialTicks),
+                        entity.getLook(Rendering.partialTicks),
                         v1, v2, v3, epsilon)
 
     /**

@@ -1,4 +1,4 @@
-package de.mineformers.vanillaimmersion.client
+package de.mineformers.vanillaimmersion.immersion
 
 import de.mineformers.vanillaimmersion.VanillaImmersion
 import de.mineformers.vanillaimmersion.network.EnchantingAction
@@ -12,18 +12,24 @@ import net.minecraft.util.math.MathHelper
 import net.minecraft.util.math.Vec3d
 import net.minecraftforge.event.entity.player.PlayerInteractEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import net.minecraftforge.fml.relauncher.Side
+import net.minecraftforge.fml.relauncher.SideOnly
 import javax.vecmath.Matrix4f
 import javax.vecmath.Vector3f
+import javax.vecmath.Vector4f
 
 /**
  * Handles interaction with the enchantment table's book "GUI".
  */
-object EnchantingUIHandler {
+object EnchantingHandler {
     /**
      * Handles interaction with enchantment tables when a right click with an empty hand happens.
      */
     @SubscribeEvent
+    @SideOnly(Side.CLIENT)
     fun onRightClickEmpty(event: PlayerInteractEvent.RightClickEmpty) {
+        if (event.hand == EnumHand.OFF_HAND)
+            return
         onInteract(event, Minecraft.getMinecraft().objectMouseOver?.hitVec ?: Vec3d.ZERO)
     }
 
@@ -57,7 +63,7 @@ object EnchantingUIHandler {
             return
 
         val partialTicks = Rendering.partialTicks
-        val origin = player.getPositionEyes(partialTicks)
+        val origin = Rendering.getEyePosition(player, partialTicks)
         val direction = player.getLook(partialTicks)
         val hoverDistance = origin.squareDistanceTo(hovered)
         for (te in enchantingTables) {
@@ -89,7 +95,15 @@ object EnchantingUIHandler {
                           Vec3d(6 * 0.0625, 8 * 0.0625, .0), Vec3d(.0, 8 * 0.0625, .0))
         val matrix = calculateMatrix(te, partialTicks, right)
         val hit = Rays.rayTraceQuad(origin, direction, quad, matrix)
-        if (hit != null && origin.squareDistanceTo(hit + te.pos + Vec3d(.0, 0.75, .0)) < hoverDistance) {
+        val distanceCheck =
+            if (hit == null)
+                false
+            else {
+                val v = Vector4f(hit.x.toFloat(), hit.y.toFloat(), hit.z.toFloat(), 1f)
+                matrix.transform(v)
+                origin.squareDistanceTo(v.x.toDouble(), v.y.toDouble(), v.z.toDouble()) < hoverDistance
+            }
+        if (hit != null && distanceCheck) {
             // The "GUI" pixel position of the hit depends on the clicked page since we have two different
             // reference corners
             val pixelHit =
@@ -133,7 +147,8 @@ object EnchantingUIHandler {
 
         val yaw = te.bookRotationPrev + dYaw * partialTicks
         var flipLeft = te.pageFlipPrev + (te.pageFlip - te.pageFlipPrev) * partialTicks + 0.25f
-        flipLeft = (flipLeft - MathHelper.truncateDoubleToInt(flipLeft.toDouble()).toFloat()) * 1.6f - 0.3f
+
+        flipLeft = (flipLeft - flipLeft.toInt()) * 1.6f - 0.3f
         if (flipLeft < 0.0f) {
             flipLeft = 0.0f
         }

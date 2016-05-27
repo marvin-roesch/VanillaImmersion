@@ -37,7 +37,7 @@ class EnchantingTable : BlockEnchantmentTable() {
     override fun onBlockActivated(world: World, pos: BlockPos, state: IBlockState,
                                   player: EntityPlayer, hand: EnumHand, stack: ItemStack?,
                                   side: EnumFacing, hitX: Float, hitY: Float, hitZ: Float): Boolean {
-        if (world.isRemote)
+        if (world.isRemote || hand == EnumHand.OFF_HAND)
             return true
         val tile = world.getTileEntity(pos)
         if (tile !is EnchantingTableLogic)

@@ -106,6 +106,7 @@ class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
             pushMatrix()
             // Translate to the table's center
             translate(x + 0.5, y + 0.75, z + 0.5)
+            enableLighting()
 
             // What follows is a straight copy from Vanilla, with meaningful names
             // We don't call the super method because we need these values later on anyway
