@@ -57,50 +57,27 @@ class FurnaceLogic : TileEntityFurnace() {
     /**
      * Amount of "heat" left from the current fuel item.
      */
-    private var fuelLeft = 0
+    private var fuelLeft: Int
+        get() = getField(0)
+        set(value) = setField(0, value)
     /**
      * Amount of "heat" provided by the current fuel item.
      */
-    private var fuel = 0
+    private var fuel: Int
+        get() = getField(1)
+        set(value) = setField(1, value)
     /**
      * Progress of the current smelting process.
      */
-    private var progress = 0
+    private var progress: Int
+        get() = getField(2)
+        set(value) = setField(2, value)
     /**
      * Time in ticks required to smelt this item.
      */
-    private var requiredTime = 0
-
-    /**
-     * Determines whether the furnace is currently burning.
-     */
-    override fun isBurning() = fuelLeft > 0
-
-    /**
-     * Get a data field from the furnace.
-     * Required for Vanilla compatibility.
-     */
-    override fun getField(id: Int): Int =
-        when (id) {
-            0 -> fuelLeft
-            1 -> fuel
-            2 -> progress
-            3 -> requiredTime
-            else -> 0
-        }
-
-    /**
-     * Set a data field in the furnace.
-     * Required for Vanilla compatibility.
-     */
-    override fun setField(id: Int, value: Int) {
-        when (id) {
-            0 -> fuelLeft = value
-            1 -> fuel = value
-            2 -> progress = value
-            3 -> requiredTime = value
-        }
-    }
+    private var requiredTime: Int
+        get() = getField(3)
+        set(value) = setField(3, value)
 
     /**
      * Gets the ItemStack in a given slot.
@@ -232,48 +209,6 @@ class FurnaceLogic : TileEntityFurnace() {
             tile.validate()
             worldObj.setTileEntity(pos, tile)
         }
-    }
-
-    /**
-     * Inserts the given item stack into the specified slot.
-     */
-    override fun setInventorySlotContents(index: Int, stack: ItemStack?) {
-        // Basically the same as Vanilla
-        val old = getStackInSlot(index)
-        val unchanged = stack != null && stack.isItemEqual(old) && ItemStack.areItemStackTagsEqual(stack, old)
-
-        // Because we shadow Vanilla's private variables, we have to change our own here
-        if (index == 0 && !unchanged) {
-            this.requiredTime = this.getCookTime(stack)
-            this.progress = 0
-        }
-
-        super.setInventorySlotContents(index, stack)
-        this.markDirty()
-    }
-
-    /**
-     * Serializes the furnace's data to NBT.
-     */
-    override fun writeToNBT(compound: NBTTagCompound): NBTTagCompound {
-        super.writeToNBT(compound)
-
-        compound.setInteger("BurnTime", fuelLeft)
-        compound.setInteger("CookTime", progress)
-        compound.setInteger("CookTimeTotal", requiredTime)
-        return compound
-    }
-
-    /**
-     * Reads the furnace's data from NBT.
-     */
-    override fun readFromNBT(compound: NBTTagCompound) {
-        super.readFromNBT(compound)
-
-        this.fuelLeft = compound.getInteger("BurnTime")
-        this.progress = compound.getInteger("CookTime")
-        this.requiredTime = compound.getInteger("CookTimeTotal")
-        this.fuel = getItemBurnTime(this[Slot.FUEL])
     }
 
     /**
