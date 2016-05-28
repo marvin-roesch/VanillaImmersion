@@ -76,8 +76,7 @@ dependencies {
 }
 
 shadowJar {
-    relocate 'kotlin', 'de.mineformers.vanillaimmersion.kotlin'
-    relocate 'org.jetbrains.annotations', 'de.mineformers.vanillaimmersion.jetbrains.annotations'
+    relocate 'org.jetbrains.annotations', 'vimmersion_shade.org.jetbrains.annotations'
     configurations = [project.configurations.shade]
     classifier ''
 }
