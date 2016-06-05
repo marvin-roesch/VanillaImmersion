@@ -11,3 +11,10 @@ vimmersion.anvil.itemName=Item Name:
 vimmersion.anvil.inUse=This anvil is currently in use by another player.
 
 itemGroup.vimmersion=Vanilla Immersion
+
+# Configuration
+config.vimmersion.blocks=Blocks
+config.vimmersion.blocks.replaceVanillaRecipes=Replace Vanilla Recipes
+config.vimmersion.blocks.conversionRecipes=Add Conversion Recipes
+config.vimmersion.blocks.enchantmentTable=Enchantment Table
+config.vimmersion.blocks.enchantmentTable.dropItems=Drop Items

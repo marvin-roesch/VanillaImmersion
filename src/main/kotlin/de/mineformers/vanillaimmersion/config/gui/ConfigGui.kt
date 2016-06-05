@@ -15,7 +15,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
  * Vanilla Immersion's Configuration interface.
  */
 class ConfigGui(parent: GuiScreen) :
-    GuiConfig(parent, buildElements(), VanillaImmersion.MODID, false, false, "VImmersion") {
+    GuiConfig(parent, buildElements(), VanillaImmersion.MODID, false, false, VanillaImmersion.MOD_NAME) {
 
     /**
      * Holds onto the individual config entries and their values.

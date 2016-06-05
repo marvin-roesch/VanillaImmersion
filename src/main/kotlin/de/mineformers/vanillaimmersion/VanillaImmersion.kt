@@ -17,6 +17,7 @@ import net.minecraft.item.Item
 import net.minecraft.item.ItemAnvilBlock
 import net.minecraft.item.ItemBlock
 import net.minecraft.item.ItemStack
+import net.minecraft.item.crafting.CraftingManager
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.SoundEvent
 import net.minecraftforge.client.model.ModelLoader
@@ -114,24 +115,54 @@ object VanillaImmersion {
      */
     @EventHandler
     fun init(event: FMLInitializationEvent) {
-        // Add immersive -> Vanilla block conversion recipes
-        GameRegistry.addShapelessRecipe(ItemStack(Blocks.FURNACE), ItemStack(VBlocks.FURNACE))
-        GameRegistry.addShapelessRecipe(ItemStack(Blocks.CRAFTING_TABLE), ItemStack(VBlocks.CRAFTING_TABLE))
-        // Fully intact, slightly damaged and very damaged anvils
-        GameRegistry.addShapelessRecipe(ItemStack(Blocks.ANVIL, 1, 0), ItemStack(VBlocks.ANVIL, 1, 0))
-        GameRegistry.addShapelessRecipe(ItemStack(Blocks.ANVIL, 1, 1), ItemStack(VBlocks.ANVIL, 1, 1))
-        GameRegistry.addShapelessRecipe(ItemStack(Blocks.ANVIL, 1, 2), ItemStack(VBlocks.ANVIL, 1, 2))
-        GameRegistry.addShapelessRecipe(ItemStack(Blocks.ENCHANTING_TABLE), ItemStack(VBlocks.ENCHANTING_TABLE))
-        GameRegistry.addShapelessRecipe(ItemStack(Blocks.BREWING_STAND), ItemStack(VItems.BREWING_STAND))
-        // Add Vanilla -> immersive block conversion recipes
-        GameRegistry.addShapelessRecipe(ItemStack(VBlocks.FURNACE), ItemStack(Blocks.FURNACE))
-        GameRegistry.addShapelessRecipe(ItemStack(VBlocks.CRAFTING_TABLE), ItemStack(Blocks.CRAFTING_TABLE))
-        // Fully intact, slightly damaged and very damaged anvils
-        GameRegistry.addShapelessRecipe(ItemStack(VBlocks.ANVIL, 1, 0), ItemStack(Blocks.ANVIL, 1, 0))
-        GameRegistry.addShapelessRecipe(ItemStack(VBlocks.ANVIL, 1, 1), ItemStack(Blocks.ANVIL, 1, 1))
-        GameRegistry.addShapelessRecipe(ItemStack(VBlocks.ANVIL, 1, 2), ItemStack(Blocks.ANVIL, 1, 2))
-        GameRegistry.addShapelessRecipe(ItemStack(VBlocks.ENCHANTING_TABLE), ItemStack(Blocks.ENCHANTING_TABLE))
-        GameRegistry.addShapelessRecipe(ItemStack(VItems.BREWING_STAND), ItemStack(Blocks.BREWING_STAND))
+        if (Configuration.getBoolean("blocks.replace-vanilla-recipes")) {
+            LOG.info("Replacing Vanilla recipes...")
+            // Add replacement recipes
+            GameRegistry.addShapedRecipe(ItemStack(Blocks.FURNACE),
+                                         "###",
+                                         "# #",
+                                         "###",
+                                         '#', VBlocks.COBBLESTONE)
+            GameRegistry.addShapedRecipe(ItemStack(Blocks.CRAFTING_TABLE),
+                                         "##",
+                                         "##",
+                                         '#', VBlocks.PLANKS)
+            GameRegistry.addShapedRecipe(ItemStack(Blocks.ANVIL),
+                                         "III",
+                                         " i ",
+                                         "iii",
+                                         'I', VBlocks.IRON_BLOCK, 'i', VItems.IRON_INGOT)
+            GameRegistry.addShapedRecipe(ItemStack(Blocks.ENCHANTING_TABLE),
+                                         " B ",
+                                         "D#D",
+                                         "###",
+                                         '#', VBlocks.OBSIDIAN, 'B', VItems.BOOK, 'D', VItems.DIAMOND)
+            GameRegistry.addShapedRecipe(ItemStack(Blocks.BREWING_STAND),
+                                         " B ",
+                                         "###",
+                                         '#', VBlocks.COBBLESTONE, 'B', VItems.BLAZE_ROD)
+        }
+        if (Configuration.getBoolean("blocks.conversion-recipes")) {
+            LOG.info("Adding Vanilla <-> Immersive recipes...")
+            // Add Vanilla -> immersive block conversion recipes
+            GameRegistry.addShapelessRecipe(ItemStack(Blocks.FURNACE), ItemStack(VBlocks.FURNACE))
+            GameRegistry.addShapelessRecipe(ItemStack(Blocks.CRAFTING_TABLE), ItemStack(VBlocks.CRAFTING_TABLE))
+            // Fully intact, slightly damaged and very damaged anvils
+            GameRegistry.addShapelessRecipe(ItemStack(Blocks.ANVIL, 1, 0), ItemStack(VBlocks.ANVIL, 1, 0))
+            GameRegistry.addShapelessRecipe(ItemStack(Blocks.ANVIL, 1, 1), ItemStack(VBlocks.ANVIL, 1, 1))
+            GameRegistry.addShapelessRecipe(ItemStack(Blocks.ANVIL, 1, 2), ItemStack(VBlocks.ANVIL, 1, 2))
+            GameRegistry.addShapelessRecipe(ItemStack(Blocks.ENCHANTING_TABLE), ItemStack(VBlocks.ENCHANTING_TABLE))
+            GameRegistry.addShapelessRecipe(ItemStack(Blocks.BREWING_STAND), ItemStack(VItems.BREWING_STAND))
+            // Add immersive -> Vanilla block conversion recipes
+            GameRegistry.addShapelessRecipe(ItemStack(VBlocks.FURNACE), ItemStack(Blocks.FURNACE))
+            GameRegistry.addShapelessRecipe(ItemStack(VBlocks.CRAFTING_TABLE), ItemStack(Blocks.CRAFTING_TABLE))
+            // Fully intact, slightly damaged and very damaged anvils
+            GameRegistry.addShapelessRecipe(ItemStack(VBlocks.ANVIL, 1, 0), ItemStack(Blocks.ANVIL, 1, 0))
+            GameRegistry.addShapelessRecipe(ItemStack(VBlocks.ANVIL, 1, 1), ItemStack(Blocks.ANVIL, 1, 1))
+            GameRegistry.addShapelessRecipe(ItemStack(VBlocks.ANVIL, 1, 2), ItemStack(Blocks.ANVIL, 1, 2))
+            GameRegistry.addShapelessRecipe(ItemStack(VBlocks.ENCHANTING_TABLE), ItemStack(Blocks.ENCHANTING_TABLE))
+            GameRegistry.addShapelessRecipe(ItemStack(VItems.BREWING_STAND), ItemStack(Blocks.BREWING_STAND))
+        }
     }
 
     /**
