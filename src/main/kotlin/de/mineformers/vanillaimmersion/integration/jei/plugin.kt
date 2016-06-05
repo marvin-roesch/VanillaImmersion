@@ -1,5 +1,6 @@
 package de.mineformers.vanillaimmersion.integration.jei
 
+import de.mineformers.vanillaimmersion.VanillaImmersion
 import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic
 import mezz.jei.Internal
 import mezz.jei.api.*
@@ -10,7 +11,6 @@ import mezz.jei.api.recipe.transfer.IRecipeTransferHandler
 import mezz.jei.gui.RecipeLayout
 import mezz.jei.input.IKeyable
 import mezz.jei.transfer.RecipeTransferErrorInternal
-import mezz.jei.util.Log
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.inventory.Container
 import net.minecraft.inventory.ContainerWorkbench
@@ -60,7 +60,7 @@ class CraftingTransferHandler : IRecipeTransferHandler {
             Internal.getRuntime().recipeRegistry.getRecipeTransferHandler(vanillaContainer, category)
         if (transferHandler == null) {
             if (doTransfer) {
-                Log.error("No Recipe Transfer handler for container {}", container.javaClass)
+                VanillaImmersion.LOG.error("No Recipe Transfer handler for container {}", container.javaClass)
             }
             return RecipeTransferErrorInternal.instance
         }

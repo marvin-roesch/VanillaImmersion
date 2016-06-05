@@ -2,9 +2,10 @@ package de.mineformers.vanillaimmersion
 
 import de.mineformers.vanillaimmersion.block.*
 import de.mineformers.vanillaimmersion.client.CraftingDragHandler
-import de.mineformers.vanillaimmersion.immersion.EnchantingHandler
 import de.mineformers.vanillaimmersion.client.renderer.*
+import de.mineformers.vanillaimmersion.config.Configuration
 import de.mineformers.vanillaimmersion.immersion.CraftingHandler
+import de.mineformers.vanillaimmersion.immersion.EnchantingHandler
 import de.mineformers.vanillaimmersion.immersion.RepairHandler
 import de.mineformers.vanillaimmersion.item.SpecialBlockItem
 import de.mineformers.vanillaimmersion.network.*
@@ -31,6 +32,7 @@ import net.minecraftforge.fml.common.network.NetworkRegistry
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper
 import net.minecraftforge.fml.common.registry.GameRegistry
 import net.minecraftforge.fml.relauncher.Side
+import org.apache.logging.log4j.LogManager
 import net.minecraft.init.Blocks as VBlocks
 import net.minecraft.init.Items as VItems
 
@@ -43,7 +45,8 @@ import net.minecraft.init.Items as VItems
      acceptedMinecraftVersions = "*",
      dependencies = "required-after:Forge",
      updateJSON = "@UPDATE_URL@",
-     modLanguageAdapter = "de.mineformers.vanillaimmersion.KotlinAdapter")
+     modLanguageAdapter = "de.mineformers.vanillaimmersion.KotlinAdapter",
+     guiFactory = "de.mineformers.vanillaimmersion.config.gui.GuiFactory")
 object VanillaImmersion {
     const val MOD_NAME = "Vanilla Immersion"
     const val MODID = "vimmersion"
@@ -61,6 +64,12 @@ object VanillaImmersion {
         SimpleNetworkWrapper(MODID)
     }
     /**
+     * Logger for the mod to inform people about things.
+     */
+    val LOG by lazy {
+        LogManager.getLogger(MODID);
+    }
+    /**
      * Temporary creative tab for the mod
      * To be removed once substitutions are fixed
      */
@@ -73,6 +82,7 @@ object VanillaImmersion {
      */
     @EventHandler
     fun preInit(event: FMLPreInitializationEvent) {
+        Configuration.load(event.modConfigurationDirectory, "vimmersion")
         Blocks.init()
         Sounds.init()
 

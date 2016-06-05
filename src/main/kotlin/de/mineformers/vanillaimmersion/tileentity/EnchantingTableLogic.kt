@@ -2,6 +2,7 @@ package de.mineformers.vanillaimmersion.tileentity
 
 import de.mineformers.vanillaimmersion.VanillaImmersion
 import de.mineformers.vanillaimmersion.client.particle.EnchantingParticle
+import de.mineformers.vanillaimmersion.config.Configuration
 import de.mineformers.vanillaimmersion.util.*
 import net.minecraft.client.Minecraft
 import net.minecraft.entity.player.EntityPlayer
@@ -170,8 +171,9 @@ class EnchantingTableLogic : TileEntityEnchantmentTable() {
             markDirty = true
         }
 
-        // Drop all items in the table if there is no enchanting in progress and there's no player nearby
-        if (result == null && bookSpread <= 0.0 && !worldObj.isRemote) {
+        // Drop all items in the table if there is no enchanting in progress and there's no player nearby (configurable)
+        if (Configuration.getBoolean("blocks.enchantment-table.drop-items")
+            && result == null && bookSpread <= 0.0 && !worldObj.isRemote) {
             for (i in inventory.contents.indices) {
                 val stack = inventory.getStackInSlot(i)
                 if (stack != null) {
