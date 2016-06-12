@@ -1,5 +1,6 @@
 package de.mineformers.vanillaimmersion.client.renderer
 
+import de.mineformers.vanillaimmersion.VanillaImmersion
 import de.mineformers.vanillaimmersion.tileentity.AnvilLogic
 import de.mineformers.vanillaimmersion.tileentity.AnvilLogic.Companion.Slot
 import net.minecraft.client.Minecraft
@@ -21,6 +22,8 @@ class AnvilRenderer : TileEntitySpecialRenderer<AnvilLogic>() {
     // TODO: Maybe switch to FastTESR?
     override fun renderTileEntityAt(te: AnvilLogic, x: Double, y: Double, z: Double,
                                     partialTicks: Float, destroyStage: Int) {
+        if (te.blockState.block !== VanillaImmersion.Blocks.ANVIL)
+            return
         pushMatrix()
         color(1f, 1f, 1f, 1f)
 

@@ -1,5 +1,6 @@
 package de.mineformers.vanillaimmersion.client.renderer
 
+import de.mineformers.vanillaimmersion.VanillaImmersion
 import de.mineformers.vanillaimmersion.tileentity.FurnaceLogic
 import de.mineformers.vanillaimmersion.tileentity.FurnaceLogic.Companion.Slot.FUEL
 import de.mineformers.vanillaimmersion.tileentity.FurnaceLogic.Companion.Slot.INPUT
@@ -17,6 +18,9 @@ import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer
 class FurnaceRenderer : TileEntitySpecialRenderer<FurnaceLogic>() {
     override fun renderTileEntityAt(te: FurnaceLogic, x: Double, y: Double, z: Double,
                                     partialTicks: Float, destroyStage: Int) {
+        if (!(te.blockState.block === VanillaImmersion.Blocks.FURNACE ||
+              te.blockState.block === VanillaImmersion.Blocks.LIT_FURNACE))
+            return
         pushMatrix()
         color(1f, 1f, 1f, 1f)
 
