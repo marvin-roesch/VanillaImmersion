@@ -208,7 +208,7 @@ object CraftingDragHandler {
         val te = Minecraft.getMinecraft().theWorld.getTileEntity(dragTarget) as CraftingTableLogic
 
         // The camera is the origin when this event is called, get its position to translate to the world origin
-        val camera = Minecraft.getMinecraft().renderViewEntity
+        val camera = Minecraft.getMinecraft().renderViewEntity ?: return
         val cX = camera.lastTickPosX + (camera.posX - camera.lastTickPosX) * event.partialTicks
         val cY = camera.lastTickPosY + (camera.posY - camera.lastTickPosY) * event.partialTicks
         val cZ = camera.lastTickPosZ + (camera.posZ - camera.lastTickPosZ) * event.partialTicks

@@ -1,7 +1,7 @@
 package de.mineformers.vanillaimmersion.integration.jei
 
 import de.mineformers.vanillaimmersion.VanillaImmersion
-import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic
+import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic.CraftingTableContainer
 import mezz.jei.Internal
 import mezz.jei.api.*
 import mezz.jei.api.gui.IRecipeLayout
@@ -12,7 +12,6 @@ import mezz.jei.gui.RecipeLayout
 import mezz.jei.input.IKeyable
 import mezz.jei.transfer.RecipeTransferErrorInternal
 import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.inventory.Container
 import net.minecraft.inventory.ContainerWorkbench
 import net.minecraft.util.math.BlockPos
 import net.minecraftforge.fml.common.Loader
@@ -51,8 +50,8 @@ object JEIProxy {
     }
 }
 
-class CraftingTransferHandler : IRecipeTransferHandler {
-    override fun transferRecipe(container: Container, recipeLayout: IRecipeLayout, player: EntityPlayer,
+class CraftingTransferHandler : IRecipeTransferHandler<CraftingTableContainer> {
+    override fun transferRecipe(container: CraftingTableContainer, recipeLayout: IRecipeLayout, player: EntityPlayer,
                                 maxTransfer: Boolean, doTransfer: Boolean): IRecipeTransferError? {
         val category = (recipeLayout as RecipeLayout).recipeCategory
         val vanillaContainer = ContainerWorkbench(player.inventory, player.worldObj, BlockPos.ORIGIN)
@@ -62,7 +61,7 @@ class CraftingTransferHandler : IRecipeTransferHandler {
             if (doTransfer) {
                 VanillaImmersion.LOG.error("No Recipe Transfer handler for container {}", container.javaClass)
             }
-            return RecipeTransferErrorInternal.instance
+            return RecipeTransferErrorInternal.INSTANCE
         }
 
         val result = transferHandler.transferRecipe(container, recipeLayout, player, maxTransfer, doTransfer)
@@ -72,7 +71,7 @@ class CraftingTransferHandler : IRecipeTransferHandler {
         return result
     }
 
-    override fun getContainerClass() = CraftingTableLogic.CraftingTableContainer::class.java
+    override fun getContainerClass() = CraftingTableContainer::class.java
 
     override fun getRecipeCategoryUid() = VanillaRecipeCategoryUid.CRAFTING
 }

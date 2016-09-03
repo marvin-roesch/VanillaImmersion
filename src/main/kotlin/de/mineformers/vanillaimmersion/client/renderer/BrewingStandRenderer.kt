@@ -53,7 +53,8 @@ class BrewingStandRenderer : TileEntitySpecialRenderer<BrewingStandLogic>() {
                     val cX = player.lastTickPosX + (player.posX - player.lastTickPosX) * partialTicks
                     val cY = player.lastTickPosY + (player.posY - player.lastTickPosY) * partialTicks
                     val cZ = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * partialTicks
-                    RenderGlobal.drawSelectionBoundingBox(boxes[hit].expandXyz(0.002).offset(-cX, -cY, -cZ))
+                    RenderGlobal.drawSelectionBoundingBox(boxes[hit].expandXyz(0.002).offset(-cX, -cY, -cZ),
+                                                          0f, 0f, 0f, 0.4f)
                 }
 
                 depthMask(true)
