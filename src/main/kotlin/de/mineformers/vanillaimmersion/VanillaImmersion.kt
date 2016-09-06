@@ -7,6 +7,7 @@ import de.mineformers.vanillaimmersion.config.Configuration
 import de.mineformers.vanillaimmersion.immersion.CraftingHandler
 import de.mineformers.vanillaimmersion.immersion.EnchantingHandler
 import de.mineformers.vanillaimmersion.immersion.RepairHandler
+import de.mineformers.vanillaimmersion.item.Hammer
 import de.mineformers.vanillaimmersion.item.SpecialBlockItem
 import de.mineformers.vanillaimmersion.network.*
 import de.mineformers.vanillaimmersion.tileentity.*
@@ -17,7 +18,6 @@ import net.minecraft.item.Item
 import net.minecraft.item.ItemAnvilBlock
 import net.minecraft.item.ItemBlock
 import net.minecraft.item.ItemStack
-import net.minecraft.item.crafting.CraftingManager
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.SoundEvent
 import net.minecraftforge.client.model.ModelLoader
@@ -68,7 +68,7 @@ object VanillaImmersion {
      * Logger for the mod to inform people about things.
      */
     val LOG by lazy {
-        LogManager.getLogger(MODID);
+        LogManager.getLogger(MODID)
     }
     /**
      * Temporary creative tab for the mod
@@ -85,6 +85,7 @@ object VanillaImmersion {
     fun preInit(event: FMLPreInitializationEvent) {
         Configuration.load(event.modConfigurationDirectory, "vimmersion")
         Blocks.init()
+        Items.init()
         Sounds.init()
 
         MinecraftForge.EVENT_BUS.register(CraftingHandler)
@@ -244,6 +245,22 @@ object VanillaImmersion {
         }
     }
 
+    object Items {
+        /**
+         * Hammer for interaction with Anvil
+         */
+        val HAMMER by lazy {
+            Hammer()
+        }
+
+        /**
+         * Initializes and registers blocks and related data
+         */
+        fun init() {
+            GameRegistry.register(HAMMER)
+        }
+    }
+
     /**
      * Holder object for all sound (events) added by this mod.
      */
@@ -297,6 +314,9 @@ object VanillaImmersion {
             ClientRegistry.bindTileEntitySpecialRenderer(EnchantingTableLogic::class.java, EnchantingTableRenderer())
             ClientRegistry.bindTileEntitySpecialRenderer(BrewingStandLogic::class.java, BrewingStandRenderer())
 
+            // Register item models
+            setItemModel(Items.HAMMER, 0, "$MODID:hammer")
+
             // Register client-specific event handlers
             MinecraftForge.EVENT_BUS.register(CraftingDragHandler)
             MinecraftForge.EVENT_BUS.register(BrewingStandRenderer.Highlight)
@@ -307,7 +327,15 @@ object VanillaImmersion {
          * Assumes the default variant is to be used ("inventory").
          */
         private fun setItemModel(block: Block, meta: Int, resource: String) {
-            ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(block),
+            setItemModel(Item.getItemFromBlock(block)!!, meta, resource)
+        }
+
+        /**
+         * Sets the model associated with an item.
+         * Assumes the default variant is to be used ("inventory").
+         */
+        private fun setItemModel(item: Item, meta: Int, resource: String) {
+            ModelLoader.setCustomModelResourceLocation(item,
                                                        meta,
                                                        ModelResourceLocation(resource, "inventory"))
         }

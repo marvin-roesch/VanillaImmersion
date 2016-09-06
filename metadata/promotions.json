@@ -1,0 +1,24 @@
+{
+    "1.10.2": {
+        "0.0.7.0": "Change: Main Version now is 1.10.2\nFix: State-aware TESRs should not crash the game anymore",
+        "0.0.8.0": "Addition: A Hammer that can be used to get the output of a repair operation on the anvil\nAddition: Naming an item on the anvil now displays a cursor\nChange: Anvil output no longer is displayed in favor of a hammer slot"
+    },
+    "1.9.4": {
+        "0.0.0.1": "Initial alpha release",
+        "0.0.1.0": "Fix: Crafting Table now respects changing output while automating\nFix: Enchantment table interaction won't trigger hovered blocks anymore\nFix: All automatable blocks don't crash your game with an NPE anymore",
+        "0.0.1.1": "Fix: Game is now runnable in an obfuscated environment again",
+        "0.0.2.0": "Addition: Shapeless crafting recipes to convert from Vanilla to immersive blocks and vice-versa\nFix: Crafting table changes output again if there already was one but the recipe is different",
+        "0.0.3.0": "Addition: JEI Integration with recipe transfer for the crafting table\nChange: Minimum required Forge version now is 12.17.0.1910\nFix: Furnace should now get properly lit when surrounded by other blocks\nFix: Furnace now properly synchronises to the client when items are inserted manually",
+        "0.0.3.1": "Fix: The mod no longer ships JEI now",
+        "0.0.4.0": "Change: Furnace respects sneaking now, one item from the stack is inserted by default, the whole stack when sneaking\nChange: Crafting Table now only consumes one item at a time rather than the whole stack without sneaking\nFix(es): The Crafting Table should now properly cancel all placing of blocks or other item uses",
+        "0.0.5.0": "Addition: Immersive Brewing Stand - Interaction should be fairly self-explanatory\nFix(es): Any previous interaction issues with the enchantment table should be resolved now",
+        "0.0.5.1": "Fix: The enchantment table should actually be usable now",
+        "0.0.5.2": "Fix: Mod actually runnable now",
+        "0.0.6.0": "Addition: Configuration options for various things, check out the config GUI\nChange: The brewing stand respects shift clicking (sneaking) now"
+    },
+    "homepage": "http://minecraft.curseforge.com/projects/vanilla-immersion",
+    "promos": {
+        "1.10.2-latest": "0.0.8.0",
+        "1.9.4-latest": "0.0.6.0"
+    }
+}

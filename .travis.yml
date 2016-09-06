@@ -16,6 +16,8 @@ cache:
 
 before_install:
   - chmod +x gradlew
- 
+
+install: true
+
 script:
   - ./gradlew clean setupCIWorkspace build

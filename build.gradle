@@ -19,6 +19,9 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.3'
         classpath 'com.matthewprenger:CurseGradle:1.0-SNAPSHOT'
+        classpath 'org.ajoberstar:gradle-git:1.5.1'
+        classpath 'co.riiid:gradle-github-plugin:0.4.2'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.1'
     }
 }
 
@@ -26,6 +29,10 @@ apply plugin: 'kotlin'
 apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'com.matthewprenger.cursegradle'
+apply plugin: 'org.ajoberstar.grgit'
+apply plugin: 'co.riiid.gradle'
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'maven-publish'
 
 def parseConfig(File config) {
     config.withReader {
@@ -36,15 +43,22 @@ def parseConfig(File config) {
 }
 
 ext.config = parseConfig(file('build.properties'))
-if (file('private.properties').exists())
+def privateConfig = file('private.properties').exists()
+if (privateConfig)
     ext.priv = parseConfig(file('private.properties'))
 
+def forgeVersion = "${config.mc_version}-${config.forge_version}${config.forge_branch != '' ? '-' : ''}${config.forge_branch}"
+
+def updateUrl = "https://raw.githubusercontent.com/PaleoCrafter/VanillaImmersion/master/metadata/promotions.json"
 version = "${config.mc_version}-${config.mod_version}"
+if (System.getenv("TRAVIS_BUILD_NUMBER") != null && System.getenv("TRAVIS_BRANCH") != "release") {
+    version = "$version+b${System.getenv("TRAVIS_BUILD_NUMBER")}"
+}
 group = 'de.mineformers.vimmersion'
 archivesBaseName = 'vanilla-immersion'
 
 minecraft {
-    version = "${config.mc_version}-${config.forge_version}${config.forge_branch != '' ? '-' : ''}${config.forge_branch}"
+    version = forgeVersion
     runDir = 'run'
     mappings = config.mappings
     useDepAts = true
@@ -52,8 +66,7 @@ minecraft {
     replace '@VERSION@', config.mod_version
     replace 'acceptedMinecraftVersions = "*",', """acceptedMinecraftVersions = "[${config.mc_version}]","""
     replace 'required-after:Forge', "required-after:Forge@[${config.forge_version},)"
-    if (file('private.properties').exists())
-        replace '@UPDATE_URL@', priv.update_url
+    replace '@UPDATE_URL@', updateUrl
 
     replaceIn 'VanillaImmersion.kt'
 }
@@ -86,7 +99,11 @@ reobf {
 }
 tasks.build.dependsOn reobfShadowJar
 
+
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import net.minecraftforge.gradle.user.TaskSourceCopy
+
 // Mad hacks to make source replacements work for Kotlin
 for (set in sourceSets) {
     def taskName = "source${set.name.capitalize()}Kotlin"
@@ -100,7 +117,6 @@ for (set in sourceSets) {
     compileTask.source = dir
 }
 
-
 processResources {
     // this will ensure that this task is redone when the versions change.
     inputs.property 'version', config.mod_version
@@ -110,13 +126,7 @@ processResources {
     from(sourceSets.main.resources.srcDirs) {
         include 'mcmod.info'
 
-        if (file('private.properties').exists()) {
-            // replace version, mcversion and updateUrl
-            expand 'version': project.version, 'mcversion': project.minecraft.version, 'updateUrl': priv.update_url
-        } else {
-            // replace version and mcversion
-            expand 'version': project.version, 'mcversion': project.minecraft.version, 'updateUrl': ''
-        }
+        expand 'version': project.version, 'mcversion': project.minecraft.version, 'updateUrl': updateUrl
     }
 
     // copy everything else other than the mcmod.info
@@ -125,17 +135,110 @@ processResources {
     }
 }
 
+def bintrayApi = privateConfig ? priv.bintray_api : System.getenv("PROJECT_BINTRAY_API")
+def bintrayUser = privateConfig ? priv.bintray_user : System.getenv("PROJECT_BINTRAY_USER")
 
-if (file('private.properties').exists()) {
+if (bintrayApi != null) {
+    bintray {
+        user = bintrayUser
+        key = bintrayApi
+        publications = ["MainPublication"]
+
+        pkg {
+            repo = "MinecraftMods"
+            name = "VanillaImmersion"
+            licenses = ["MIT"]
+            websiteUrl = 'http://minecraft.curseforge.com/projects/vanilla-immersion'
+            issueTrackerUrl = 'https://github.com/PaleoCrafter/VanillaImmersion/issues'
+            vcsUrl = "https://github.com/PaleoCrafter/VanillaImmersion.git"
+            publicDownloadNumbers = true
+            githubRepo = "PaleoCrafter/VanillaImmersion"
+            publish = false
+
+            version {
+                name = project.version
+                released = new Date()
+                attributes = ["MC Version"        : config.mc_version,
+                              "Min. Forge Version": forgeVersion]
+
+                if (System.getenv("TRAVIS_BRANCH") == "release") {
+                    vcsTag = "v${project.version}"
+                }
+            }
+        }
+    }
+}
+
+publishing {
+    publications {
+        MainPublication(MavenPublication) {
+            from components.java
+
+            groupId 'de.mineformers.vanillaimmersion'
+            artifactId 'vanilla-immersion'
+            version project.version
+
+            artifact sourceJar {
+                classifier "sources"
+            }
+        }
+    }
+}
+
+bintrayUpload.dependsOn reobfShadowJar
+
+def gitApi = privateConfig ? priv.github_api : System.getenv("PROJECT_GITHUB_API")
+
+if (gitApi != null) {
+    github {
+        def changeFile = file('metadata/changes.json')
+        def changes = new JsonSlurper().parseText(changeFile.text)
+        def githubLists = []
+        [["additions", "addition"], ["changes", "change"], ["fixes", "fix"]].each {
+            def (String key, String label) = it
+            if (changes.containsKey(key) && !changes[key].isEmpty()) {
+                def githubList = "  - **${key.capitalize()}**"
+                changes[key].each {
+                    githubList += "\n    - $it"
+                }
+                githubLists.add(githubList)
+            }
+        }
+        def githubList = githubLists.join("\n")
+        def githubText = """${changes.github.description}
+
+Changes
+=======
+$githubList
+"""
+        owner = "PaleoCrafter"
+        repo = "VanillaImmersion"
+        token = gitApi
+        tagName = "v$version"
+        name = changes.github.title
+        body = githubText
+        prerelease = true
+
+        assets = [jar.archivePath]
+    }
+}
+
+githubRelease.dependsOn bintrayUpload
+
+def cfApi = privateConfig ? priv.cf_api : System.getenv("PROJECT_CURSE_API")
+def cfProject = privateConfig ? priv.cf_project : System.getenv("PROJECT_CURSE_PROJECT")
+def cfType = privateConfig ? priv.cf_type : System.getenv("PROJECT_CURSE_TYPE")
+
+if (cfApi != null) {
     curseforge {
-        apiKey = priv.cf_api
+        apiKey = cfApi
         project {
-            id = priv.cf_project
+            id = cfProject
             changelogType = 'html'
             changelog = """See <a title="GitHub Changelog" href="https://github.com/PaleoCrafter/VanillaImmersion/releases/tag/v${
                 version
             }">GitHub</a>"""
-            releaseType = priv.cf_type
+            releaseType = cfType
             addGameVersion config.mc_version
 
             relations {
@@ -149,6 +252,51 @@ if (file('private.properties').exists()) {
     }
 
     afterEvaluate {
-        curseforge.curseProjects.each { tasks["curseforge${it.id}"].dependsOn reobfShadowJar }
+        curseforge.curseProjects.each { tasks["curseforge${it.id}"].dependsOn githubRelease }
     }
+}
+
+task release() {
+    if (System.getenv("TRAVIS_BRANCH") == "release")
+        dependsOn "curseforge"
+    else
+        dependsOn bintrayUpload
+}
+
+task generateChangelogs() {
+    doLast {
+        def changeFile = file('metadata/changes.json')
+        def changes = new JsonSlurper().parseText(changeFile.text)
+        def promotionFile = file('metadata/promotions.json')
+        def promotions = new JsonSlurper().parseText(promotionFile.text)
+        def promotionTexts = []
+        def githubLists = []
+        [["additions", "addition"], ["changes", "change"], ["fixes", "fix"]].each {
+            def (String key, String label) = it
+            if (changes.containsKey(key) && !changes[key].isEmpty()) {
+                promotionTexts.add(changes[key].collect { "${label.capitalize()}: $it" }.join("\n"))
+                def githubList = "  - **${key.capitalize()}**"
+                changes[key].each {
+                    githubList += "\n    - $it"
+                }
+                githubLists.add(githubList)
+            }
+        }
+        def promotionText = promotionTexts.join("\n")
+        promotions.promos["${config.mc_version}-latest"] = config.mod_version
+        promotions[config.mc_version][config.mod_version] = promotionText
+        def newPromos = JsonOutput.prettyPrint(JsonOutput.toJson(promotions))
+        promotionFile.text = newPromos
+        grgit.add(patterns: "metadata/promotions.json")
+        grgit.commit(message: "Update Forge promotions file for release of version $version")
+        grgit.tag.add {
+            name = "v$version"
+            message = changes.github.title
+        }
+        file("github.md").text = githubText
+    }
+}
+
+afterEvaluate {
+    tasks.build.dependsOn(release)
 }

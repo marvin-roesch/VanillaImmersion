@@ -1,0 +1,15 @@
+{
+  "github": {
+    "title": "General improvements",
+    "description": "This release includes various changes to the anvil."
+  },
+  "additions": [
+    "A Hammer that can be used to get the output of a repair operation on the anvil",
+    "Naming an item on the anvil now displays a cursor"
+  ],
+  "changes": [
+    "Anvil output no longer is displayed in favor of a hammer slot"
+  ],
+  "fixes": [
+  ]
+}

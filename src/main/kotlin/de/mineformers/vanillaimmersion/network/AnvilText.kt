@@ -43,7 +43,6 @@ object AnvilText {
                     // Release the lock, change the name and try to "repair"
                     tile.playerLock = null
                     tile.itemName = msg.text
-                    RepairHandler.tryRepair(player.worldObj, msg.pos, player)
                 }
             }
             return null

@@ -33,7 +33,7 @@ class CraftingTable : BlockWorkbench() {
     init {
         setHardness(2.5f)
         soundType = SoundType.WOOD
-        unlocalizedName = "vimmersion.workbench"
+        unlocalizedName = "$MODID.workbench"
         setCreativeTab(VanillaImmersion.CREATIVE_TAB)
         defaultState = blockState.baseState.withProperty(FACING, EnumFacing.NORTH)
         registryName = ResourceLocation(MODID, "crafting_table")

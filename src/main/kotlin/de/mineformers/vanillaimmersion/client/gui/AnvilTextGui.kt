@@ -10,12 +10,13 @@ import org.lwjgl.input.Keyboard
 /**
  * "GUI" for easy handling of text input for the anvil.
  */
-class AnvilTextGui(private val anvil: AnvilLogic) : GuiScreen() {
+class AnvilTextGui(val anvil: AnvilLogic) : GuiScreen() {
     /**
      * The text field making up the main part of the "GUI"
      */
-    private val nameField by lazy {
-        val field = GuiTextField(0, this.fontRendererObj, 0, 0, 0, 0)
+    val nameField by lazy {
+        val field = GuiTextField(0, this.fontRendererObj, 0, 0, 50, 20)
+        field.enableBackgroundDrawing = false
         field.maxStringLength = 30
         field.isFocused = true
         field.setCanLoseFocus(false)

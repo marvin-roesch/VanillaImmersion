@@ -1,12 +1,15 @@
 package de.mineformers.vanillaimmersion.block
 
 import de.mineformers.vanillaimmersion.VanillaImmersion
+import de.mineformers.vanillaimmersion.VanillaImmersion.Items
 import de.mineformers.vanillaimmersion.VanillaImmersion.MODID
 import de.mineformers.vanillaimmersion.tileentity.AnvilLogic
+import de.mineformers.vanillaimmersion.tileentity.AnvilLogic.Companion.Slot
 import de.mineformers.vanillaimmersion.util.Inventories
 import net.minecraft.block.BlockAnvil
 import net.minecraft.block.SoundType
 import net.minecraft.block.state.IBlockState
+import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
@@ -26,7 +29,7 @@ class Anvil : BlockAnvil() {
         soundType = SoundType.ANVIL
         setResistance(2000.0F)
         setCreativeTab(VanillaImmersion.CREATIVE_TAB)
-        unlocalizedName = "vimmersion.anvil"
+        unlocalizedName = "$MODID.anvil"
         registryName = ResourceLocation(MODID, "anvil")
     }
 
@@ -45,7 +48,7 @@ class Anvil : BlockAnvil() {
     override fun breakBlock(world: World, pos: BlockPos, state: IBlockState) {
         val tile = world.getTileEntity(pos)
         if (tile is AnvilLogic) {
-            Inventories.spill(world, pos, tile.inventory, 0..1)
+            Inventories.spill(world, pos, tile.inventory)
             world.updateComparatorOutputLevel(pos, this)
         }
         super.breakBlock(world, pos, state)

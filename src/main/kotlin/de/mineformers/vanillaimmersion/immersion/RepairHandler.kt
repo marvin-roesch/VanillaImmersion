@@ -1,27 +1,24 @@
 package de.mineformers.vanillaimmersion.immersion
 
 import de.mineformers.vanillaimmersion.VanillaImmersion
+import de.mineformers.vanillaimmersion.VanillaImmersion.Items
 import de.mineformers.vanillaimmersion.block.CraftingTable
 import de.mineformers.vanillaimmersion.network.AnvilLock
 import de.mineformers.vanillaimmersion.tileentity.AnvilLogic
 import de.mineformers.vanillaimmersion.tileentity.AnvilLogic.Companion.Slot
 import de.mineformers.vanillaimmersion.util.*
-import net.minecraft.block.Block
 import net.minecraft.block.BlockAnvil
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.entity.player.EntityPlayerMP
-import net.minecraft.init.Blocks
 import net.minecraft.init.SoundEvents
 import net.minecraft.inventory.ContainerRepair
 import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumHand
-import net.minecraft.util.EnumParticleTypes
 import net.minecraft.util.SoundCategory
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.World
-import net.minecraft.world.WorldServer
 import net.minecraftforge.event.entity.player.PlayerInteractEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
@@ -49,8 +46,6 @@ object RepairHandler {
             }
             val hitVec = event.hitVec - event.pos
             if (handleClick(event.world, event.pos, event.entityPlayer, stack, hitVec)) {
-                // If an item was inserted/extracted, update the repair status
-                tryRepair(event.world, event.pos, event.entityPlayer)
                 event.isCanceled = true
             }
             // If the item was consumed and it results in the item stack being empty, remove it from the player's hand
@@ -60,15 +55,31 @@ object RepairHandler {
             }
         } else if (event.face == state.getValue(BlockAnvil.FACING).rotateY() &&
                    event.itemStack == null &&
-                   event.hitVec.y >= event.pos.y + 0.625) {
+                   event.hitVec.y >= event.pos.y + 0.625 &&
+                   tile[Slot.INPUT_OBJECT] != null) {
             // When you hit the front face, try to edit the text
-            if (tile is AnvilLogic && tile.canInteract(event.entityPlayer)) {
+            if (tile.canInteract(event.entityPlayer)) {
                 tile.playerLock = event.entityPlayer.uniqueID
                 VanillaImmersion.NETWORK.sendTo(AnvilLock.Message(event.pos), event.entityPlayer as EntityPlayerMP)
-            } else if (tile is AnvilLogic) {
+            } else {
                 tile.sendLockMessage(event.entityPlayer)
             }
         }
+    }
+
+    /**
+     * Handles hammer smashes on any anvil.
+     */
+    @SubscribeEvent
+    fun onLeftClick(event: PlayerInteractEvent.LeftClickBlock) {
+        if (event.hand == EnumHand.OFF_HAND)
+            return
+        val tile = event.world.getTileEntity(event.pos)
+        val stack = event.itemStack
+        if (tile !is AnvilLogic || event.world.isRemote || stack?.item != Items.HAMMER || event.face != EnumFacing.UP)
+            return
+        event.isCanceled = true
+        tile.hammer(event.entityPlayer)
     }
 
     /**
@@ -84,45 +95,29 @@ object RepairHandler {
         val state = world.getBlockState(pos)
         val facing = state.getValue(CraftingTable.FACING)
         val angle = -Math.toRadians(180.0 - facing.horizontalAngle).toFloat()
-        val rot = (-16 * ((hitVec - Vec3d(0.5, 0.0, 0.5)).rotateYaw(angle) - Vec3d(0.5, 0.0, 0.5))).toBlockPos()
+        val rot = -16 * ((hitVec - Vec3d(0.5, 0.0, 0.5)).rotateYaw(angle) - Vec3d(0.5, 0.0, 0.5))
         // The slot depends on the x position (due to the anvil's orientation this is more like "depth")
-        val slot = if (rot.x > 8) Slot.INPUT_MATERIAL else Slot.INPUT_OBJECT
-        // The output slot will be interacted with for the whole right-hand side
-        if (rot.z >= 8 && tile[Slot.OUTPUT] != null) {
-            // If the anvil is locked, notify the player
-            if (!tile.canInteract(player)) {
-                tile.sendLockMessage(player)
-                return false
-            }
-
-            // Perform the repair operation again to check if the player meets all conditions
-            val container = ContainerRepair(player.inventory, world, pos, player)
-            container.getSlot(0).putStack(tile[Slot.INPUT_OBJECT])
-            container.getSlot(1).putStack(tile[Slot.INPUT_MATERIAL])
-            container.updateItemName(tile.itemName)
-
-            if (!container.getSlot(2).canTakeStack(player))
-                return false
-
-            val result = container.getSlot(2).stack
-            container.getSlot(2).onPickupFromSlot(player, result)
-
-            tile[Slot.INPUT_OBJECT] = container.getSlot(0).stack
-            tile[Slot.INPUT_MATERIAL] = container.getSlot(1).stack
-            tile[Slot.OUTPUT] = null
-            tile.itemName = null
-            Inventories.insertOrDrop(player, result?.copy())
-            return true
-        } else if (rot.z >= 8) {
-            // If there is no output, don't do anything
-            return false
+        val slot = when (rot.z) {
+            in .0..5.1 -> Slot.INPUT_OBJECT
+            in 6.0..11.0 -> Slot.INPUT_MATERIAL
+            in 11.5..16.0 -> Slot.HAMMER
+            else -> return false
         }
+        return interactWithSlot(world, pos, tile, player, slot, stack, rot.z <= 11.0)
+    }
+
+    private fun interactWithSlot(world: World, pos: BlockPos,
+                                 tile: AnvilLogic,
+                                 player: EntityPlayer,
+                                 slot: Slot,
+                                 stack: ItemStack?,
+                                 blockLocked: Boolean): Boolean {
         // One of the input slots was clicked
         val existing = tile[slot]
         // If there already was an item in there, drop it
         if (stack == null && existing != null) {
             // If the anvil is locked, notify the player
-            if (!tile.canInteract(player)) {
+            if (!tile.canInteract(player) && blockLocked) {
                 tile.sendLockMessage(player)
                 return false
             }
@@ -131,7 +126,7 @@ object RepairHandler {
             return true
         } else if (stack != null) {
             // If the anvil is locked, notify the player
-            if (!tile.canInteract(player)) {
+            if (!tile.canInteract(player) && blockLocked) {
                 tile.sendLockMessage(player)
                 return false
             }
@@ -147,31 +142,32 @@ object RepairHandler {
 
     /**
      * Tries to repair an item in an anvil. "Repair" may refer to applying a name or an enchantment as well.
+     * Returns an object indicating the success of the operation, if not simulated, the player's experience will be
+     * modified.
      */
-    fun tryRepair(world: World, pos: BlockPos, player: EntityPlayer) {
+    fun tryRepair(world: World, pos: BlockPos, player: EntityPlayer, simulate: Boolean): RepairResult? {
         val tile = world.getTileEntity(pos)
         if (tile !is AnvilLogic || world.isRemote)
-            return
+            return null
         // Use the Vanilla container to ensure maximum compatibility
         val container = ContainerRepair(player.inventory, world, pos, player)
-        container.getSlot(0).putStack(tile[Slot.INPUT_OBJECT])
-        container.getSlot(1).putStack(tile[Slot.INPUT_MATERIAL])
+        val objectSlot = container.getSlot(0)
+        val materialSlot = container.getSlot(1)
+        val outputSlot = container.getSlot(2)
+        objectSlot.putStack(tile[Slot.INPUT_OBJECT])
+        materialSlot.putStack(tile[Slot.INPUT_MATERIAL])
         container.updateItemName(tile.itemName)
-        if (container.getSlot(2).hasStack) {
-            // Transfer the container's result to the anvil
-            val result = container.getSlot(2).stack
-            // Spawn some fancy particles and sounds
-            (world as WorldServer).spawnParticle(EnumParticleTypes.BLOCK_DUST,
-                                                 pos.x + 0.5, pos.y + 1.0, pos.z + 0.5,
-                                                 150, 0.0, 0.0, 0.0, 0.15,
-                                                 Block.getStateId(Blocks.ANVIL.defaultState))
-            world.playSound(null, pos.x + 0.5, pos.y + 0.5, pos.z + 0.5,
-                            SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1f, 1f)
-            tile[Slot.OUTPUT] = result
-        } else {
-            // There was no result, clear the anvil
-            tile[Slot.OUTPUT] = null
-            tile.itemName = null
+        val result = outputSlot.stack ?: return null
+        if (!outputSlot.canTakeStack(player))
+            return null
+        if (!simulate) {
+            outputSlot.onPickupFromSlot(player, result)
         }
+        return RepairResult(objectSlot.stack, materialSlot.stack, result)
     }
+
+    /**
+     * A simple wrapper around the result of a repair operation.
+     */
+    data class RepairResult(val input: ItemStack?, val material: ItemStack?, val output: ItemStack?)
 }

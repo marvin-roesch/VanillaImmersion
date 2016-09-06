@@ -47,7 +47,7 @@ class BrewingStand : BlockBrewingStand() {
         setHardness(0.5F)
         setLightLevel(0.125F)
         setCreativeTab(VanillaImmersion.CREATIVE_TAB)
-        unlocalizedName = "vimmersion.brewingStand"
+        unlocalizedName = "$MODID.brewingStand"
         registryName = ResourceLocation(MODID, "brewing_stand")
     }
 

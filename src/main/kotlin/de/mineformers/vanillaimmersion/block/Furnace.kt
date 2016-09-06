@@ -34,7 +34,7 @@ class Furnace(val lit: Boolean) : BlockFurnace(lit) {
     init {
         setHardness(3.5F)
         soundType = SoundType.STONE
-        unlocalizedName = "vimmersion.furnace"
+        unlocalizedName = "$MODID.furnace"
         setCreativeTab(VanillaImmersion.CREATIVE_TAB)
         registryName = ResourceLocation(MODID, if (lit) "lit_furnace" else "furnace")
         if (lit) {
