@@ -115,7 +115,7 @@ processResources {
             expand 'version': project.version, 'mcversion': project.minecraft.version, 'updateUrl': priv.update_url
         } else {
             // replace version and mcversion
-            expand 'version': project.version, 'mcversion': project.minecraft.version
+            expand 'version': project.version, 'mcversion': project.minecraft.version, 'updateUrl': ''
         }
     }
 
@@ -125,25 +125,30 @@ processResources {
     }
 }
 
-curseforge {
-    apiKey = priv.cf_api
-    project {
-        id = priv.cf_project
-        changelogType = 'html'
-        changelog = """See <a title="GitHub Changelog" href="https://github.com/PaleoCrafter/VanillaImmersion/releases/tag/v${version}">GitHub</a>"""
-        releaseType = priv.cf_type
-        addGameVersion config.mc_version
 
-        relations {
-            optionalLibrary 'just-enough-items-jei'
-        }
+if (file('private.properties').exists()) {
+    curseforge {
+        apiKey = priv.cf_api
+        project {
+            id = priv.cf_project
+            changelogType = 'html'
+            changelog = """See <a title="GitHub Changelog" href="https://github.com/PaleoCrafter/VanillaImmersion/releases/tag/v${
+                version
+            }">GitHub</a>"""
+            releaseType = priv.cf_type
+            addGameVersion config.mc_version
 
-        mainArtifact(shadowJar) {
-            displayName = "Vanilla Immersion - ${config.mod_version}"
+            relations {
+                optionalLibrary 'just-enough-items-jei'
+            }
+
+            mainArtifact(shadowJar) {
+                displayName = "Vanilla Immersion - ${config.mod_version}"
+            }
         }
     }
-}
 
-afterEvaluate {
-    curseforge.curseProjects.each { tasks["curseforge${it.id}"].dependsOn reobfShadowJar }
+    afterEvaluate {
+        curseforge.curseProjects.each { tasks["curseforge${it.id}"].dependsOn reobfShadowJar }
+    }
 }
