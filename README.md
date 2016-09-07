@@ -1,8 +1,8 @@
 <img align="center" src="http://patches.mineformers.de/minecraft/vimmersion/github_images/banner.png?t=0" alt="VanillaImersion Logo">
 <div align="center">
-  <img src="http://patches.mineformers.de/minecraft/vimmersion/github_images/builds_passing.png" alt="Build Status">
-  <a href="http://minecraft.curseforge.com/projects/vanilla-immersion"><img src="http://patches.mineformers.de/minecraft/vimmersion/github_images/links_curseforge.png" alt="CurseForge"></a>
-  <a href="https://github.com/PaleoCrafter/VanillaImmersion/issues"><img src="http://patches.mineformers.de/minecraft/vimmersion/github_images/links_issues.png" alt="Issues"></a>
+  <a href="https://travis-ci.org/PaleoCrafter/VanillaImmersion"><img src="http://services.mineformers.de/travis/build-status/PaleoCrafter/VanillaImmersion" alt="Build Status"></a>
+  <a href="http://minecraft.curseforge.com/projects/vanilla-immersion"><img src="http://services.mineformers.de/static/curseforge" alt="CurseForge"></a>
+  <a href="https://github.com/PaleoCrafter/VanillaImmersion/issues"><img src="http://services.mineformers.de/static/issues" alt="Issues"></a>
 </div>
 
 ### Development Setup and Building
