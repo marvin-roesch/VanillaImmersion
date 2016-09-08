@@ -2,10 +2,14 @@
 
 package de.mineformers.vanillaimmersion.util
 
+import net.minecraft.util.Rotation
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import net.minecraft.util.math.Vec3i
+import javax.vecmath.AxisAngle4d
+import javax.vecmath.Matrix4d
+import javax.vecmath.Vector4d
 
 // Various extensions to do with Minecraft's vector types, should be all fairly self explanatory
 
@@ -14,6 +18,24 @@ val AxisAlignedBB.min: Vec3d
 
 val AxisAlignedBB.max: Vec3d
     get() = Vec3d(this.maxX, this.maxY, this.maxZ)
+
+fun AxisAlignedBB.rotateX(rotation: Rotation) = rotate(Vec3d(1.0, .0, .0), rotation)
+
+fun AxisAlignedBB.rotateY(rotation: Rotation) = rotate(Vec3d(.0, 1.0, .0), rotation)
+
+fun AxisAlignedBB.rotateZ(rotation: Rotation) = rotate(Vec3d(.0, .0, 1.0), rotation)
+
+fun AxisAlignedBB.rotate(axis: Vec3d, rotation: Rotation): AxisAlignedBB {
+    val angle = when (rotation) {
+        Rotation.COUNTERCLOCKWISE_90 -> Math.PI / 2
+        Rotation.CLOCKWISE_90 -> -Math.PI / 2
+        Rotation.CLOCKWISE_180 -> -Math.PI
+        else -> .0
+    }
+    val offset = this.offset(-.5, -.5, -.5)
+    return AxisAlignedBB(offset.min.rotate(axis, angle),
+                         offset.max.rotate(axis, angle)).offset(.5, .5, .5)
+}
 
 val Vec3d.x: Double
     get() = this.xCoord
@@ -25,6 +47,31 @@ val Vec3d.z: Double
     get() = this.zCoord
 
 fun Vec3d.toBlockPos() = BlockPos(this)
+
+fun Vec3d.rotateX(rotation: Rotation) = rotate(Vec3d(1.0, .0, .0), rotation)
+
+fun Vec3d.rotateY(rotation: Rotation) = rotate(Vec3d(.0, 1.0, .0), rotation)
+
+fun Vec3d.rotateZ(rotation: Rotation) = rotate(Vec3d(.0, .0, 1.0), rotation)
+
+fun Vec3d.rotate(axis: Vec3d, rotation: Rotation): Vec3d {
+    val angle = when (rotation) {
+        Rotation.COUNTERCLOCKWISE_90 -> Math.PI / 2
+        Rotation.CLOCKWISE_90 -> -Math.PI / 2
+        Rotation.CLOCKWISE_180 -> -Math.PI
+        else -> .0
+    }
+    return rotate(axis, angle)
+}
+
+fun Vec3d.rotate(axis: Vec3d, angle: Double): Vec3d {
+    val matrix = Matrix4d()
+    matrix.setIdentity()
+    matrix.setRotation(AxisAngle4d(axis.x, axis.y, axis.z, angle))
+    val vec = Vector4d(x, y, z, 1.0)
+    matrix.transform(vec)
+    return Vec3d(vec.x, vec.y, vec.z)
+}
 
 operator fun Vec3d.get(coord: Int) =
     when (coord) {

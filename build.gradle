@@ -151,7 +151,7 @@ if (bintrayApi != null) {
             vcsUrl = "https://github.com/PaleoCrafter/VanillaImmersion.git"
             publicDownloadNumbers = true
             githubRepo = "PaleoCrafter/VanillaImmersion"
-            publish = false
+            publish = true
 
             version {
                 name = project.version

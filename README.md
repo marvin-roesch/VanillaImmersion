@@ -4,6 +4,11 @@
   <a href="http://minecraft.curseforge.com/projects/vanilla-immersion"><img src="http://services.mineformers.de/static/curseforge" alt="CurseForge"></a>
   <a href="https://github.com/PaleoCrafter/VanillaImmersion/issues"><img src="http://services.mineformers.de/static/issues" alt="Issues"></a>
 </div>
+<div align="center">
+  <img src="http://services.mineformers.de/static/download.svg" alt="Download Latest">
+  <a href="http://services.mineformers.de/download/release/245247-vanilla-immersion"><img src="http://services.mineformers.de/download/release.svg" alt="Release"></a>
+  <a href="http://services.mineformers.de/download/nightly/paleocrafter/MinecraftMods/VanillaImmersion"><img src="http://services.mineformers.de/download/nightly.svg" alt="Nightly"></a>
+</div>
 
 ### Development Setup and Building
 This mod follows the standard structure for Minecraft Mods. If you want to work with the code yourself and even build it, follow this guide. Please be aware that basic understanding of programming terms and Java/Kotlin is expected.

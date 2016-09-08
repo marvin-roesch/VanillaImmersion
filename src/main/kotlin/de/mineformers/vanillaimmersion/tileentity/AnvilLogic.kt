@@ -1,7 +1,11 @@
 package de.mineformers.vanillaimmersion.tileentity
 
+import de.mineformers.vanillaimmersion.VanillaImmersion
+import de.mineformers.vanillaimmersion.VanillaImmersion.Items
 import de.mineformers.vanillaimmersion.immersion.RepairHandler
 import de.mineformers.vanillaimmersion.util.Inventories
+import de.mineformers.vanillaimmersion.util.SlotHighlight
+import de.mineformers.vanillaimmersion.util.SlotHighlights
 import net.minecraft.block.BlockAnvil
 import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.player.EntityPlayer
@@ -15,19 +19,24 @@ import net.minecraft.network.NetworkManager
 import net.minecraft.network.play.server.SPacketUpdateTileEntity
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.EnumFacing
+import net.minecraft.util.ResourceLocation
+import net.minecraft.util.Rotation
 import net.minecraft.util.SoundCategory
+import net.minecraft.util.math.AxisAlignedBB
+import net.minecraft.util.math.Vec3d
 import net.minecraft.util.text.TextComponentTranslation
 import net.minecraftforge.common.capabilities.Capability
 import net.minecraftforge.common.util.Constants
 import net.minecraftforge.items.CapabilityItemHandler.ITEM_HANDLER_CAPABILITY
 import net.minecraftforge.items.ItemStackHandler
 import net.minecraftforge.items.wrapper.RangedWrapper
+import java.lang.Math.*
 import java.util.*
 
 /**
  * Implements all logic and data storage for the anvil.
  */
-class AnvilLogic : TileEntity() {
+class AnvilLogic : TileEntity(), SlotHighlights {
     companion object {
         /**
          * Helper enum for meaningful interaction with the inventory.
@@ -46,12 +55,29 @@ class AnvilLogic : TileEntity() {
              */
             HAMMER
         }
+
+        val OBJECT_HIGHLIGHT = SlotHighlight(AxisAlignedBB(.35, 1.005, 0.68125, .65, 1.02, .98125),
+                                             ResourceLocation("textures/items/iron_pickaxe.png"))
+        val MATERIAL_HIGHLIGHT = SlotHighlight(AxisAlignedBB(.35, 1.005, 0.32125, .65, 1.02, .62125),
+                                               ResourceLocation("textures/items/iron_ingot.png"))
+        val HAMMER_HIGHLIGHT = SlotHighlight(AxisAlignedBB(0.25, 1.005, .07, 0.75, 1.02, .25),
+                                             ResourceLocation(VanillaImmersion.MODID, "textures/icons/hammer.png"),
+                                             uvs = listOf(Vec3d(.0, .0, .0),
+                                                          Vec3d(.0, .0, .6875),
+                                                          Vec3d(.25, .0, 0.6875),
+                                                          Vec3d(.25, .0, .0)))
     }
 
     /**
      * Extension of default item stack handler to control insertion and extraction from certain slots.
      */
     internal inner class AnvilInventory : ItemStackHandler(3) {
+        override fun insertItem(slot: Int, stack: ItemStack, simulate: Boolean): ItemStack? {
+            if (slot == Slot.HAMMER.ordinal && stack.item != Items.HAMMER)
+                return stack
+            return super.insertItem(slot, stack, simulate)
+        }
+
         override fun onContentsChanged(slot: Int) {
             // Update the output if the inputs were modified
             if (slot != Slot.HAMMER.ordinal && world?.isRemote == false) {
@@ -79,6 +105,16 @@ class AnvilLogic : TileEntity() {
      */
     val facing: EnumFacing
         get() = blockState.getValue(BlockAnvil.FACING)
+    /**
+     * The anvil's rotation relative to a north facing.
+     */
+    val rotation: Rotation
+        get() = when (facing) {
+            EnumFacing.EAST -> Rotation.COUNTERCLOCKWISE_90
+            EnumFacing.WEST -> Rotation.CLOCKWISE_90
+            EnumFacing.SOUTH -> Rotation.CLOCKWISE_180
+            else -> Rotation.NONE
+        }
     /**
      * The anvil's inventory.
      */
@@ -157,7 +193,7 @@ class AnvilLogic : TileEntity() {
         // If the input is invalid, abort
         RepairHandler.tryRepair(world, pos, player, true) ?: return
         hammerCount++
-        if (hammerCount == 3 || player.capabilities.isCreativeMode) {
+        if (hammerCount == requiredHammerCount(this[Slot.INPUT_OBJECT]) || player.capabilities.isCreativeMode) {
             val output = RepairHandler.tryRepair(world, pos, player, false)!!
             this[Slot.INPUT_OBJECT] = output.input
             this[Slot.INPUT_MATERIAL] = output.material
@@ -173,26 +209,30 @@ class AnvilLogic : TileEntity() {
     /**
      * Determines the amount of times inputs must be hit with a hammer for a successful repair.
      */
-    fun requiredHammerCount(input: ItemStack): Int {
-        // 3rd degree polynomial fitted to Vanilla tool materials
+    fun requiredHammerCount(input: ItemStack?): Int {
+        // Logarithmic function fitted to Vanilla tool materials
         // Produces the following mapping based on tool material:
         // Gold -> 2 hits
         // Wood -> 3 hits
         // Stone -> 4 hits
         // Iron -> 6 hits
         // Diamond -> 8 hits
-        fun polynomial(x: Double) = Math.round(6.046774959e-9 * x * x * x
-                                               - 2.157463514e-5 * x * x
-                                               + 2.314246515e-2 * x
-                                               + 1.445764646).toInt()
+        fun fit(x: Double) = min(max(2, round(1.83815 * log(0.0866616 * x)).toInt()), 10)
 
-        val item = input.item
+        val item = input?.item ?: Int.MAX_VALUE
         return when (item) {
-            is ItemTool -> polynomial(item.toolMaterial.maxUses.toDouble())
-            is ItemSword -> polynomial(Item.ToolMaterial.valueOf(item.toolMaterialName).maxUses.toDouble())
+            is ItemTool -> fit(item.toolMaterial.maxUses.toDouble())
+            is ItemSword -> fit(Item.ToolMaterial.valueOf(item.toolMaterialName).maxUses.toDouble())
             else -> 3
         }
     }
+
+    override val highlights: Map<Int, SlotHighlight>
+        get() = mapOf(Slot.INPUT_OBJECT.ordinal to OBJECT_HIGHLIGHT,
+                      Slot.INPUT_MATERIAL.ordinal to MATERIAL_HIGHLIGHT,
+                      Slot.HAMMER.ordinal to HAMMER_HIGHLIGHT).mapValues {
+            it.value.copy(rotation = rotation)
+        }
 
     /**
      * Serializes the anvil's data to NBT.

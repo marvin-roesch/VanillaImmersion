@@ -320,6 +320,7 @@ object VanillaImmersion {
             // Register client-specific event handlers
             MinecraftForge.EVENT_BUS.register(CraftingDragHandler)
             MinecraftForge.EVENT_BUS.register(BrewingStandRenderer.Highlight)
+            MinecraftForge.EVENT_BUS.register(SlotHighlightRenderer)
         }
 
         /**

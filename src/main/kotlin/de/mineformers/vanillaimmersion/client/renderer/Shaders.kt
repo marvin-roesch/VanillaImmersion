@@ -18,9 +18,16 @@ object Shaders {
     final val EMBERS by lazy {
         Shader(null, ResourceLocation("vimmersion", "embers"))
     }
+    /**
+     * The slot highlight shader turns a texture into a greyscale image.
+     */
+    final val SLOT_HIGHLIGHT by lazy {
+        Shader(null, ResourceLocation("vimmersion", "slot_highlight"))
+    }
 
     internal fun init() {
         ALPHA.init()
         EMBERS.init()
+        SLOT_HIGHLIGHT.init()
     }
 }

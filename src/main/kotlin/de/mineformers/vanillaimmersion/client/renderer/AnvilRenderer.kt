@@ -62,15 +62,6 @@ class AnvilRenderer : TileEntitySpecialRenderer<AnvilLogic>() {
             popMatrix()
         }
 
-        // Render the output translucently
-//        enableBlend()
-//        tryBlendFuncSeparate(GL11.GL_ONE, GL11.GL_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO)
-//        Shaders.ALPHA.activate()
-//        Shaders.ALPHA.setUniformFloat("alpha", 0.5f)
-//        renderItem(te, Slot.OUTPUT, 0.0, -0.25)
-//        Shaders.ALPHA.deactivate()
-//        disableBlend()
-
         RenderHelper.disableStandardItemLighting()
         disableRescaleNormal()
 
