@@ -47,9 +47,9 @@ def forgeVersion = "${config.mc_version}-${config.forge_version}${config.forge_b
 
 def updateUrl = "https://raw.githubusercontent.com/PaleoCrafter/VanillaImmersion/master/metadata/promotions.json"
 version = "${config.mc_version}-${config.mod_version}"
-if (System.getenv("TRAVIS_BUILD_NUMBER") != null && !(System.getenv("TRAVIS_BRANCH") in ["master", "release"])) {
+if (System.getenv("TRAVIS_BUILD_NUMBER") != null && System.getenv("TRAVIS_BRANCH") != "master") {
     version = "$version+${System.getenv("TRAVIS_BRANCH")}.b${System.getenv("TRAVIS_BUILD_NUMBER")}"
-} else if (System.getenv("TRAVIS_BUILD_NUMBER") != null && System.getenv("TRAVIS_BRANCH") != "release") {
+} else if (System.getenv("TRAVIS_BUILD_NUMBER") != null && System.getenv("TRAVIS_TAG") == null) {
     version = "$version+b${System.getenv("TRAVIS_BUILD_NUMBER")}"
 }
 group = 'de.mineformers.vimmersion'
@@ -159,7 +159,7 @@ if (bintrayApi != null) {
                 attributes = ["MC Version"        : config.mc_version,
                               "Min. Forge Version": forgeVersion]
 
-                if (System.getenv("TRAVIS_BRANCH") == "release") {
+                if (System.getenv("TRAVIS_TAG") == "v${project.version}".toString()) {
                     vcsTag = "v${project.version}"
                 }
             }
@@ -231,7 +231,7 @@ if (cfApi != null) {
 }
 
 task release() {
-    if (System.getenv("TRAVIS_BRANCH") == "release")
+    if (System.getenv("TRAVIS_TAG") == "v${project.version}".toString())
         dependsOn "curseforge"
     else
         dependsOn bintrayUpload
