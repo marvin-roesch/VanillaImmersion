@@ -44,12 +44,11 @@ if (privateConfig)
     ext.priv = parseConfig(file('private.properties'))
 def tagMatcher = "git tag --contains HEAD".execute().text =~ /v[-\d.]+/
 ext["gitTag"] = tagMatcher.count > 0 ? tagMatcher[0] : null
-def isRelease() { return project.gitTag == "v${project.version}" }
+def isRelease() { return project.gitTag == "v${project.version}" && System.getenv("CI") == "true" }
 def forgeVersion = "${config.mc_version}-${config.forge_version}${config.forge_branch != '' ? '-' : ''}${config.forge_branch}"
 
 def updateUrl = "https://raw.githubusercontent.com/PaleoCrafter/VanillaImmersion/master/metadata/promotions.json"
 version = "${config.mc_version}-${config.mod_version}"
-println "GIT_TAG=${project.gitTag} VERSION=v${project.version} IS_RELEASE=${isRelease()}"
 if (System.getenv("TRAVIS_BUILD_NUMBER") != null && System.getenv("TRAVIS_BRANCH") != "master") {
     version = "$version+${System.getenv("TRAVIS_BRANCH")}.b${System.getenv("TRAVIS_BUILD_NUMBER")}"
 } else if (System.getenv("TRAVIS_BUILD_NUMBER") != null && !isRelease()) {
