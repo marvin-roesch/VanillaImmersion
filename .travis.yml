@@ -21,4 +21,4 @@ install: true
 
 script:
   - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then bash ./gradlew clean setupCIWorkspace assemble; fi'
-  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then bash ./gradlew; fi'
+  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then bash ./gradlew clean setupCIWorkspace build; fi'
