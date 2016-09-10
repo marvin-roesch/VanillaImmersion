@@ -42,18 +42,17 @@ ext.config = parseConfig(file('build.properties'))
 def privateConfig = file('private.properties').exists()
 if (privateConfig)
     ext.priv = parseConfig(file('private.properties'))
-
+def gitTag = "git tag --contains HEAD".execute().text
+def isRelease() { return gitTag == "v${project.version}" }
 def forgeVersion = "${config.mc_version}-${config.forge_version}${config.forge_branch != '' ? '-' : ''}${config.forge_branch}"
 
 def updateUrl = "https://raw.githubusercontent.com/PaleoCrafter/VanillaImmersion/master/metadata/promotions.json"
 version = "${config.mc_version}-${config.mod_version}"
 if (System.getenv("TRAVIS_BUILD_NUMBER") != null && System.getenv("TRAVIS_BRANCH") != "master") {
     version = "$version+${System.getenv("TRAVIS_BRANCH")}.b${System.getenv("TRAVIS_BUILD_NUMBER")}"
-} else if (System.getenv("TRAVIS_BUILD_NUMBER") != null && (System.getenv("TRAVIS_TAG") == null || System.getenv("TRAVIS_TAG") == "")) {
+} else if (System.getenv("TRAVIS_BUILD_NUMBER") != null && !isRelease()) {
     version = "$version+b${System.getenv("TRAVIS_BUILD_NUMBER")}"
 }
-println "TRAVIS_BRANCH=${System.getenv("TRAVIS_BRANCH")}"
-println "TRAVIS_TAG=${System.getenv("TRAVIS_TAG")}"
 group = 'de.mineformers.vimmersion'
 archivesBaseName = 'vanilla-immersion'
 
@@ -161,8 +160,8 @@ if (bintrayApi != null) {
                 attributes = ["MC Version"        : config.mc_version,
                               "Min. Forge Version": forgeVersion]
 
-                if (System.getenv("TRAVIS_TAG") == "v${project.version}".toString()) {
-                    vcsTag = "v${project.version}"
+                if (isRelease()) {
+                    vcsTag = gitTag
                 }
             }
         }
@@ -233,7 +232,7 @@ if (cfApi != null) {
 }
 
 task release() {
-    if (System.getenv("TRAVIS_TAG") == "v${project.version}".toString()) {
+    if (isRelease()) {
         println "Triggering release build"
         dependsOn "curseforge"
     } else
