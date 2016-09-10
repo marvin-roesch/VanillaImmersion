@@ -136,6 +136,7 @@ sealed class ConfigEntry(val name: String, val type: ConfigGuiType, val language
                           val maxLength: Int, val fixedLength: Boolean, val entryGuiClass: Class<out GuiEditArrayEntries.IArrayEntry>?) :
         Property<List<T>>(name, type, languageKey, comment,
                           default, requiresWorldRestart, requiresGameRestart, validValues, guiClass)
+
     /**
      * A configuration property to be validated with a [Pattern].
      */

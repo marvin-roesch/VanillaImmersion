@@ -13,9 +13,7 @@ import net.minecraft.client.renderer.texture.TextureMap
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer
 import net.minecraft.client.resources.I18n
 import net.minecraft.item.ItemBlock
-import net.minecraft.item.ItemStack
 import org.apache.commons.lang3.StringUtils
-import org.lwjgl.opengl.GL11
 
 /**
  * Renders the items on top of an anvil.
@@ -57,7 +55,7 @@ class AnvilRenderer : TileEntitySpecialRenderer<AnvilLogic>() {
             rotate(-90f, 0f, 1f, 0f)
             rotate(86f, 1f, 0f, 0f)
             rotate(6f, 0f, 0f, 1f)
-            scale(0.75f, 0.75f, 0.75f)
+            scale(0.5f, 0.5f, 0.5f)
             Minecraft.getMinecraft().renderItem.renderItem(hammer, FIXED)
             popMatrix()
         }
@@ -86,7 +84,7 @@ class AnvilRenderer : TileEntitySpecialRenderer<AnvilLogic>() {
         } else if (activeScreen is AnvilTextGui && activeScreen.anvil == te) {
             val label = I18n.format("vimmersion.anvil.itemName")
             font.drawString(label, -font.getStringWidth(label) / 2, 25 - font.FONT_HEIGHT - 2, 0xFFFFFF)
-            activeScreen.nameField.xPosition = -font.getStringWidth(te.itemName) / 2
+            activeScreen.nameField.xPosition = -font.getStringWidth(activeScreen.nameField.text) / 2
             activeScreen.nameField.yPosition = 25
             activeScreen.nameField.drawTextBox()
         }

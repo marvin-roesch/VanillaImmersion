@@ -3,6 +3,9 @@ package de.mineformers.vanillaimmersion.tileentity
 import de.mineformers.vanillaimmersion.block.CraftingTable
 import de.mineformers.vanillaimmersion.immersion.CraftingHandler
 import de.mineformers.vanillaimmersion.util.Inventories
+import de.mineformers.vanillaimmersion.util.SelectionBox
+import de.mineformers.vanillaimmersion.util.SubSelections
+import de.mineformers.vanillaimmersion.util.selectionBox
 import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.inventory.*
@@ -13,6 +16,9 @@ import net.minecraft.network.play.server.SPacketUpdateTileEntity
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumFacing.*
+import net.minecraft.util.Rotation
+import net.minecraft.util.math.AxisAlignedBB
+import net.minecraft.util.math.Vec3d
 import net.minecraftforge.common.capabilities.Capability
 import net.minecraftforge.common.util.Constants
 import net.minecraftforge.items.CapabilityItemHandler.ITEM_HANDLER_CAPABILITY
@@ -22,7 +28,7 @@ import net.minecraftforge.items.wrapper.RangedWrapper
 /**
  * Implements all logic and data storage for the anvil.
  */
-class CraftingTableLogic : TileEntity() {
+class CraftingTableLogic : TileEntity(), SubSelections {
     companion object {
         /**
          * Helper enum for meaningful interaction with the inventory.
@@ -68,6 +74,29 @@ class CraftingTableLogic : TileEntity() {
              * The (2|2) slot in the crafting grid.
              */
             IN_BOTTOM_RIGHT
+        }
+
+        val SELECTIONS by lazy {
+            val builder = mutableListOf<SelectionBox>()
+            for (x in 0..3)
+                for (y in 0..2) {
+                    if (x == 3 && y != 1)
+                        continue
+                    builder.add(
+                        selectionBox(AxisAlignedBB((13 - x * 3) * .0625, .8751, (12 - y * 3) * .0625,
+                                                   (13 - x * 3 - 2) * .0625, .89, (12 - y * 3 - 2) * .0625)
+                                         .contract(0.004)) {
+                            rightClicks = false
+                            leftClicks = false
+
+                            slot(if(x == 3) 0 else 1 + x + y * 3)
+
+                            renderOptions {
+                                hoverColor = Vec3d(.1, .1, .1)
+                            }
+                        })
+                }
+            builder.toList()
         }
     }
 
@@ -121,6 +150,16 @@ class CraftingTableLogic : TileEntity() {
      */
     val facing: EnumFacing
         get() = blockState.getValue(CraftingTable.FACING)
+    /**
+     * The crafting table's rotation relative to a north facing.
+     */
+    val rotation: Rotation
+        get() = when (facing) {
+            EnumFacing.EAST -> Rotation.CLOCKWISE_90
+            EnumFacing.WEST -> Rotation.COUNTERCLOCKWISE_90
+            EnumFacing.SOUTH -> Rotation.CLOCKWISE_180
+            else -> Rotation.NONE
+        }
     /**
      * The crafting table's inventory.
      */
@@ -266,6 +305,9 @@ class CraftingTableLogic : TileEntity() {
      * Marked as operator to allow this: `table[slot] = stack`
      */
     operator fun set(slot: Slot, stack: ItemStack?) = inventory.setStackInSlot(slot.ordinal, stack)
+
+    override val boxes: List<SelectionBox>
+        get() = SELECTIONS.map { it.withRotation(rotation) }
 
     /**
      * Serializes the crafting table's data to NBT.

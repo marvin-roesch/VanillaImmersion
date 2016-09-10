@@ -13,7 +13,9 @@ import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.util.*
+import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
+import net.minecraft.world.IBlockAccess
 import net.minecraft.world.World
 
 /**
@@ -38,6 +40,16 @@ class CraftingTable : BlockWorkbench() {
         defaultState = blockState.baseState.withProperty(FACING, EnumFacing.NORTH)
         registryName = ResourceLocation(MODID, "crafting_table")
     }
+
+    @Deprecated("Vanilla")
+    override fun getBoundingBox(state: IBlockState?, source: IBlockAccess?, pos: BlockPos?) =
+        AxisAlignedBB(.0, .0, .0, 1.0, .875, 1.0)
+
+    @Deprecated("Vanilla")
+    override fun isFullCube(state: IBlockState) = false
+
+    @Deprecated("Vanilla")
+    override fun isOpaqueCube(state: IBlockState) = false
 
     /**
      * Handles right clicks for the crafting table.

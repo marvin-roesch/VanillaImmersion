@@ -4,8 +4,6 @@ import de.mineformers.vanillaimmersion.VanillaImmersion
 import de.mineformers.vanillaimmersion.VanillaImmersion.MODID
 import de.mineformers.vanillaimmersion.client.particle.BubbleParticle
 import de.mineformers.vanillaimmersion.tileentity.BrewingStandLogic
-import de.mineformers.vanillaimmersion.tileentity.sync
-import de.mineformers.vanillaimmersion.util.*
 import net.minecraft.block.BlockBrewingStand
 import net.minecraft.block.state.IBlockState
 import net.minecraft.client.Minecraft
@@ -13,7 +11,6 @@ import net.minecraft.entity.Entity
 import net.minecraft.entity.item.EntityItem
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
-import net.minecraft.stats.StatList
 import net.minecraft.tileentity.TileEntityBrewingStand
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumHand
@@ -23,8 +20,6 @@ import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.IBlockAccess
 import net.minecraft.world.World
-import net.minecraftforge.event.entity.player.PlayerInteractEvent
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import java.util.*
 
 /**
@@ -33,12 +28,6 @@ import java.util.*
  */
 class BrewingStand : BlockBrewingStand() {
     companion object {
-        val BOTTLE1_AABB = AxisAlignedBB(10.0 * 0.0625, .0, 6 * 0.0625,
-                                         14.0 * 0.0625, 12 * 0.0625, 10 * 0.0625)
-        val BOTTLE2_AABB = AxisAlignedBB(3.0 * 0.0625, .0, 2 * 0.0625,
-                                         7.0 * 0.0625, 12 * 0.0625, 6 * 0.0625)
-        val BOTTLE3_AABB = AxisAlignedBB(3.0 * 0.0625, .0, 10 * 0.0625,
-                                         7.0 * 0.0625, 12 * 0.0625, 14 * 0.0625)
         val BOWL_AABB = AxisAlignedBB(5.0 * 0.0625, 13.5 * 0.0625, 5 * 0.0625,
                                       11.0 * 0.0625, 15.5 * 0.0625, 11 * 0.0625)
     }
@@ -51,76 +40,12 @@ class BrewingStand : BlockBrewingStand() {
         registryName = ResourceLocation(MODID, "brewing_stand")
     }
 
-    @SubscribeEvent
-    fun onRightClick(event: PlayerInteractEvent.RightClickBlock) {
-        val world = event.world
-        val pos = event.pos
-        val state = world.getBlockState(pos)
-        val player = event.entityPlayer
-        val hand = event.hand
-        val stack = event.itemStack
-        val side = event.face!!
-        val hitVec = event.hitVec - pos
-        if (state.block === this && onBlockActivated(world, pos, state, player, hand, stack, side,
-                                                     hitVec.x.toFloat(), hitVec.y.toFloat(), hitVec.z.toFloat())) {
-            event.isCanceled = true
-        }
-    }
-
+    /**
+     * Handles right clicks for the brewing stand.
+     */
     override fun onBlockActivated(world: World, pos: BlockPos, state: IBlockState,
-                                  player: EntityPlayer, hand: EnumHand, stack: ItemStack?, side: EnumFacing,
-                                  hitX: Float, hitY: Float, hitZ: Float): Boolean {
-        if (hand == EnumHand.OFF_HAND)
-            return false
-        // Check the various boxes of the brewing stand
-        val boxes = listOf(
-            BOTTLE1_AABB.offset(pos), BOTTLE2_AABB.offset(pos), BOTTLE3_AABB.offset(pos), BOWL_AABB.offset(pos),
-            STICK_AABB.offset(pos)
-        )
-        val tile = world.getTileEntity(pos)
-        val hit = Rays.rayTraceBoxes(player, boxes)
-        // Short circuit clicks on the stick in the middle, they take priority.
-        if (hit == 4) {
-            return false
-        }
-        if (hit != -1 && !world.isRemote && tile is BrewingStandLogic) {
-            // If we can insert into the fuel slot, do it
-            val slot =
-                if (hit == 3 && tile.canInsertFuel(stack))
-                    4
-                else
-                    hit
-            val existing = tile.getStackInSlot(slot)
-            if (stack == null && existing != null) {
-                // Extract item
-                val extracted = tile.inventory.extractItem(slot, Int.MAX_VALUE, false)
-                Inventories.insertOrDrop(player, extracted)
-                tile.sync()
-                player.addStat(StatList.BREWINGSTAND_INTERACTION)
-                return true
-            } else if (stack != null) {
-                // Insert item
-                val remaining =
-                    if (player.isSneaking) {
-                        // Insert all when sneaking
-                        tile.inventory.insertItem(slot, stack, false)
-                    } else {
-                        val single = stack.copy()
-                        single.stackSize = 1
-                        // Only insert one by default
-                        val consumed = tile.inventory.insertItem(slot, single, false) == null
-                        if (consumed)
-                            stack.stackSize--
-                        stack
-                    }
-                player.setHeldItem(hand, remaining)
-                tile.sync()
-                player.addStat(StatList.BREWINGSTAND_INTERACTION)
-                return true
-            }
-        }
-        return true
-    }
+                                  player: EntityPlayer, hand: EnumHand, stack: ItemStack?,
+                                  side: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) = false
 
     /**
      * Triggers whenever an entity collides with this block.

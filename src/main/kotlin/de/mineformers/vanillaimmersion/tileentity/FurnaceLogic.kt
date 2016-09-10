@@ -3,23 +3,32 @@ package de.mineformers.vanillaimmersion.tileentity
 import de.mineformers.vanillaimmersion.VanillaImmersion.Blocks.FURNACE
 import de.mineformers.vanillaimmersion.VanillaImmersion.Blocks.LIT_FURNACE
 import de.mineformers.vanillaimmersion.util.Inventories
+import de.mineformers.vanillaimmersion.util.SelectionBox
+import de.mineformers.vanillaimmersion.util.SubSelections
+import de.mineformers.vanillaimmersion.util.selectionBox
 import net.minecraft.block.BlockFurnace
 import net.minecraft.block.BlockFurnace.FACING
 import net.minecraft.block.state.IBlockState
+import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.item.crafting.FurnaceRecipes
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.network.NetworkManager
 import net.minecraft.network.play.server.SPacketUpdateTileEntity
+import net.minecraft.stats.StatList
 import net.minecraft.tileentity.TileEntityFurnace
 import net.minecraft.util.EnumFacing
+import net.minecraft.util.EnumHand
+import net.minecraft.util.Rotation
+import net.minecraft.util.math.AxisAlignedBB
+import net.minecraft.util.math.Vec3d
 import net.minecraftforge.items.IItemHandlerModifiable
 import net.minecraftforge.items.wrapper.InvWrapper
 
 /**
  * Implements all logic and data storage for the furnace.
  */
-class FurnaceLogic : TileEntityFurnace() {
+class FurnaceLogic : TileEntityFurnace(), SubSelections {
     companion object {
         /**
          * Helper enum for meaningful interaction with the inventory.
@@ -44,6 +53,26 @@ class FurnaceLogic : TileEntityFurnace() {
          * Required for swapping of lit and unlit furnace.
          */
         internal var KEEP_INVENTORY = false
+
+        val INPUT_SELECTION =
+            selectionBox(AxisAlignedBB(3 * 0.0625, 9 * 0.0625, 0.0625,
+                                       13 * 0.0625, 12 * 0.0625, 13 * 0.0625).contract(0.004)) {
+                slot(Slot.INPUT.ordinal) {
+                    renderFilled = true
+                }
+
+                renderOptions()
+            }
+        val FUEL_SELECTION =
+            selectionBox(AxisAlignedBB(3 * 0.0625, 0.0625, 0.0625,
+                                       13 * 0.0625, 5 * 0.0625, 13 * 0.0625).contract(0.004)) {
+                slot(Slot.FUEL.ordinal) {
+                    renderFilled = true
+                }
+
+                renderOptions()
+            }
+        val SELECTIONS = listOf(INPUT_SELECTION, FUEL_SELECTION)
     }
 
     /**
@@ -56,6 +85,16 @@ class FurnaceLogic : TileEntityFurnace() {
      */
     val facing: EnumFacing
         get() = blockState.getValue(BlockFurnace.FACING)
+    /**
+     * The furnace's rotation relative to a north facing.
+     */
+    val rotation: Rotation
+        get() = when (facing) {
+            EnumFacing.EAST -> Rotation.CLOCKWISE_90
+            EnumFacing.WEST -> Rotation.COUNTERCLOCKWISE_90
+            EnumFacing.SOUTH -> Rotation.CLOCKWISE_180
+            else -> Rotation.NONE
+        }
     /**
      * The furnace's inventory.
      */
@@ -96,6 +135,48 @@ class FurnaceLogic : TileEntityFurnace() {
      * Marked as operator to allow this: `furnace[slot] = stack`
      */
     operator fun set(slot: Slot, stack: ItemStack?) = setInventorySlotContents(slot.ordinal, stack)
+
+    override val boxes: List<SelectionBox>
+        get() = SELECTIONS.map { it.withRotation(rotation) }
+
+    override fun onRightClickBox(box: SelectionBox, player: EntityPlayer, hand: EnumHand, stack: ItemStack?,
+                                 side: EnumFacing, hitVec: Vec3d): Boolean {
+        // When clicking the front, insert or extract items from the furnace
+        if (side == EnumFacing.NORTH && hand == EnumHand.MAIN_HAND) {
+            if (world.isRemote)
+                return true
+            val slot = Slot.values()[box.slot!!.id]
+            val existing = this[slot]
+            if (stack == null && existing != null) {
+                // Extract item
+                val extracted = inventory.extractItem(slot.ordinal, Int.MAX_VALUE, false)
+                Inventories.insertOrDrop(player, extracted)
+                sync()
+                player.addStat(StatList.FURNACE_INTERACTION)
+                return true
+            } else if (stack != null) {
+                // Insert item
+                val remaining =
+                    if (player.isSneaking) {
+                        // Insert all when sneaking
+                        inventory.insertItem(slot.ordinal, stack, false)
+                    } else {
+                        val single = stack.copy()
+                        single.stackSize = 1
+                        // Only insert one by default
+                        val consumed = inventory.insertItem(slot.ordinal, single, false) == null
+                        if (consumed)
+                            stack.stackSize--
+                        stack
+                    }
+                player.setHeldItem(hand, remaining)
+                sync()
+                player.addStat(StatList.FURNACE_INTERACTION)
+                return true
+            }
+        }
+        return false
+    }
 
     /**
      * Checks whether the current input item can be smelted, i.e. the result fits into the output slot.

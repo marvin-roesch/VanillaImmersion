@@ -31,7 +31,7 @@ class CraftingTableRenderer : TileEntitySpecialRenderer<CraftingTableLogic>() {
         OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, bX.toFloat(), bY.toFloat())
 
         // Translate to the table's center and rotate according to its orientation
-        translate(x + 0.5, y + 1.0, z + 0.5)
+        translate(x + 0.5, y + 0.875, z + 0.5)
         rotate(180f - te.facing.horizontalAngle, 0f, 1f, 0f)
         // The slots aren't completely centered due to the output slot, translate 1 "pixel" to the left therefore
         translate(0.0625, 0.0, 0.0)
@@ -77,11 +77,16 @@ class CraftingTableRenderer : TileEntitySpecialRenderer<CraftingTableLogic>() {
     private fun renderItem(te: CraftingTableLogic, slot: Slot, x: Double, z: Double) {
         pushMatrix()
         // Magic numbers, but this appears to be the perfect offset
-        translate(x, 0.0703125, z)
+        translate(x, 0.01, z)
         val stack = te[slot]
         // Most blocks use a block model which requires special treatment
         if (stack?.item is ItemBlock) {
+            translate(0.0, 0.06328125, 0.0)
             scale(2f, 2f, 2f)
+        } else {
+            // Rotate items to lie down flat on the anvil
+            rotate(90f, 1f, 0f, 0f)
+            rotate(180f, 0f, 1f, 0f)
         }
         // Again, magic numbers
         scale(0.140625, 0.140625, 0.140625)

@@ -37,6 +37,11 @@ fun AxisAlignedBB.rotate(axis: Vec3d, rotation: Rotation): AxisAlignedBB {
                          offset.max.rotate(axis, angle)).offset(.5, .5, .5)
 }
 
+fun AxisAlignedBB.contains(p: Vec3d) =
+    p.x in minX..maxX &&
+    p.y in minY..maxY &&
+    p.z in minZ..maxZ
+
 val Vec3d.x: Double
     get() = this.xCoord
 
@@ -46,7 +51,8 @@ val Vec3d.y: Double
 val Vec3d.z: Double
     get() = this.zCoord
 
-fun Vec3d.toBlockPos() = BlockPos(this)
+val Vec3d.blockPos: BlockPos
+    get() = BlockPos(this)
 
 fun Vec3d.rotateX(rotation: Rotation) = rotate(Vec3d(1.0, .0, .0), rotation)
 
@@ -72,6 +78,13 @@ fun Vec3d.rotate(axis: Vec3d, angle: Double): Vec3d {
     matrix.transform(vec)
     return Vec3d(vec.x, vec.y, vec.z)
 }
+
+val Rotation.inverse: Rotation
+    get() = when (this) {
+        Rotation.COUNTERCLOCKWISE_90 -> Rotation.CLOCKWISE_90
+        Rotation.CLOCKWISE_90 -> Rotation.COUNTERCLOCKWISE_90
+        else -> this
+    }
 
 operator fun Vec3d.get(coord: Int) =
     when (coord) {
@@ -141,6 +154,8 @@ operator fun Vec3d.div(b: Vec3d) = Vec3d(x / b.x, y / b.y, z / b.z)
 
 operator fun Vec3d.div(b: Vec3i) = this / Vec3d(b)
 
+val Vec3i.vec3d: Vec3d
+    get() = Vec3d(this)
 
 operator fun BlockPos.plus(b: Vec3i) = this.add(b)
 

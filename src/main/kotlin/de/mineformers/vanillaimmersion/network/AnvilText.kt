@@ -1,6 +1,5 @@
 package de.mineformers.vanillaimmersion.network
 
-import de.mineformers.vanillaimmersion.immersion.RepairHandler
 import de.mineformers.vanillaimmersion.tileentity.AnvilLogic
 import io.netty.buffer.ByteBuf
 import net.minecraft.util.math.BlockPos

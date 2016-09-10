@@ -1,15 +1,12 @@
 package de.mineformers.vanillaimmersion.block
 
 import de.mineformers.vanillaimmersion.VanillaImmersion
-import de.mineformers.vanillaimmersion.VanillaImmersion.Items
 import de.mineformers.vanillaimmersion.VanillaImmersion.MODID
 import de.mineformers.vanillaimmersion.tileentity.AnvilLogic
-import de.mineformers.vanillaimmersion.tileentity.AnvilLogic.Companion.Slot
 import de.mineformers.vanillaimmersion.util.Inventories
 import net.minecraft.block.BlockAnvil
 import net.minecraft.block.SoundType
 import net.minecraft.block.state.IBlockState
-import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing

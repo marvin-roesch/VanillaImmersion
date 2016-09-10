@@ -215,7 +215,7 @@ object CraftingDragHandler {
 
         pushMatrix()
         translate(-cX, -cY, -cZ)
-        translate(dragTarget!!.x + 0.5, dragTarget!!.y.toDouble() + 1.0, dragTarget!!.z + 0.5)
+        translate(dragTarget!!.x + 0.5, dragTarget!!.y.toDouble() + 0.875, dragTarget!!.z + 0.5)
         rotate(180f - te.facing.horizontalAngle, 0f, 1f, 0f)
         // Translate the slots 1 "pixel" to the left (when looking at it), since they are not perfectly centered
         translate(0.0625, 0.0, 0.0)
@@ -283,11 +283,17 @@ object CraftingDragHandler {
      */
     private fun renderDragStack(x: Double, z: Double) {
         pushMatrix()
-        translate(x, 0.0703125, z)
+        // Magic numbers, but this appears to be the perfect offset
+        translate(x, 0.015, z)
         val stack = dragStack
-        // ItemBlocks generally have smaller transforms, double their size
+        // Most blocks use a block model which requires special treatment
         if (stack?.item is ItemBlock) {
+            translate(0.0, 0.06328125, 0.0)
             scale(2f, 2f, 2f)
+        } else {
+            // Rotate items to lie down flat on the anvil
+            rotate(90f, 1f, 0f, 0f)
+            rotate(180f, 0f, 1f, 0f)
         }
         // Some magic numbers, makes items fit perfectly on the crafting grid
         scale(0.140625, 0.140625, 0.140625)

@@ -3,6 +3,7 @@ package de.mineformers.vanillaimmersion.client.gui
 import de.mineformers.vanillaimmersion.VanillaImmersion
 import de.mineformers.vanillaimmersion.network.AnvilText
 import de.mineformers.vanillaimmersion.tileentity.AnvilLogic
+import de.mineformers.vanillaimmersion.tileentity.AnvilLogic.Companion.Slot
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.gui.GuiTextField
 import org.lwjgl.input.Keyboard
@@ -15,7 +16,9 @@ class AnvilTextGui(val anvil: AnvilLogic) : GuiScreen() {
      * The text field making up the main part of the "GUI"
      */
     val nameField by lazy {
-        val field = GuiTextField(0, this.fontRendererObj, 0, 0, 50, 20)
+        val field = GuiTextField(0, this.fontRendererObj, 0, 0, 102, 20)
+        field.setTextColor(0xFFFFFFFF.toInt())
+        field.text = anvil[Slot.INPUT_OBJECT]?.displayName
         field.enableBackgroundDrawing = false
         field.maxStringLength = 30
         field.isFocused = true

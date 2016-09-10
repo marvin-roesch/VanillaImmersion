@@ -5,9 +5,9 @@ import de.mineformers.vanillaimmersion.client.CraftingDragHandler
 import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic
 import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic.Companion.Slot
 import de.mineformers.vanillaimmersion.util.Inventories
+import de.mineformers.vanillaimmersion.util.blockPos
 import de.mineformers.vanillaimmersion.util.minus
 import de.mineformers.vanillaimmersion.util.times
-import de.mineformers.vanillaimmersion.util.toBlockPos
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.inventory.Container
 import net.minecraft.inventory.InventoryCrafting
@@ -77,7 +77,7 @@ object CraftingHandler {
         // coordinate space
         val facing = state.getValue(CraftingTable.FACING)
         val angle = -Math.toRadians(180.0 - facing.horizontalAngle).toFloat()
-        val rot = (-16 * ((hitVec - Vec3d(0.5, 0.0, 0.5)).rotateYaw(angle) - Vec3d(0.5, 0.0, 0.5))).toBlockPos()
+        val rot = (-16 * ((hitVec - Vec3d(0.5, 0.0, 0.5)).rotateYaw(angle) - Vec3d(0.5, 0.0, 0.5))).blockPos
         // The crafting grid starts at (3|4)
         val x = rot.x - 3
         val y = rot.z - 4
@@ -121,7 +121,7 @@ object CraftingHandler {
         val existing = tile[slot]
         // Try to remove the item in the hovered slot
         if (existing != null && !world.isRemote) {
-            Inventories.spawn(world, pos, EnumFacing.UP, existing.copy())
+            Inventories.insertOrDrop(player, existing.copy())
             tile[slot] = null
             craft(world, pos, player)
             player.addStat(StatList.CRAFTING_TABLE_INTERACTION)

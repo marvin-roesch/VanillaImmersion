@@ -1,8 +1,12 @@
 package de.mineformers.vanillaimmersion.util
 
 import net.minecraft.entity.Entity
+import net.minecraft.util.EnumFacing
 import net.minecraft.util.math.AxisAlignedBB
+import net.minecraft.util.math.RayTraceResult
 import net.minecraft.util.math.Vec3d
+import java.lang.Math.max
+import java.lang.Math.min
 import javax.vecmath.Matrix4f
 import javax.vecmath.Vector4f
 
@@ -15,7 +19,8 @@ object Rays {
      * returns the index of the first one hit, `-1` otherwise.
      */
     fun rayTraceBoxes(entity: Entity, boxes: List<AxisAlignedBB>) =
-        rayTraceBoxes(Rendering.getEyePosition(entity, Rendering.partialTicks), entity.getLook(Rendering.partialTicks),
+        rayTraceBoxes(Rendering.getEyePosition(entity, Rendering.partialTicks),
+                      entity.getLook(Rendering.partialTicks),
                       boxes)
 
     /**
@@ -24,13 +29,14 @@ object Rays {
     fun rayTraceBoxes(origin: Vec3d, dir: Vec3d, boxes: List<AxisAlignedBB>) =
         boxes.mapIndexed { i, box -> Pair(i, rayTraceBox(origin, dir, box)) }
             .filter { it.second != null }
-            .minBy { it.second!!.squareDistanceTo(origin) }?.first ?: -1
+            .minBy { it.second!!.hitVec.squareDistanceTo(origin) }?.first ?: -1
 
     /**
      * Performs a ray-box intersection from an entity's eyes.
      */
     fun rayTraceBox(entity: Entity, box: AxisAlignedBB) =
-        rayTraceBox(Rendering.getEyePosition(entity, Rendering.partialTicks), entity.getLook(Rendering.partialTicks),
+        rayTraceBox(Rendering.getEyePosition(entity, Rendering.partialTicks),
+                    entity.getLook(Rendering.partialTicks),
                     box)
 
     /**
@@ -41,62 +47,43 @@ object Rays {
      *
      * @author Andrew Woo
      */
-    fun rayTraceBox(origin: Vec3d, dir: Vec3d, box: AxisAlignedBB): Vec3d? {
-        var inside = true;
-        val quadrant = arrayOf(0, 0, 0)
-        var whichPlane = -1
-        val maxT = arrayOf(.0, .0, .0)
-        val candidatePlane = arrayOf(.0, .0, .0)
-        val RIGHT = 0
-        val LEFT = 1
-        val MIDDLE = 2
+    fun rayTraceBox(origin: Vec3d, dir: Vec3d, box: AxisAlignedBB): RayTraceResult? {
+        var t1: Double
+        var t2: Double
 
-        /* Find candidate planes; this loop can be avoided if
-           rays cast all from the eye(assume perpsective view) */
-        for (i in quadrant.indices)
-            if (origin[i] < box.min[i]) {
-                quadrant[i] = LEFT
-                candidatePlane[i] = box.min[i]
-                inside = false
-            } else if (origin[i] > box.max[i]) {
-                quadrant[i] = RIGHT
-                candidatePlane[i] = box.max[i]
-                inside = false
-            } else {
-                quadrant[i] = MIDDLE
+        var tmin = Double.NEGATIVE_INFINITY
+        var tmax = Double.POSITIVE_INFINITY
+
+        var closestPoint = Vec3d(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE)
+        var face = EnumFacing.NORTH
+
+        for (i in 0..2) {
+            t1 = (box.min[i] - origin[i]) / dir[i]
+            t2 = (box.max[i] - origin[i]) / dir[i]
+
+            if (t1 >= 0) {
+                val p = origin + t1 * dir
+                if (box.contains(p) && p.squareDistanceTo(origin) < closestPoint.squareDistanceTo(origin)) {
+                    closestPoint = p
+                    face = EnumFacing.VALUES[((2 * i + 4) % 6)]
+                }
+            }
+            if (t2 >= 0) {
+                val p = origin + t2 * dir
+                if (box.contains(p) && p.squareDistanceTo(origin) < closestPoint.squareDistanceTo(origin)) {
+                    closestPoint = p
+                    face = EnumFacing.VALUES[((2 * i + 5) % 6)]
+                }
             }
 
-        /* Ray origin inside bounding box */
-        if (inside) {
-            return origin
+            tmin = max(tmin, min(t1, t2))
+            tmax = min(tmax, max(t1, t2))
         }
 
-
-        /* Calculate T distances to candidate planes */
-        for (i in quadrant.indices)
-            if (quadrant[i] != MIDDLE && dir[i] != .0)
-                maxT[i] = (candidatePlane[i] - origin[i]) / dir[i];
-            else
-                maxT[i] = -1.0
-
-        /* Get largest of the maxT's for final choice of intersection */
-        whichPlane = 0;
-        for (i in quadrant.indices)
-            if (maxT[whichPlane] < maxT[i])
-                whichPlane = i;
-
-        /* Check final candidate actually inside box */
-        if (maxT[whichPlane] < .0) return null
-        val result = arrayOf(.0, .0, .0)
-        for (i in quadrant.indices)
-            if (whichPlane != i) {
-                result[i] = origin[i] + maxT[whichPlane] * dir[i];
-                if (result[i] < box.min[i] || result[i] > box.max[i])
-                    return null;
-            } else {
-                result[i] = candidatePlane[i];
-            }
-        return Vec3d(result[0], result[1], result[2]);
+        if (tmax > max(.0, tmin)) {
+            return RayTraceResult(origin + dir * max(.0, tmin), face)
+        }
+        return null
     }
 
     /**

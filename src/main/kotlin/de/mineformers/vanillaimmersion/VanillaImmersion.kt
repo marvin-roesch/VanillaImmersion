@@ -11,6 +11,8 @@ import de.mineformers.vanillaimmersion.item.Hammer
 import de.mineformers.vanillaimmersion.item.SpecialBlockItem
 import de.mineformers.vanillaimmersion.network.*
 import de.mineformers.vanillaimmersion.tileentity.*
+import de.mineformers.vanillaimmersion.util.SubSelectionHandler
+import de.mineformers.vanillaimmersion.util.SubSelectionRenderer
 import net.minecraft.block.Block
 import net.minecraft.client.renderer.block.model.ModelResourceLocation
 import net.minecraft.creativetab.CreativeTabs
@@ -91,9 +93,7 @@ object VanillaImmersion {
         MinecraftForge.EVENT_BUS.register(CraftingHandler)
         MinecraftForge.EVENT_BUS.register(RepairHandler)
         MinecraftForge.EVENT_BUS.register(EnchantingHandler)
-        MinecraftForge.EVENT_BUS.register(Blocks.FURNACE)
-        MinecraftForge.EVENT_BUS.register(Blocks.LIT_FURNACE)
-        MinecraftForge.EVENT_BUS.register(Blocks.BREWING_STAND)
+        MinecraftForge.EVENT_BUS.register(SubSelectionHandler)
 
         // Register messages and handlers
         NETWORK.registerMessage(AnvilLock.Handler, AnvilLock.Message::class.java,
@@ -116,6 +116,12 @@ object VanillaImmersion {
      */
     @EventHandler
     fun init(event: FMLInitializationEvent) {
+        LOG.info("Adding recipes...")
+        GameRegistry.addShapedRecipe(ItemStack(Items.HAMMER),
+                                     " IS",
+                                     " SI",
+                                     "S  ",
+                                     'I', VItems.IRON_INGOT, 'S', VItems.STICK)
         if (Configuration.getBoolean("blocks.replace-vanilla-recipes")) {
             LOG.info("Replacing Vanilla recipes...")
             // Add replacement recipes
@@ -319,8 +325,7 @@ object VanillaImmersion {
 
             // Register client-specific event handlers
             MinecraftForge.EVENT_BUS.register(CraftingDragHandler)
-            MinecraftForge.EVENT_BUS.register(BrewingStandRenderer.Highlight)
-            MinecraftForge.EVENT_BUS.register(SlotHighlightRenderer)
+            MinecraftForge.EVENT_BUS.register(SubSelectionRenderer)
         }
 
         /**

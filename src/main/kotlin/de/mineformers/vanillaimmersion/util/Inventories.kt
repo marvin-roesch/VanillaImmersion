@@ -62,6 +62,10 @@ object Inventories {
             return
         if (!player.inventory.addItemStackToInventory(stack))
             InventoryHelper.spawnItemStack(player.worldObj, player.posX, player.posY, player.posZ, stack)
+        else
+            player.worldObj.playSound(null, player.posX, player.posY, player.posZ,
+                                      SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS,
+                                      .2f, ((player.rng.nextFloat() - player.rng.nextFloat()) * .7f + 1f) * 2f)
     }
 
     /**

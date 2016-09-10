@@ -33,6 +33,7 @@ class FurnaceRenderer : TileEntitySpecialRenderer<FurnaceLogic>() {
         // Translate to the furnace's center and rotate according to its orientation
         translate(x + 0.5, y, z + 0.5)
         rotate(180f - te.facing.horizontalAngle, 0f, 1f, 0f)
+        rotate(180f, 0f, 1f, 0f)
 
         Minecraft.getMinecraft().textureManager.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE)
         enableRescaleNormal()
