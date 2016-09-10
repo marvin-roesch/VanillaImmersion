@@ -70,7 +70,7 @@ class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
         }
     }
 
-    private val BOOK_TEXTURE = ResourceLocation("textures/entity/enchanting_table_book.png")
+    private val BOOK_TEXTURE = ResourceLocation("vimmersion", "textures/entity/enchanting_table_book.png")
     private val BOOK_GUI_TEXTURE = ResourceLocation("textures/gui/book.png")
     private val LAPIS_TEXTURE = ResourceLocation("textures/items/dye_powder_blue.png")
     private val ENCHANTING_TABLE_TEXTURE = ResourceLocation("textures/gui/container/enchanting_table.png")
@@ -80,10 +80,10 @@ class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
     init {
         init()
         // Make the pages of the book 1 "pixel" wider, otherwise text will hardly fit on them
-        book.pagesRight = ModelRenderer(book).setTextureOffset(0, 10).addBox(0.0f, -4.0f, -0.99f, 6, 8, 1);
-        book.pagesLeft = ModelRenderer(book).setTextureOffset(12, 10).addBox(0.0f, -4.0f, -0.01f, 6, 8, 1);
-        book.flippingPageRight = ModelRenderer(book).setTextureOffset(24, 10).addBox(0.0f, -4.0f, 0.0f, 6, 8, 0);
-        book.flippingPageLeft = ModelRenderer(book).setTextureOffset(24, 10).addBox(0.0f, -4.0f, 0.0f, 6, 8, 0);
+        book.pagesRight = ModelRenderer(book).setTextureOffset(0, 10).addBox(0.0f, -4.0f, -0.99f, 6, 8, 1)
+        book.pagesLeft = ModelRenderer(book).setTextureOffset(14, 10).addBox(0.0f, -4.0f, -0.01f, 6, 8, 1)
+        book.flippingPageRight = ModelRenderer(book).setTextureOffset(28, 10).addBox(0.0f, -4.0f, 0.0f, 6, 8, 0)
+        book.flippingPageLeft = ModelRenderer(book).setTextureOffset(28, 10).addBox(0.0f, -4.0f, 0.0f, 6, 8, 0)
     }
 
     // TODO: Maybe switch to FastTESR?
@@ -241,7 +241,6 @@ class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
         scale(-0.004, -0.004, 0.004)
 
         // We may use GUI methods from here since we have applied transformations that let us move in its local space
-        Gui.drawRect(0, 0, 94, 125, 0xFFF3F3F3.toInt())
         if (te.page == -1) {
             // No actual page visible: Draw a bunch of nonsense
             drawWrappedText("~fa" + generateRandomLore(30..40), 4, 4, 86, 0x685E4A, 125 / 9 - 1)
