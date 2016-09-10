@@ -1,6 +1,19 @@
 Changelog
 =========
 
+### Version 0.0.8.0 for Minecraft 1.10.2
+**Note:** This version of the mod requires at least Forge version *1.10.2-12.18.1.2076*.
+  - **Additions**
+    - Hammer that can be used to get the output of a repair operation on the anvil
+    - Naming an item on the anvil now displays a cursor
+    - Individual selection boxes for all slots in all blocks apart from the enchantment table
+  - **Changes**
+    - Anvil output no longer is displayed in favor of a hammer slot
+    - Naming an item on the anvil now defaults to the item's current name, mimicking Vanilla behavior
+    - Items now appear flat on the crafting table and it was reduced in height for easier access
+  - **Fixes**
+    - Middle-clicking and breaking the Furnace now selects the immersive variant
+
 ### Version 0.0.7.0 for Minecraft 1.10.2
 **Note:** This version of the mod requires at least Forge version *1.10.2-12.18.1.2076*.
   - **Fixes**

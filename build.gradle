@@ -52,6 +52,8 @@ if (System.getenv("TRAVIS_BUILD_NUMBER") != null && System.getenv("TRAVIS_BRANCH
 } else if (System.getenv("TRAVIS_BUILD_NUMBER") != null && (System.getenv("TRAVIS_TAG") == null || System.getenv("TRAVIS_TAG") == "")) {
     version = "$version+b${System.getenv("TRAVIS_BUILD_NUMBER")}"
 }
+println "TRAVIS_BRANCH=${System.getenv("TRAVIS_BRANCH")}"
+println "TRAVIS_TAG=${System.getenv("TRAVIS_TAG")}"
 group = 'de.mineformers.vimmersion'
 archivesBaseName = 'vanilla-immersion'
 
