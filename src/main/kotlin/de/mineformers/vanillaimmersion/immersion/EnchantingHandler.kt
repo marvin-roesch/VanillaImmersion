@@ -1,7 +1,5 @@
 package de.mineformers.vanillaimmersion.immersion
 
-import de.mineformers.vanillaimmersion.VanillaImmersion
-import de.mineformers.vanillaimmersion.network.EnchantingAction
 import de.mineformers.vanillaimmersion.tileentity.EnchantingTableLogic
 import de.mineformers.vanillaimmersion.util.*
 import net.minecraft.client.Minecraft
@@ -111,8 +109,9 @@ object EnchantingHandler {
                     Vec3d(0.0, 125.0, 0.0) - Vec3d(-hit.x.toDouble(), hit.y.toDouble(), 0.0) / 0.004
                 else
                     Vec3d(94.0, 125.0, 0.0) - Vec3d(hit.x.toDouble(), hit.y.toDouble(), 0.0) / 0.004
-            if (player.worldObj.isRemote) {
+            if (!player.worldObj.isRemote) {
                 handleUIHit(te, right, player, pixelHit.x, pixelHit.y)
+            } else {
                 player.swingArm(EnumHand.MAIN_HAND)
             }
             return true
@@ -124,8 +123,7 @@ object EnchantingHandler {
      * Handles a click on the enchantment table's "GUI", performing the appropriate action.
      */
     private fun handleUIHit(table: EnchantingTableLogic, right: Boolean, player: EntityPlayer, x: Double, y: Double) {
-        // Just send it off to the server, the client does not have any control
-        VanillaImmersion.NETWORK.sendToServer(EnchantingAction.PageHitMessage(table.pos, right, x, y))
+        table.performPageAction(player, table.page + if (right) 1 else 0, x, y)
     }
 
     /**

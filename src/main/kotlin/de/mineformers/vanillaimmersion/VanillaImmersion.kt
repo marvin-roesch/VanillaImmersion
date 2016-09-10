@@ -102,10 +102,8 @@ object VanillaImmersion {
                                 1, Side.SERVER)
         NETWORK.registerMessage(CraftingDrag.Handler, CraftingDrag.Message::class.java,
                                 2, Side.SERVER)
-        NETWORK.registerMessage(EnchantingAction.PageHitHandler, EnchantingAction.PageHitMessage::class.java,
-                                3, Side.SERVER)
         NETWORK.registerMessage(OpenGui.Handler, OpenGui.Message::class.java,
-                                4, Side.SERVER)
+                                3, Side.SERVER)
         NetworkRegistry.INSTANCE.registerGuiHandler(this, GuiHandler())
 
         PROXY.preInit(event)
