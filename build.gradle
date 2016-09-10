@@ -233,9 +233,10 @@ if (cfApi != null) {
 }
 
 task release() {
-    if (System.getenv("TRAVIS_TAG") == "v${project.version}".toString())
+    if (System.getenv("TRAVIS_TAG") == "v${project.version}".toString()) {
+        println "Triggering release build"
         dependsOn "curseforge"
-    else
+    } else
         dependsOn bintrayUpload
 }
 
