@@ -53,8 +53,8 @@ class AnvilRenderer : TileEntitySpecialRenderer<AnvilLogic>() {
             // Magic numbers, but this appears to be the perfect offset
             translate(.0, .05, -.32)
             rotate(-90f, 0f, 1f, 0f)
-            rotate(86f, 1f, 0f, 0f)
-            rotate(7f, 0f, 0f, 1f)
+            rotate(85f, 1f, 0f, 0f)
+            rotate(6f, 0f, 0f, 1f)
             scale(0.5f, 0.5f, 0.5f)
             Minecraft.getMinecraft().renderItem.renderItem(hammer, FIXED)
             popMatrix()

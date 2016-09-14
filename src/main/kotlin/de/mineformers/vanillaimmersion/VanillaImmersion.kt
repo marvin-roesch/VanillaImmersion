@@ -146,6 +146,11 @@ object VanillaImmersion {
                                          " B ",
                                          "###",
                                          '#', VBlocks.COBBLESTONE, 'B', VItems.BLAZE_ROD)
+            GameRegistry.addShapedRecipe(ItemStack(Blocks.BEACON),
+                                         "GGG",
+                                         "GSG",
+                                         "OOO",
+                                         'G', VBlocks.GLASS, 'S', VItems.NETHER_STAR, 'O', VBlocks.OBSIDIAN)
         }
         if (Configuration.getBoolean("blocks.conversion-recipes")) {
             LOG.info("Adding Vanilla <-> Immersive recipes...")
@@ -158,6 +163,7 @@ object VanillaImmersion {
             GameRegistry.addShapelessRecipe(ItemStack(Blocks.ANVIL, 1, 2), ItemStack(VBlocks.ANVIL, 1, 2))
             GameRegistry.addShapelessRecipe(ItemStack(Blocks.ENCHANTING_TABLE), ItemStack(VBlocks.ENCHANTING_TABLE))
             GameRegistry.addShapelessRecipe(ItemStack(Blocks.BREWING_STAND), ItemStack(VItems.BREWING_STAND))
+            GameRegistry.addShapelessRecipe(ItemStack(Blocks.BEACON), ItemStack(VBlocks.BEACON))
             // Add immersive -> Vanilla block conversion recipes
             GameRegistry.addShapelessRecipe(ItemStack(VBlocks.FURNACE), ItemStack(Blocks.FURNACE))
             GameRegistry.addShapelessRecipe(ItemStack(VBlocks.CRAFTING_TABLE), ItemStack(Blocks.CRAFTING_TABLE))
@@ -167,6 +173,7 @@ object VanillaImmersion {
             GameRegistry.addShapelessRecipe(ItemStack(VBlocks.ANVIL, 1, 2), ItemStack(Blocks.ANVIL, 1, 2))
             GameRegistry.addShapelessRecipe(ItemStack(VBlocks.ENCHANTING_TABLE), ItemStack(Blocks.ENCHANTING_TABLE))
             GameRegistry.addShapelessRecipe(ItemStack(VItems.BREWING_STAND), ItemStack(Blocks.BREWING_STAND))
+            GameRegistry.addShapelessRecipe(ItemStack(VBlocks.BEACON), ItemStack(Blocks.BEACON))
         }
     }
 
@@ -212,6 +219,12 @@ object VanillaImmersion {
         val BREWING_STAND by lazy {
             BrewingStand()
         }
+        /**
+         * Immersive Beacon
+         */
+        val BEACON by lazy {
+            Beacon()
+        }
 
         /**
          * Initializes and registers blocks and related data
@@ -224,12 +237,14 @@ object VanillaImmersion {
             register(ANVIL, ::ItemAnvilBlock)
             register(ENCHANTING_TABLE)
             register(BREWING_STAND, ::SpecialBlockItem)
+            register(BEACON)
 
             GameRegistry.registerTileEntity(FurnaceLogic::class.java, "$MODID:furnace")
             GameRegistry.registerTileEntity(CraftingTableLogic::class.java, "$MODID:crafting_table")
             GameRegistry.registerTileEntity(AnvilLogic::class.java, "$MODID:anvil")
             GameRegistry.registerTileEntity(EnchantingTableLogic::class.java, "$MODID:enchanting_table")
             GameRegistry.registerTileEntity(BrewingStandLogic::class.java, "$MODID:brewing_stand")
+            GameRegistry.registerTileEntity(BeaconLogic::class.java, "$MODID:beacon")
         }
 
         /**
@@ -310,6 +325,7 @@ object VanillaImmersion {
             setItemModel(Blocks.ANVIL, 2, "minecraft:anvil_very_damaged")
             setItemModel(Blocks.ENCHANTING_TABLE, 0, "minecraft:enchanting_table")
             setItemModel(Blocks.BREWING_STAND, 0, "minecraft:brewing_stand")
+            setItemModel(Blocks.BEACON, 0, "minecraft:beacon")
 
             // Register TESRs
             ClientRegistry.bindTileEntitySpecialRenderer(FurnaceLogic::class.java, FurnaceRenderer())
