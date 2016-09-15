@@ -1,16 +1,7 @@
 {
   "forge_marker": 1,
   "defaults": {
-    "model": "vimmersion:crafting_table",
-    "textures": {
-      "particle": "blocks/crafting_table_front",
-      "down": "blocks/planks_oak",
-      "up": "vimmersion:blocks/crafting_table_top",
-      "north": "blocks/crafting_table_front",
-      "east": "blocks/crafting_table_side",
-      "south": "blocks/crafting_table_side",
-      "west": "blocks/crafting_table_front"
-    }
+    "model": "vimmersion:crafting_table"
   },
   "variants": {
     "facing": {

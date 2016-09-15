@@ -1,6 +1,10 @@
 {
   "textures": {
-    "particle": "#front"
+    "particle": "blocks/stone",
+    "top": "blocks/furnace_top",
+    "side": "blocks/furnace_side",
+    "iron_bars": "blocks/iron_block",
+    "front": "blocks/furnace_front_off"
   },
   "elements": [
     {
