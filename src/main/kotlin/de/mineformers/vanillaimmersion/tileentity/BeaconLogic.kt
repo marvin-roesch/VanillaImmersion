@@ -61,6 +61,24 @@ class BeaconLogic : TileEntityBeacon() {
      * Determines the beacon's current editing state.
      */
     var state: BeaconState? = null
+        set(value) {
+            field = value
+            sync()
+        }
+
+    /**
+     * Determines all available effects for the current levels of the beacon.
+     */
+    fun availableEffects(secondary: Boolean): List<Potion> {
+        if (!secondary) {
+            return EFFECTS_LIST.take(Math.min(levels, 3)).flatMap { it.toList() }
+        } else {
+            return if (state == null || state!!.primary == null)
+                emptyList()
+            else
+                EFFECTS_LIST.drop(3).flatMap { it.toList() } + state!!.primary!!
+        }
+    }
 
     /**
      * Gets the ItemStack in a given slot.
@@ -73,6 +91,31 @@ class BeaconLogic : TileEntityBeacon() {
      * Marked as operator to allow this: `beacon[slot] = stack`
      */
     operator fun set(slot: Slot, stack: ItemStack?) = setInventorySlotContents(slot.ordinal, stack)
+
+    fun onScroll(direction: Int) {
+        if (state == null || direction == 0)
+            return
+        val state = this.state!!
+        val secondary = state.stage == 2
+        val current = if (secondary) state.secondary else state.primary
+        val available = availableEffects(secondary)
+        val currentIndex = available.indexOf(current)
+        val signum = if(direction > 0) 1 else -1
+        when {
+            currentIndex == 0 && direction < 0 ->
+                if (secondary)
+                    this.state = state.copy(secondary = null)
+                else
+                    this.state = state.copy(primary = null, secondary = null)
+            currentIndex >= 0 || signum == 1 -> {
+                val new = available[Math.max(0, Math.min(currentIndex + signum, available.size - 1))]
+                if (secondary)
+                    this.state = state.copy(secondary = new)
+                else
+                    this.state = state.copy(primary = new, secondary = null)
+            }
+        }
+    }
 
     override fun getRenderBoundingBox(): AxisAlignedBB = INFINITE_EXTENT_AABB
 
@@ -95,6 +138,11 @@ class BeaconLogic : TileEntityBeacon() {
             this.state = BeaconState(Potion.getPotionById(state.getInteger("Primary")),
                                      Potion.getPotionById(state.getInteger("Secondary")),
                                      state.getInteger("Stage"))
+        } else {
+            this.state = null
+        }
+        if (worldObj != null && worldObj.isRemote) {
+            worldObj.markBlockRangeForRenderUpdate(pos, pos)
         }
     }
 

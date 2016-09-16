@@ -24,10 +24,17 @@ object Shaders {
     final val SLOT_HIGHLIGHT by lazy {
         Shader(null, ResourceLocation("vimmersion", "slot_highlight"))
     }
+    /**
+     * The "transparent depth" shader assigns infinite depth to transparent texture pixels, if desired.
+     */
+    final val TRANSPARENT_DEPTH by lazy {
+        Shader(null, ResourceLocation("vimmersion", "transparent_depth"))
+    }
 
     internal fun init() {
         ALPHA.init()
         EMBERS.init()
         SLOT_HIGHLIGHT.init()
+        TRANSPARENT_DEPTH.init()
     }
 }

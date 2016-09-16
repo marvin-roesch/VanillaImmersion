@@ -57,7 +57,7 @@ class CraftingTable : BlockWorkbench() {
      * [CraftingHandler][de.mineformers.vanillaimmersion.immersion.CraftingHandler].
      */
     override fun onBlockActivated(world: World, pos: BlockPos, state: IBlockState,
-                                  player: EntityPlayer, hand: EnumHand, heldItem: ItemStack?,
+                                  player: EntityPlayer, hand: EnumHand, stack: ItemStack?,
                                   side: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) = true
 
     /**

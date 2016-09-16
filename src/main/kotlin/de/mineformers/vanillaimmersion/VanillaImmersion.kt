@@ -1,6 +1,7 @@
 package de.mineformers.vanillaimmersion
 
 import de.mineformers.vanillaimmersion.block.*
+import de.mineformers.vanillaimmersion.client.BeaconHandler
 import de.mineformers.vanillaimmersion.client.CraftingDragHandler
 import de.mineformers.vanillaimmersion.client.renderer.*
 import de.mineformers.vanillaimmersion.config.Configuration
@@ -104,6 +105,8 @@ object VanillaImmersion {
                                 2, Side.SERVER)
         NETWORK.registerMessage(OpenGui.Handler, OpenGui.Message::class.java,
                                 3, Side.SERVER)
+        NETWORK.registerMessage(BeaconScroll.Handler, BeaconScroll.Message::class.java,
+                                4, Side.SERVER)
         NetworkRegistry.INSTANCE.registerGuiHandler(this, GuiHandler())
 
         PROXY.preInit(event)
@@ -341,6 +344,7 @@ object VanillaImmersion {
             // Register client-specific event handlers
             MinecraftForge.EVENT_BUS.register(CraftingDragHandler)
             MinecraftForge.EVENT_BUS.register(SubSelectionRenderer)
+            MinecraftForge.EVENT_BUS.register(BeaconHandler)
         }
 
         /**
