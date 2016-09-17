@@ -323,14 +323,14 @@ class AnvilLogic : TileEntity(), SubSelections {
             return false
         if (stack?.item != Items.HAMMER || side != EnumFacing.UP)
             return false
-        hammer(player)
+        hammer(player, stack!!)
         return true
     }
 
     /**
      * Tries to hammer the anvil's current input.
      */
-    fun hammer(player: EntityPlayer) {
+    fun hammer(player: EntityPlayer, stack: ItemStack) {
         if (world.isRemote)
             return
         val simulated = tryRepair(world, pos, player, true)
@@ -358,8 +358,13 @@ class AnvilLogic : TileEntity(), SubSelections {
                                 mX, mY, mZ, .0,
                                 Item.getIdFromItem(item))
         }
-        if (!player.capabilities.isCreativeMode)
+        if (!player.capabilities.isCreativeMode) {
             player.removeExperienceLevel(1)
+        }
+        stack.damageItem(1, player)
+        if (stack.stackSize == 0) {
+            player.setHeldItem(EnumHand.MAIN_HAND, null)
+        }
         if (hammerCount == requiredHammerCount(player) || player.capabilities.isCreativeMode) {
             val output = tryRepair(world, pos, player, false)!!
             this[Slot.INPUT_OBJECT] = output.input

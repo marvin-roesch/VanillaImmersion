@@ -7,7 +7,6 @@ import de.mineformers.vanillaimmersion.client.renderer.*
 import de.mineformers.vanillaimmersion.config.Configuration
 import de.mineformers.vanillaimmersion.immersion.CraftingHandler
 import de.mineformers.vanillaimmersion.immersion.EnchantingHandler
-import de.mineformers.vanillaimmersion.immersion.RepairHandler
 import de.mineformers.vanillaimmersion.item.Hammer
 import de.mineformers.vanillaimmersion.item.SpecialBlockItem
 import de.mineformers.vanillaimmersion.network.*
@@ -92,7 +91,6 @@ object VanillaImmersion {
         Sounds.init()
 
         MinecraftForge.EVENT_BUS.register(CraftingHandler)
-        MinecraftForge.EVENT_BUS.register(RepairHandler)
         MinecraftForge.EVENT_BUS.register(EnchantingHandler)
         MinecraftForge.EVENT_BUS.register(SubSelectionHandler)
 
