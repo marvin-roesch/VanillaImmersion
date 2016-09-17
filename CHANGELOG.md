@@ -1,6 +1,15 @@
 Changelog
 =========
 
+### Version 0.0.9.0 for Minecraft 1.10.2
+**Note:** This version of the mod requires at least Forge version *1.10.2-12.18.1.2077*.
+  - **Additions**
+    - Immersive version of the beacon that is interacted with by enabling and edit mode through right clicking and then scrolling
+  - **Changes**
+    - Hammers now are iron tools and take damage on use
+  - **Fixes**
+    - The book on enchantment tables is now correctly textured
+
 ### Version 0.0.8.0 for Minecraft 1.10.2
 **Note:** This version of the mod requires at least Forge version *1.10.2-12.18.1.2076*.
   - **Additions**
