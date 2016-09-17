@@ -14,7 +14,7 @@ import net.minecraft.item.ItemBlock
 /**
  * Renders the items held by a brewing stand.
  */
-class BrewingStandRenderer : TileEntitySpecialRenderer<BrewingStandLogic>() {
+open class BrewingStandRenderer : TileEntitySpecialRenderer<BrewingStandLogic>() {
     override fun renderTileEntityAt(te: BrewingStandLogic, x: Double, y: Double, z: Double,
                                     partialTicks: Float, destroyStage: Int) {
         pushMatrix()

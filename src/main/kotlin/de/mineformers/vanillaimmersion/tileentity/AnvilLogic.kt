@@ -33,7 +33,7 @@ import java.util.*
 /**
  * Implements all logic and data storage for the anvil.
  */
-class AnvilLogic : TileEntity(), SubSelections {
+open class AnvilLogic : TileEntity(), SubSelections {
     companion object {
         /**
          * Helper enum for meaningful interaction with the inventory.
@@ -250,12 +250,12 @@ class AnvilLogic : TileEntity(), SubSelections {
     /**
      * Handles interaction with a given slot.
      */
-    private fun interactWithSlot(world: World, pos: BlockPos,
-                                 tile: AnvilLogic,
-                                 player: EntityPlayer,
-                                 slot: Slot,
-                                 stack: ItemStack?,
-                                 blockLocked: Boolean): Boolean {
+    open protected fun interactWithSlot(world: World, pos: BlockPos,
+                                        tile: AnvilLogic,
+                                        player: EntityPlayer,
+                                        slot: Slot,
+                                        stack: ItemStack?,
+                                        blockLocked: Boolean): Boolean {
         // One of the input slots was clicked
         val existing = tile[slot]
         // If there already was an item in there, drop it
@@ -290,7 +290,7 @@ class AnvilLogic : TileEntity(), SubSelections {
      * Returns an object indicating the success of the operation, if not simulated, the player's experience will be
      * modified.
      */
-    fun tryRepair(world: World, pos: BlockPos, player: EntityPlayer, simulate: Boolean): RepairResult? {
+    open fun tryRepair(world: World, pos: BlockPos, player: EntityPlayer, simulate: Boolean): RepairResult? {
         val tile = world.getTileEntity(pos)
         if (tile !is AnvilLogic || world.isRemote)
             return null
@@ -330,7 +330,7 @@ class AnvilLogic : TileEntity(), SubSelections {
     /**
      * Tries to hammer the anvil's current input.
      */
-    fun hammer(player: EntityPlayer, stack: ItemStack) {
+    open fun hammer(player: EntityPlayer, stack: ItemStack) {
         if (world.isRemote)
             return
         val simulated = tryRepair(world, pos, player, true)
@@ -381,7 +381,7 @@ class AnvilLogic : TileEntity(), SubSelections {
     /**
      * The required amount of hits for the current input to be repaired.
      */
-    fun requiredHammerCount(player: EntityPlayer): Int {
+    open fun requiredHammerCount(player: EntityPlayer): Int {
         val result = tryRepair(world, pos, player, true) ?: return Int.MAX_VALUE
         return result.requiredLevels
     }

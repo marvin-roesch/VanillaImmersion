@@ -1,39 +1,20 @@
 package de.mineformers.vanillaimmersion.tileentity
 
 import net.minecraft.block.state.IBlockState
-import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.potion.Potion
 import net.minecraft.tileentity.TileEntityBeacon
 import net.minecraft.util.math.AxisAlignedBB
-import net.minecraftforge.items.IItemHandlerModifiable
-import net.minecraftforge.items.wrapper.InvWrapper
 
 /**
  * Implements all logic and data storage for the beacon.
  */
-class BeaconLogic : TileEntityBeacon() {
-    companion object {
-        /**
-         * Helper enum for meaningful interaction with the inventory.
-         */
-        enum class Slot {
-            /**
-             * The item used to pay for the effect.
-             */
-            PAYMENT
-        }
-    }
-
+open class BeaconLogic : TileEntityBeacon() {
     /**
      * The beacon's block state.
      */
     val blockState: IBlockState
         get() = worldObj.getBlockState(pos)
-    /**
-     * The beacon's inventory.
-     */
-    val inventory: IItemHandlerModifiable = InvWrapper(this)
     /**
      * The height of the pyramid beneath the beacon, -1 if there is none.
      */
@@ -69,7 +50,7 @@ class BeaconLogic : TileEntityBeacon() {
     /**
      * Determines all available effects for the current levels of the beacon.
      */
-    fun availableEffects(secondary: Boolean): List<Potion> {
+    open fun availableEffects(secondary: Boolean): List<Potion> {
         if (!secondary) {
             return EFFECTS_LIST.take(Math.min(levels, 3)).flatMap { it.toList() }
         } else {
@@ -81,21 +62,9 @@ class BeaconLogic : TileEntityBeacon() {
     }
 
     /**
-     * Gets the ItemStack in a given slot.
-     * Marked as operator to allow this: `beacon[slot]`
-     */
-    operator fun get(slot: Slot): ItemStack? = getStackInSlot(slot.ordinal)
-
-    /**
-     * Sets the ItemStack in a given slot.
-     * Marked as operator to allow this: `beacon[slot] = stack`
-     */
-    operator fun set(slot: Slot, stack: ItemStack?) = setInventorySlotContents(slot.ordinal, stack)
-
-    /**
      * Implements scrolling behaviour for the beacon while it is in edit mode.
      */
-    fun onScroll(direction: Int) {
+    open fun onScroll(direction: Int) {
         if (state == null || direction == 0)
             return
         val state = this.state!!

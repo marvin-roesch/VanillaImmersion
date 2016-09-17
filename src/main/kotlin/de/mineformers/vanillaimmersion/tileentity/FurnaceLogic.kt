@@ -28,7 +28,7 @@ import net.minecraftforge.items.wrapper.InvWrapper
 /**
  * Implements all logic and data storage for the furnace.
  */
-class FurnaceLogic : TileEntityFurnace(), SubSelections {
+open class FurnaceLogic : TileEntityFurnace(), SubSelections {
     companion object {
         /**
          * Helper enum for meaningful interaction with the inventory.
@@ -102,25 +102,25 @@ class FurnaceLogic : TileEntityFurnace(), SubSelections {
     /**
      * Amount of "heat" left from the current fuel item.
      */
-    private var fuelLeft: Int
+    protected var fuelLeft: Int
         get() = getField(0)
         set(value) = setField(0, value)
     /**
      * Amount of "heat" provided by the current fuel item.
      */
-    private var fuel: Int
+    protected var fuel: Int
         get() = getField(1)
         set(value) = setField(1, value)
     /**
      * Progress of the current smelting process.
      */
-    private var progress: Int
+    protected var progress: Int
         get() = getField(2)
         set(value) = setField(2, value)
     /**
      * Time in ticks required to smelt this item.
      */
-    private var requiredTime: Int
+    protected var requiredTime: Int
         get() = getField(3)
         set(value) = setField(3, value)
 
@@ -181,7 +181,7 @@ class FurnaceLogic : TileEntityFurnace(), SubSelections {
     /**
      * Checks whether the current input item can be smelted, i.e. the result fits into the output slot.
      */
-    private fun canSmelt(): Boolean {
+    open protected fun canSmelt(): Boolean {
         val input = this[Slot.INPUT]
         val output = this[Slot.OUTPUT]
         // If there is no input, there is nothing to smelt
@@ -216,7 +216,7 @@ class FurnaceLogic : TileEntityFurnace(), SubSelections {
 
         // Reduce the amount of fuel whenever the furnace is burning
         if (this.isBurning) {
-            --this.fuelLeft
+            reduceFuel()
             sync = true
         }
 
@@ -275,6 +275,13 @@ class FurnaceLogic : TileEntityFurnace(), SubSelections {
     }
 
     /**
+     * Changes the current fuel level according to the implementation's rules.
+     */
+    open protected fun reduceFuel() {
+        --this.fuelLeft
+    }
+
+    /**
      * Updates the furnace block according to its burning state.
      */
     private fun updateState() {
@@ -285,9 +292,9 @@ class FurnaceLogic : TileEntityFurnace(), SubSelections {
         KEEP_INVENTORY = true
         // Swap between lit and unlit variant
         if (isBurning) {
-            worldObj.setBlockState(pos, LIT_FURNACE.defaultState.withProperty(FACING, state.getValue(FACING)), 3)
+            worldObj.setBlockState(pos, getLitState(state), 3)
         } else {
-            worldObj.setBlockState(pos, FURNACE.defaultState.withProperty(FACING, state.getValue(FACING)), 3)
+            worldObj.setBlockState(pos, getDefaultState(state), 3)
         }
         KEEP_INVENTORY = false
 
@@ -297,6 +304,16 @@ class FurnaceLogic : TileEntityFurnace(), SubSelections {
             worldObj.setTileEntity(pos, tile)
         }
     }
+
+    /**
+     * Converts a given state into one of the default (unlit) furnace.
+     */
+    open fun getDefaultState(state: IBlockState) = FURNACE.defaultState.withProperty(FACING, state.getValue(FACING))
+
+    /**
+     * Converts a given state into one of the lit furnace.
+     */
+    open fun getLitState(state: IBlockState) = LIT_FURNACE.defaultState.withProperty(FACING, state.getValue(FACING))
 
     /**
      * Composes a tag for updates of the TE (both initial chunk data and later updates).

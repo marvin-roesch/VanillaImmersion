@@ -332,7 +332,7 @@ object SubSelectionRenderer {
 
             for (box in tile.boxes.filter(::renderFilter)) {
                 val hoverColor = box.rendering?.hoverColor ?: Vec3d.ZERO
-                val color = if(hovered == box) hoverColor else Vec3d.ZERO
+                val color = if (hovered == box) hoverColor else Vec3d.ZERO
                 color(color.x.toFloat(), color.y.toFloat(), color.z.toFloat(), 0.4f)
                 val rotated = box.bounds.rotateY(box.rotation).offset(pos)
                 drawSelectionBoundingBox(rotated.expandXyz(0.002),

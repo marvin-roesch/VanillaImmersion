@@ -25,7 +25,7 @@ import java.util.*
  * Technically, the lit/unlit status could be handled through blockstates,
  * but this mod intends to keep full Vanilla compatibility, metadata can thus not be modified.
  */
-class Furnace(val lit: Boolean) : BlockFurnace(lit) {
+open class Furnace(val lit: Boolean) : BlockFurnace(lit) {
     init {
         setHardness(3.5F)
         soundType = SoundType.STONE

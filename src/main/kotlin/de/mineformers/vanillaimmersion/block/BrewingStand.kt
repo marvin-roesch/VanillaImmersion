@@ -26,7 +26,7 @@ import java.util.*
  * Immersive Brewing Stand implementation.
  * Derives from the Vanilla brewing stand to allow substitution later on.
  */
-class BrewingStand : BlockBrewingStand() {
+open class BrewingStand : BlockBrewingStand() {
     companion object {
         val BOWL_AABB = AxisAlignedBB(5.0 * 0.0625, 13.5 * 0.0625, 5 * 0.0625,
                                       11.0 * 0.0625, 15.5 * 0.0625, 11 * 0.0625)

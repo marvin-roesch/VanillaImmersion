@@ -1,5 +1,6 @@
 package de.mineformers.vanillaimmersion.client.renderer
 
+import de.mineformers.vanillaimmersion.block.EnchantingTable
 import de.mineformers.vanillaimmersion.tileentity.EnchantingTableLogic
 import de.mineformers.vanillaimmersion.tileentity.EnchantingTableLogic.Companion.Slot
 import net.minecraft.client.Minecraft
@@ -26,7 +27,7 @@ import java.util.*
 /**
  * Renders the items on top of a crafting table as well as the book "GUI".
  */
-class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
+open class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
     companion object {
         /**
          * The field holding the enchantment clues.
@@ -90,7 +91,7 @@ class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
     override fun renderTileEntityAt(te: TileEntityEnchantmentTable, x: Double, y: Double, z: Double,
                                     partialTicks: Float, destroyStage: Int) {
         // Since we derive from the vanilla renderer, we can't change the type parameters
-        if (te !is EnchantingTableLogic) {
+        if (te !is EnchantingTableLogic || te.blockType !is EnchantingTable) {
             return
         }
         pushMatrix()

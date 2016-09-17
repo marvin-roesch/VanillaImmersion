@@ -1,6 +1,6 @@
 package de.mineformers.vanillaimmersion.client.renderer
 
-import de.mineformers.vanillaimmersion.VanillaImmersion
+import de.mineformers.vanillaimmersion.block.Furnace
 import de.mineformers.vanillaimmersion.tileentity.FurnaceLogic
 import de.mineformers.vanillaimmersion.tileentity.FurnaceLogic.Companion.Slot.FUEL
 import de.mineformers.vanillaimmersion.tileentity.FurnaceLogic.Companion.Slot.INPUT
@@ -15,11 +15,10 @@ import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer
 /**
  * Renders the items inside a furnace
  */
-class FurnaceRenderer : TileEntitySpecialRenderer<FurnaceLogic>() {
+open class FurnaceRenderer : TileEntitySpecialRenderer<FurnaceLogic>() {
     override fun renderTileEntityAt(te: FurnaceLogic, x: Double, y: Double, z: Double,
                                     partialTicks: Float, destroyStage: Int) {
-        if (!(te.blockState.block === VanillaImmersion.Blocks.FURNACE ||
-              te.blockState.block === VanillaImmersion.Blocks.LIT_FURNACE))
+        if (te.blockState.block !is Furnace)
             return
         pushMatrix()
         color(1f, 1f, 1f, 1f)

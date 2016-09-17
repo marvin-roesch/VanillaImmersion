@@ -24,7 +24,7 @@ import net.minecraft.world.World
  * Adds a tile entity to the crafting table, but this does not break Vanilla compatibility.
  * Also adds a facing property to the block state, which also does not break compatibility.
  */
-class CraftingTable : BlockWorkbench() {
+open class CraftingTable : BlockWorkbench() {
     companion object {
         /**
          * Facing property indicating the table's front.

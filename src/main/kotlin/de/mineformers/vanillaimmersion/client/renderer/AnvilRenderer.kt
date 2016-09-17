@@ -1,6 +1,6 @@
 package de.mineformers.vanillaimmersion.client.renderer
 
-import de.mineformers.vanillaimmersion.VanillaImmersion
+import de.mineformers.vanillaimmersion.block.Anvil
 import de.mineformers.vanillaimmersion.client.gui.AnvilTextGui
 import de.mineformers.vanillaimmersion.tileentity.AnvilLogic
 import de.mineformers.vanillaimmersion.tileentity.AnvilLogic.Companion.Slot
@@ -18,11 +18,11 @@ import org.apache.commons.lang3.StringUtils
 /**
  * Renders the items on top of an anvil.
  */
-class AnvilRenderer : TileEntitySpecialRenderer<AnvilLogic>() {
+open class AnvilRenderer : TileEntitySpecialRenderer<AnvilLogic>() {
     // TODO: Maybe switch to FastTESR?
     override fun renderTileEntityAt(te: AnvilLogic, x: Double, y: Double, z: Double,
                                     partialTicks: Float, destroyStage: Int) {
-        if (te.blockState.block !== VanillaImmersion.Blocks.ANVIL)
+        if (te.blockState.block !is Anvil)
             return
         pushMatrix()
         color(1f, 1f, 1f, 1f)

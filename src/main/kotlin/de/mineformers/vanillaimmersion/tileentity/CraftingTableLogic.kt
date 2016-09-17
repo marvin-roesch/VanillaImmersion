@@ -10,6 +10,7 @@ import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.inventory.*
 import net.minecraft.item.ItemStack
+import net.minecraft.item.crafting.CraftingManager
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.network.NetworkManager
 import net.minecraft.network.play.server.SPacketUpdateTileEntity
@@ -19,8 +20,10 @@ import net.minecraft.util.EnumFacing.*
 import net.minecraft.util.Rotation
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.Vec3d
+import net.minecraft.world.WorldServer
 import net.minecraftforge.common.capabilities.Capability
 import net.minecraftforge.common.util.Constants
+import net.minecraftforge.common.util.FakePlayerFactory
 import net.minecraftforge.items.CapabilityItemHandler.ITEM_HANDLER_CAPABILITY
 import net.minecraftforge.items.ItemStackHandler
 import net.minecraftforge.items.wrapper.RangedWrapper
@@ -28,7 +31,7 @@ import net.minecraftforge.items.wrapper.RangedWrapper
 /**
  * Implements all logic and data storage for the anvil.
  */
-class CraftingTableLogic : TileEntity(), SubSelections {
+open class CraftingTableLogic : TileEntity(), SubSelections {
     companion object {
         /**
          * Helper enum for meaningful interaction with the inventory.
@@ -89,7 +92,7 @@ class CraftingTableLogic : TileEntity(), SubSelections {
                             rightClicks = false
                             leftClicks = false
 
-                            slot(if(x == 3) 0 else 1 + x + y * 3)
+                            slot(if (x == 3) 0 else 1 + x + y * 3)
 
                             renderOptions {
                                 hoverColor = Vec3d(.1, .1, .1)
@@ -117,7 +120,7 @@ class CraftingTableLogic : TileEntity(), SubSelections {
                 // Simulate the extraction first to get the likely result
                 val extracted = super.extractItem(slot, amount, true)
                 // Check the "craftability" again and indicate failure if it was unsuccessful
-                if (!CraftingHandler.takeCraftingResult(world, pos, null, extracted, simulate))
+                if (!takeCraftingResult(null, extracted, simulate))
                     return null
             }
             return super.extractItem(slot, amount, simulate)
@@ -126,7 +129,7 @@ class CraftingTableLogic : TileEntity(), SubSelections {
         override fun onContentsChanged(slot: Int) {
             // Update the crafting result if the output slot was affected (i.e. the output was extracted)
             if (slot == Slot.OUTPUT.ordinal) {
-                CraftingHandler.craft(worldObj, pos, null)
+                craft(null)
             }
             // Sync any inventories to the client
             markDirty()
@@ -308,6 +311,76 @@ class CraftingTableLogic : TileEntity(), SubSelections {
 
     override val boxes: List<SelectionBox>
         get() = SELECTIONS.map { it.withRotation(rotation) }
+
+    /**
+     * Tries to perform a crafting operation.
+     */
+    open fun craft(player: EntityPlayer?) {
+        // Crafting only happens server-side
+        if (world.isRemote)
+            return
+
+        // Initialize the crafting matrix, either via a real crafting container if there is a player or
+        // via a dummy inventory if there is none
+        val matrix =
+            if (player != null)
+                createContainer(player, false).craftMatrix
+            else {
+                val container = object : Container() {
+                    override fun canInteractWith(playerIn: EntityPlayer?) = true
+                }
+                val inventory = InventoryCrafting(container, 3, 3)
+                // Fill the matrix with ingredients
+                for (i in 1..(this.inventory.slots - 1))
+                    inventory.setInventorySlotContents(i - 1, this.inventory.getStackInSlot(i))
+                inventory
+            }
+        val result = CraftingManager.getInstance().findMatchingRecipe(matrix, world)
+        // There is no need to craft if there already is the same result
+        if (Inventories.equal(this[Slot.OUTPUT], result))
+            return
+        this[Slot.OUTPUT] = result
+    }
+
+    /**
+     * Takes the crafting result from a crafting table, optionally with a player.
+     */
+    fun takeCraftingResult(player: EntityPlayer?, result: ItemStack?, simulate: Boolean): Boolean {
+        // Only take the result on the server and if it exists
+        if (world.isRemote || result == null)
+            return true
+        val tile = world.getTileEntity(pos)
+        if (tile !is CraftingTableLogic)
+            return false
+
+        // Use a fake player if the given one is null
+        val craftingPlayer = player ?: FakePlayerFactory.getMinecraft(world as WorldServer)
+        // Create a crafting container and fill it with ingredients
+        val container = tile.createContainer(craftingPlayer, simulate)
+        val craftingSlot = container.getSlot(0)
+        if (craftingSlot.stack == null)
+            return false
+        // Imitate a player picking up an item from the output slot
+        craftingSlot.onPickupFromSlot(craftingPlayer, result)
+        // Only manipulate the table's inventory when we're not simulating the action
+        if (!simulate) {
+            // Grant the player the result
+            if (player != null) {
+                dropResult(player, result)
+                tile[Slot.OUTPUT] = null
+            }
+        }
+        // Try to craft a new item right away
+        craft(player)
+        return true
+    }
+
+    /**
+     * Drops the result of the current crafting operation.
+     */
+    open protected fun dropResult(player: EntityPlayer, result: ItemStack?) {
+        Inventories.insertOrDrop(player, result)
+    }
 
     /**
      * Serializes the crafting table's data to NBT.

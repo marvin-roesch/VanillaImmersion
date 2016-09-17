@@ -1,6 +1,7 @@
 package de.mineformers.vanillaimmersion.client
 
 import de.mineformers.vanillaimmersion.VanillaImmersion
+import de.mineformers.vanillaimmersion.block.CraftingTable
 import de.mineformers.vanillaimmersion.client.renderer.Shaders
 import de.mineformers.vanillaimmersion.immersion.CraftingHandler
 import de.mineformers.vanillaimmersion.immersion.CraftingHandler.splitDrag
@@ -166,7 +167,7 @@ object CraftingDragHandler {
         // We're only interested in blocks, although a crafting table entity might be interesting
         if (hovered != null && hovered.typeOfHit == RayTraceResult.Type.BLOCK) {
             val state = world.getBlockState(hovered.blockPos)
-            if (state.block == VanillaImmersion.Blocks.CRAFTING_TABLE) {
+            if (state.block is CraftingTable) {
                 if (dragTarget == null) {
                     // If the crafting process was just initiated, the block is definitely valid
                     dragTarget = hovered.blockPos

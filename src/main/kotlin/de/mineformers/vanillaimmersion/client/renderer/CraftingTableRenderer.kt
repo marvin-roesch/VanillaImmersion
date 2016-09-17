@@ -1,6 +1,6 @@
 package de.mineformers.vanillaimmersion.client.renderer
 
-import de.mineformers.vanillaimmersion.VanillaImmersion
+import de.mineformers.vanillaimmersion.block.CraftingTable
 import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic
 import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic.Companion.Slot
 import net.minecraft.client.Minecraft
@@ -16,10 +16,10 @@ import net.minecraftforge.fml.common.Loader
 /**
  * Renders the items on top of a crafting table.
  */
-class CraftingTableRenderer : TileEntitySpecialRenderer<CraftingTableLogic>() {
+open class CraftingTableRenderer : TileEntitySpecialRenderer<CraftingTableLogic>() {
     override fun renderTileEntityAt(te: CraftingTableLogic, x: Double, y: Double, z: Double,
                                     partialTicks: Float, destroyStage: Int) {
-        if (te.blockState.block !== VanillaImmersion.Blocks.CRAFTING_TABLE)
+        if (te.blockState.block !is CraftingTable)
             return
         pushMatrix()
         color(1f, 1f, 1f, 1f)

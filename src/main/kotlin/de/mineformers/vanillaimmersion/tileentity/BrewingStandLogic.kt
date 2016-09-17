@@ -23,7 +23,7 @@ import net.minecraftforge.items.wrapper.InvWrapper
 /**
  * Implements all logic and data storage for the brewing stand.
  */
-class BrewingStandLogic : TileEntityBrewingStand(), SubSelections {
+open class BrewingStandLogic : TileEntityBrewingStand(), SubSelections {
     companion object {
         /**
          * Helper enum for meaningful interaction with the inventory.

@@ -1,6 +1,6 @@
 {
   "textures": {
-    "particle": "#texture",
+    "particle": "vimmersion:items/hammer",
     "texture": "vimmersion:items/hammer"
   },
   "elements": [

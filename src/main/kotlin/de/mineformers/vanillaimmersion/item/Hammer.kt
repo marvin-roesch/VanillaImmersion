@@ -8,7 +8,7 @@ import net.minecraft.util.ResourceLocation
 /**
  * The Hammer serves as tool for editing objects on the anvil.
  */
-class Hammer : ItemTool(1f, -2.4f, ToolMaterial.IRON, emptySet()) {
+open class Hammer : ItemTool(1f, -2.4f, ToolMaterial.IRON, emptySet()) {
     init {
         creativeTab = VanillaImmersion.CREATIVE_TAB
         unlocalizedName = "$MODID.hammer"

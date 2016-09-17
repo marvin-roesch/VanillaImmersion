@@ -26,7 +26,7 @@ import net.minecraftforge.oredict.OreDictionary
 /**
  * Implements all logic and data storage for the enchantment table.
  */
-class EnchantingTableLogic : TileEntityEnchantmentTable() {
+open class EnchantingTableLogic : TileEntityEnchantmentTable() {
     companion object {
         /**
          * Helper enum for meaningful interaction with the inventory.
@@ -43,7 +43,7 @@ class EnchantingTableLogic : TileEntityEnchantmentTable() {
         }
     }
 
-    internal inner class EnchantingTableInventory : ItemStackHandler(2) {
+    open inner class EnchantingTableInventory : ItemStackHandler(2) {
         /**
          * Reference to all variants of lapis lazuli.
          */
@@ -76,45 +76,45 @@ class EnchantingTableLogic : TileEntityEnchantmentTable() {
     /**
      * The enchantment table's inventory.
      */
-    internal val inventory = EnchantingTableInventory()
+    open val inventory = EnchantingTableInventory()
     /**
      * An array of the required XP levels for the options available.
      */
-    internal val requiredLevels = intArrayOf(0, 0, 0)
+    val requiredLevels = intArrayOf(0, 0, 0)
     /**
      * An array of guaranteed enchantments among the options available.
      */
-    internal val enchantmentIds = intArrayOf(-1, -1, -1)
+    val enchantmentIds = intArrayOf(-1, -1, -1)
     /**
      * An array of levels for the guaranteed enchantments.
      */
-    internal val enchantmentLevels = intArrayOf(-1, -1, -1)
+    val enchantmentLevels = intArrayOf(-1, -1, -1)
     /**
      * The current XP seed, used for deciding the enchantments.
      */
-    internal var xpSeed = 0L
+    var xpSeed = 0L
     /**
      * The currently active (left) page.
      * `-1` if no enchantable item is stored.
      */
-    internal var page = -1
+    var page = -1
     /**
      * The progress of an active enchantment process.
      */
-    internal var progress = 0
+    var progress = 0
     /**
      * The amount of modifiers consumed in an enchantment.
      */
-    internal var consumedModifiers = 0
+    var consumedModifiers = 0
     /**
      * The result of enchanting an item.
      */
-    internal var result: ItemStack? = null
+    var result: ItemStack? = null
     /**
      * The last tick count (+ partial ticks) before the enchanting process was started.
      * Required for rendering.
      */
-    internal var bobStop = 0f
+    var bobStop = 0f
 
     /**
      * Gets the ItemStack in a given slot.
@@ -161,8 +161,7 @@ class EnchantingTableLogic : TileEntityEnchantmentTable() {
             if (progress > 120 && !worldObj.isRemote) {
                 Inventories.spawn(worldObj, pos, EnumFacing.UP, result)
                 this[Slot.OBJECT] = null
-                if (this[Slot.MODIFIERS] != null)
-                    this[Slot.MODIFIERS]!!.stackSize -= consumedModifiers
+                inventory.extractItem(Slot.MODIFIERS.ordinal, consumedModifiers, false)
                 consumedModifiers = 0
                 progress = 0
                 bobStop = 0f
@@ -174,13 +173,8 @@ class EnchantingTableLogic : TileEntityEnchantmentTable() {
         // Drop all items in the table if there is no enchanting in progress and there's no player nearby (configurable)
         if (Configuration.getBoolean("blocks.enchantment-table.drop-items")
             && result == null && bookSpread <= 0.0 && !worldObj.isRemote) {
-            for (i in inventory.contents.indices) {
-                val stack = inventory.getStackInSlot(i)
-                if (stack != null) {
-                    Inventories.spawn(worldObj, pos, EnumFacing.UP, inventory.extractItem(i, Int.MAX_VALUE, false))
-                    markDirty = true
-                }
-            }
+            dropContents()
+            markDirty = true
         }
 
         // Save data and synchronize with clients if required
@@ -190,10 +184,19 @@ class EnchantingTableLogic : TileEntityEnchantmentTable() {
         }
     }
 
+    open fun dropContents() {
+        for (i in inventory.contents.indices) {
+            val stack = inventory.getStackInSlot(i)
+            if (stack != null) {
+                Inventories.spawn(worldObj, pos, EnumFacing.UP, inventory.extractItem(i, Int.MAX_VALUE, false))
+            }
+        }
+    }
+
     /**
      * Updates the enchantment data according to the stored items.
      */
-    fun updateEnchantment(player: EntityPlayer) {
+    open fun updateEnchantment(player: EntityPlayer) {
         // Use Vanilla container for maximum compatibility
         val container = ContainerEnchantment(player.inventory, worldObj, pos)
         container.tableInventory.setInventorySlotContents(0, this[Slot.OBJECT]?.copy())
@@ -216,7 +219,7 @@ class EnchantingTableLogic : TileEntityEnchantmentTable() {
     /**
      * Tries to start an enchanting process.
      */
-    private fun tryEnchantment(player: EntityPlayer, enchantment: Int) {
+    open protected fun tryEnchantment(player: EntityPlayer, enchantment: Int) {
         val container = ContainerEnchantment(player.inventory, worldObj, pos)
         container.tableInventory.setInventorySlotContents(0, this[Slot.OBJECT]?.copy())
         container.tableInventory.setInventorySlotContents(1, this[Slot.MODIFIERS]?.copy())

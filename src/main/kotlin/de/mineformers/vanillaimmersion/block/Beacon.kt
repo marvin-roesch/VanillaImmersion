@@ -21,7 +21,7 @@ import net.minecraft.world.World
  * Immersive Beacon implementation.
  * Derives from the Vanilla beacon to allow substitution later on.
  */
-class Beacon : BlockBeacon() {
+open class Beacon : BlockBeacon() {
     companion object {
         val EDITING_STAGE = PropertyInteger.create("editing_stage", 0, 3)!!
     }
@@ -63,12 +63,12 @@ class Beacon : BlockBeacon() {
                                                      null,
                                                  stage = 2)
                     else
-                        tile.state = beacon.copy(stage = if(player.isSneaking && beacon.stage == 2) 1 else 3)
+                        tile.state = beacon.copy(stage = if (player.isSneaking && beacon.stage == 2) 1 else 3)
                 } else {
                     // If the player is sneaking and we're in the last stage,
                     // change the stage rather than completing the editing
                     if (player.isSneaking && beacon.stage == 3) {
-                        tile.state = beacon.copy(stage = if(tile.levels > 3) 2 else 1)
+                        tile.state = beacon.copy(stage = if (tile.levels > 3) 2 else 1)
                         return true
                     }
                     // If there was an effect selected, check whether the player has the required payment or

@@ -20,7 +20,7 @@ import net.minecraft.world.World
  * Derives from the Vanilla anvil to allow substitution later on.
  * Adds a tile entity to the anvil, but this does not break Vanilla compatibility.
  */
-class Anvil : BlockAnvil() {
+open class Anvil : BlockAnvil() {
     init {
         setHardness(5.0F)
         soundType = SoundType.ANVIL

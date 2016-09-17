@@ -19,7 +19,7 @@ import java.lang.Math.*
 /**
  * Renders effect icons for the beacon.
  */
-class BeaconRenderer : TileEntityBeaconRenderer() {
+open class BeaconRenderer : TileEntityBeaconRenderer() {
     val POTION_LEVEL_TEXTURE = ResourceLocation(VanillaImmersion.MODID, "textures/icons/potion_level.png")
 
     override fun renderTileEntityAt(te: TileEntityBeacon?, x: Double, y: Double, z: Double,

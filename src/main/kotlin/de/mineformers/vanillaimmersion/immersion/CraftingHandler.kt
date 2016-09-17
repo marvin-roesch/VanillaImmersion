@@ -9,18 +9,13 @@ import de.mineformers.vanillaimmersion.util.blockPos
 import de.mineformers.vanillaimmersion.util.minus
 import de.mineformers.vanillaimmersion.util.times
 import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.inventory.Container
-import net.minecraft.inventory.InventoryCrafting
 import net.minecraft.item.ItemStack
-import net.minecraft.item.crafting.CraftingManager
 import net.minecraft.stats.StatList
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumHand
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.World
-import net.minecraft.world.WorldServer
-import net.minecraftforge.common.util.FakePlayerFactory
 import net.minecraftforge.event.entity.player.PlayerInteractEvent
 import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -107,12 +102,12 @@ object CraftingHandler {
             return true
         // Special case for the output
         if (slotX == 3 && slotY == 1) {
-            takeCraftingResult(world, pos, player, tile[Slot.OUTPUT], false)
+            tile.takeCraftingResult(player, tile[Slot.OUTPUT], false)
             // If the player is sneaking, try to extract as many crafting results from the table as possible
             if (player.isSneaking && !world.isRemote) {
                 val result = tile[Slot.OUTPUT]
                 while (result != null && Inventories.equal(result, tile[Slot.OUTPUT])) {
-                    takeCraftingResult(world, pos, player, tile[Slot.OUTPUT], false)
+                    tile.takeCraftingResult(player, tile[Slot.OUTPUT], false)
                 }
             }
             return true
@@ -123,7 +118,7 @@ object CraftingHandler {
         if (existing != null && !world.isRemote) {
             Inventories.insertOrDrop(player, existing.copy())
             tile[slot] = null
-            craft(world, pos, player)
+            tile.craft(player)
             player.addStat(StatList.CRAFTING_TABLE_INTERACTION)
         }
         return true
@@ -154,7 +149,7 @@ object CraftingHandler {
         if (stack.stackSize == 0)
             player.setHeldItem(EnumHand.MAIN_HAND, null)
         // Try crafting with the added items
-        craft(table.world, table.pos, player)
+        table.craft(player)
     }
 
     /**
@@ -185,72 +180,5 @@ object CraftingHandler {
         // The amount to be inserted into the slot is either the maximum amount or
         // what remains to be filled into the slot
         return if (stack == null) maxAmount else Math.min(stack.maxStackSize - stack.stackSize, maxAmount)
-    }
-
-    /**
-     * Tries to perform a crafting operation.
-     */
-    fun craft(world: World, pos: BlockPos, player: EntityPlayer?) {
-        // Crafting only happens server-side
-        if (world.isRemote)
-            return
-        val tile = world.getTileEntity(pos)
-        if (tile !is CraftingTableLogic)
-            return
-
-        // Initialize the crafting matrix, either via a real crafting container if there is a player or
-        // via a dummy inventory if there is none
-        val matrix =
-            if (player != null)
-                tile.createContainer(player, false).craftMatrix
-            else {
-                val container = object : Container() {
-                    override fun canInteractWith(playerIn: EntityPlayer?) = true
-                }
-                val inventory = InventoryCrafting(container, 3, 3)
-                // Fill the matrix with ingredients
-                for (i in 1..(tile.inventory.slots - 1))
-                    inventory.setInventorySlotContents(i - 1, tile.inventory.getStackInSlot(i))
-                inventory
-            }
-        val result = CraftingManager.getInstance().findMatchingRecipe(matrix, world)
-        // There is no need to craft if there already is the same result
-        if (Inventories.equal(tile[Slot.OUTPUT], result))
-            return
-        tile[Slot.OUTPUT] = result
-    }
-
-    /**
-     * Takes the crafting result from a crafting table, optionally with a player.
-     */
-    fun takeCraftingResult(world: World, pos: BlockPos, player: EntityPlayer?,
-                           result: ItemStack?, simulate: Boolean): Boolean {
-        // Only take the result on the server and if it exists
-        if (world.isRemote || result == null)
-            return true
-        val tile = world.getTileEntity(pos)
-        if (tile !is CraftingTableLogic)
-            return false
-
-        // Use a fake player if the given one is null
-        val craftingPlayer = player ?: FakePlayerFactory.getMinecraft(world as WorldServer)
-        // Create a crafting container and fill it with ingredients
-        val container = tile.createContainer(craftingPlayer, simulate)
-        val craftingSlot = container.getSlot(0)
-        if (craftingSlot.stack == null)
-            return false
-        // Imitate a player picking up an item from the output slot
-        craftingSlot.onPickupFromSlot(craftingPlayer, result)
-        // Only manipulate the table's inventory when we're not simulating the action
-        if (!simulate) {
-            // Grant the player the result
-            if (player != null) {
-                Inventories.insertOrDrop(player, result)
-                tile[Slot.OUTPUT] = null
-            }
-        }
-        // Try to craft a new item right away
-        craft(world, pos, player)
-        return true
     }
 }

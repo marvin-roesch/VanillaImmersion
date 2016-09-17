@@ -116,6 +116,7 @@ for (set in sourceSets) {
     compileTask.dependsOn taskName
     compileTask.source = dir
 }
+sourceJar.from sourceSets.main.kotlin
 
 processResources {
     // this will ensure that this task is redone when the versions change.
@@ -142,7 +143,7 @@ if (bintrayApi != null) {
     bintray {
         user = bintrayUser
         key = bintrayApi
-        publications = ["MainPublication"]
+        publications = ["VanillaImmersion"]
 
         pkg {
             repo = "MinecraftMods"
@@ -171,7 +172,7 @@ if (bintrayApi != null) {
 
 publishing {
     publications {
-        MainPublication(MavenPublication) {
+        VanillaImmersion(MavenPublication) {
             from components.java
 
             groupId 'de.mineformers.vanillaimmersion'
@@ -185,6 +186,7 @@ publishing {
     }
 }
 
+sourceJar.dependsOn reobfShadowJar
 bintrayUpload.dependsOn reobfShadowJar
 
 def cfApi = privateConfig ? priv.cf_api : System.getenv("PROJECT_CURSE_API")

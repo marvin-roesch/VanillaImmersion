@@ -19,7 +19,7 @@ import net.minecraft.world.World
  * Immersive Enchantment Table implementation.
  * Derives from the Vanilla enchanting table to allow substitution later on.
  */
-class EnchantingTable : BlockEnchantmentTable() {
+open class EnchantingTable : BlockEnchantmentTable() {
     init {
         setHardness(5.0F)
         setResistance(2000.0F)
