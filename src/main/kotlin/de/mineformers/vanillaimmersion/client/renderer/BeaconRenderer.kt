@@ -28,12 +28,16 @@ class BeaconRenderer : TileEntityBeaconRenderer() {
         if (te !is BeaconLogic || te.levels <= 0) {
             return
         }
+        // Build icons for the beacon
         val icons: Map<Int, BeaconIcon> =
             if (te.state == null) {
+                // If not editing, just use the current effects
                 buildIconMap(te.primaryEffect, te.secondaryEffect) ?: return
             } else if (te.state!!.stage > 2) {
+                // If editing, but in last stage, display result
                 buildIconMap(te.state!!.primary, te.state!!.secondary) ?: return
             } else {
+                // If editing, decide whether to display barrier (= no selection) or active selection
                 val state = te.state!!
                 val barrierIcon = BeaconIcon(ResourceLocation("textures/items/barrier.png"),
                                              listOf(.0, .0, 1.0, 1.0),
@@ -51,35 +55,42 @@ class BeaconRenderer : TileEntityBeaconRenderer() {
                     mapOf(0 to icon, 1 to icon, 2 to icon, 3 to icon)
                 }
             }
+
         pushMatrix()
         translate(x, y, z)
         translate(.5, .0, .5)
         enableBlend()
+        // Override the depth function to allow correct overlaying of secondary effect icons
         depthFunc(GL11.GL_LESS)
         tryBlendFuncSeparate(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA,
                              SourceFactor.ONE, DestFactor.ZERO)
         disableLighting()
         disableAlpha()
         color(1f, 1f, 1f, 1f)
+        // Activate shader to assign infinite depth to transparent pixels
         Shaders.TRANSPARENT_DEPTH.activate()
         renderQuads(icons)
         Shaders.TRANSPARENT_DEPTH.deactivate()
         disableBlend()
         enableAlpha()
         enableLighting()
+        // Reset changes to the depth function
         depthFunc(GL11.GL_LEQUAL)
         popMatrix()
-        tryBlendFuncSeparate(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA,
-                             SourceFactor.ONE, DestFactor.ZERO)
     }
 
+    /**
+     * Generates a map from side to beacon icon, based on the passed effects.
+     */
     private fun buildIconMap(primary: Potion?, secondary: Potion?): Map<Int, BeaconIcon>? {
         if (primary == null)
             return null
+        // Basic UV calculation, ripped from Vanilla
         var uMin = (primary.statusIconIndex % 8 * 18) / 256.0
         var vMin = (198 + primary.statusIconIndex / 8 * 18) / 256.0
         var uMax = uMin + 18 / 256f
         var vMax = vMin + 18 / 256f
+        // Make the icons pulsate in a 90 tick time frame
         val t = Minecraft.getMinecraft().theWorld.totalWorldTime % 90.0
         val alpha = pulsate(t, 0.1, 0.3, 90.0)
         val primaryIcon = BeaconIcon(GuiContainer.INVENTORY_BACKGROUND,
@@ -87,6 +98,7 @@ class BeaconRenderer : TileEntityBeaconRenderer() {
                                      false,
                                      alpha)
         if (secondary != null) {
+            // If the secondary effect is just the level 2 effect, display only that
             if (secondary == primary) {
                 val secondaryIcon = primaryIcon.copy(level2 = true)
                 return mapOf(0 to secondaryIcon, 1 to secondaryIcon, 2 to secondaryIcon, 3 to secondaryIcon)
@@ -105,41 +117,55 @@ class BeaconRenderer : TileEntityBeaconRenderer() {
         }
     }
 
+    /**
+     * Calculates the current value of a pulsating motion with a given duration.
+     */
     fun pulsate(time: Double, start: Double, change: Double, duration: Double) =
-        abs(start + change * sin(2 * PI * time * (1 / (duration * 2)))).toFloat()
+        (start + change * abs(sin(2 * PI * time * (1 / (duration * 2))))).toFloat()
 
+    /**
+     * Renders beacon icons on every side using the provided information.
+     */
     fun renderQuads(uvs: Map<Int, BeaconIcon>) {
         val tessellator = Tessellator.getInstance()
         val buffer = tessellator.buffer
+        // Draw something for all four sides
         for (i in 0..3) {
             if (i !in uvs.keys)
                 continue
             val (texture, localUVs, level2, alpha) = uvs[i]!!
             pushMatrix()
+            // Rotate according to the current side
             rotate(i * 90f, 0f, 1f, 0f)
             color(1f, 1f, 1f, alpha)
+            // Draw the level 2 overlay first, to fill the depth buffer accordingly
             if (level2) {
+                // The level 2 overlay requires that transparent pixels have infinite depth
                 Shaders.TRANSPARENT_DEPTH.setUniformBool("overrideDepth", true)
                 Minecraft.getMinecraft().renderEngine.bindTexture(POTION_LEVEL_TEXTURE)
                 buffer.begin(GL_QUADS, DefaultVertexFormats.POSITION_TEX)
-                buffer.pos(-.25, .75, .25 + 0.06255).tex(.0, .0).endVertex()
-                buffer.pos(-.25, .25, .25 + 0.06255).tex(.0, 1.0).endVertex()
-                buffer.pos(.25, .25, .25 + 0.06255).tex(1.0, 1.0).endVertex()
-                buffer.pos(.25, .75, .25 + 0.06255).tex(1.0, .0).endVertex()
+                buffer.pos(-.25, .75, .25 + 0.0626).tex(.0, .0).endVertex()
+                buffer.pos(-.25, .25, .25 + 0.0626).tex(.0, 1.0).endVertex()
+                buffer.pos(.25, .25, .25 + 0.0626).tex(1.0, 1.0).endVertex()
+                buffer.pos(.25, .75, .25 + 0.0626).tex(1.0, .0).endVertex()
                 tessellator.draw()
             }
+            // The actual icon does not need infinite depth for transparent pixels
             Shaders.TRANSPARENT_DEPTH.setUniformBool("overrideDepth", false)
             Minecraft.getMinecraft().renderEngine.bindTexture(texture)
             buffer.begin(GL_QUADS, DefaultVertexFormats.POSITION_TEX)
-            buffer.pos(-.25, .75, .25 + 0.06255).tex(localUVs[0], localUVs[1]).endVertex()
-            buffer.pos(-.25, .25, .25 + 0.06255).tex(localUVs[0], localUVs[3]).endVertex()
-            buffer.pos(.25, .25, .25 + 0.06255).tex(localUVs[2], localUVs[3]).endVertex()
-            buffer.pos(.25, .75, .25 + 0.06255).tex(localUVs[2], localUVs[1]).endVertex()
+            buffer.pos(-.25, .75, .25 + 0.0626).tex(localUVs[0], localUVs[1]).endVertex()
+            buffer.pos(-.25, .25, .25 + 0.0626).tex(localUVs[0], localUVs[3]).endVertex()
+            buffer.pos(.25, .25, .25 + 0.0626).tex(localUVs[2], localUVs[3]).endVertex()
+            buffer.pos(.25, .75, .25 + 0.0626).tex(localUVs[2], localUVs[1]).endVertex()
             tessellator.draw()
             popMatrix()
         }
     }
 
+    /**
+     * Wraps around the information about beacon icons.
+     */
     data class BeaconIcon(val texture: ResourceLocation, val uvs: List<Double>,
-                          val level2: Boolean = false, val alpha: Float = 1f)
+                          val level2: Boolean = false, val alpha: Float = 0.7f)
 }

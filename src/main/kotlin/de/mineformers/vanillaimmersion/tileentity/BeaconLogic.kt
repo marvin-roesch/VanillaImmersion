@@ -92,6 +92,9 @@ class BeaconLogic : TileEntityBeacon() {
      */
     operator fun set(slot: Slot, stack: ItemStack?) = setInventorySlotContents(slot.ordinal, stack)
 
+    /**
+     * Implements scrolling behaviour for the beacon while it is in edit mode.
+     */
     fun onScroll(direction: Int) {
         if (state == null || direction == 0)
             return
@@ -100,14 +103,17 @@ class BeaconLogic : TileEntityBeacon() {
         val current = if (secondary) state.secondary else state.primary
         val available = availableEffects(secondary)
         val currentIndex = available.indexOf(current)
-        val signum = if(direction > 0) 1 else -1
+        // We're only concerned with the sign of the scrolling, not its magnitude
+        val signum = if (direction > 0) 1 else -1
         when {
             currentIndex == 0 && direction < 0 ->
+                // When the active selection is the first non-null one and scrolling down, set the selection to null
                 if (secondary)
                     this.state = state.copy(secondary = null)
                 else
                     this.state = state.copy(primary = null, secondary = null)
             currentIndex >= 0 || signum == 1 -> {
+                // Only allow scrolling in either direction if the active selection is not null
                 val new = available[Math.max(0, Math.min(currentIndex + signum, available.size - 1))]
                 if (secondary)
                     this.state = state.copy(secondary = new)
@@ -117,10 +123,19 @@ class BeaconLogic : TileEntityBeacon() {
         }
     }
 
-    override fun getRenderBoundingBox(): AxisAlignedBB = INFINITE_EXTENT_AABB
+    override fun updateBeacon() {
+        val oldLevels = levels
+        super.updateBeacon()
+        // Cancel editing if the beacon's completeness state might have been affected
+        if (oldLevels != levels)
+            state = null
+    }
+
+    override fun getRenderBoundingBox(): AxisAlignedBB = INFINITE_EXTENT_AABB // Required since base implementation does a block check
 
     override fun writeToNBT(compound: NBTTagCompound): NBTTagCompound {
         val result = super.writeToNBT(compound)
+        // Write the editing state to NBT if in edit mode
         if (state != null) {
             val state = NBTTagCompound()
             state.setInteger("Stage", this.state!!.stage)
@@ -141,6 +156,7 @@ class BeaconLogic : TileEntityBeacon() {
         } else {
             this.state = null
         }
+        // Since we're inheriting from the Vanilla implementation, rendering updates must be issued here
         if (worldObj != null && worldObj.isRemote) {
             worldObj.markBlockRangeForRenderUpdate(pos, pos)
         }
@@ -148,8 +164,12 @@ class BeaconLogic : TileEntityBeacon() {
 
     override fun setField(id: Int, value: Int) {
         super.setField(id, value)
+        // Synchronise changes to all fields
         sync()
     }
 
+    /**
+     * Wrapper around the beacon's editing state.
+     */
     data class BeaconState(val primary: Potion? = null, val secondary: Potion? = null, val stage: Int = 1)
 }

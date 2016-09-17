@@ -35,12 +35,16 @@ class Beacon : BlockBeacon() {
         defaultState = blockState.baseState.withProperty(EDITING_STAGE, 0)
     }
 
+    /**
+     * Handles beacon edit mode switching.
+     */
     override fun onBlockActivated(world: World, pos: BlockPos, state: IBlockState,
                                   player: EntityPlayer, hand: EnumHand, stack: ItemStack?,
                                   side: EnumFacing, hitX: Float, hitY: Float, hitZ: Float): Boolean {
         val tile = world.getTileEntity(pos)
         if (tile is BeaconLogic && !world.isRemote && hand == EnumHand.MAIN_HAND) {
             if (tile.state == null && stack == null) {
+                // When right clicked with an empty hand, initiate editing
                 val primary = tile.primaryEffect
                 val secondary = tile.secondaryEffect
                 val available = tile.availableEffects(false)
@@ -48,6 +52,8 @@ class Beacon : BlockBeacon() {
             } else if (tile.state != null) {
                 val beacon = tile.state!!
                 if (beacon.stage != 3 && beacon.primary != null) {
+                    // In the non-final stages, in- or decrease the stage accordingly
+                    // Only allow the second stage to be displayed if the beacon has more than 3 levels
                     if (beacon.stage == 1 && tile.levels > 3)
                         tile.state = beacon.copy(secondary =
                                                  if (beacon.secondary == beacon.primary ||
@@ -57,17 +63,27 @@ class Beacon : BlockBeacon() {
                                                      null,
                                                  stage = 2)
                     else
-                        tile.state = beacon.copy(stage = 3)
+                        tile.state = beacon.copy(stage = if(player.isSneaking && beacon.stage == 2) 1 else 3)
                 } else {
+                    // If the player is sneaking and we're in the last stage,
+                    // change the stage rather than completing the editing
+                    if (player.isSneaking && beacon.stage == 3) {
+                        tile.state = beacon.copy(stage = if(tile.levels > 3) 2 else 1)
+                        return true
+                    }
+                    // If there was an effect selected, check whether the player has the required payment or
+                    // whether he is in creative mode
                     if (beacon.primary != null) {
                         if ((stack == null || !stack.item.isBeaconPayment(stack)) &&
                             !player.capabilities.isCreativeMode)
                             return true
                     }
+                    // Update effects and stop editing
                     tile.primaryEffect = beacon.primary
                     tile.secondaryEffect = if (beacon.primary != null) beacon.secondary else null
                     tile.state = null
-                    if (stack != null) {
+                    // Take away the payment item
+                    if (stack != null && !player.capabilities.isCreativeMode) {
                         stack.stackSize--
                         if (stack.stackSize == 0)
                             player.setHeldItem(hand, null)
