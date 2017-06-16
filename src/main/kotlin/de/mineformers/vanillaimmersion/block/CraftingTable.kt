@@ -3,7 +3,6 @@ package de.mineformers.vanillaimmersion.block
 import de.mineformers.vanillaimmersion.VanillaImmersion
 import de.mineformers.vanillaimmersion.VanillaImmersion.MODID
 import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic
-import de.mineformers.vanillaimmersion.util.Inventories
 import de.mineformers.vanillaimmersion.util.spill
 import net.minecraft.block.BlockHorizontal
 import net.minecraft.block.BlockWorkbench
@@ -13,7 +12,11 @@ import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
-import net.minecraft.util.*
+import net.minecraft.util.EnumFacing
+import net.minecraft.util.EnumHand
+import net.minecraft.util.Mirror
+import net.minecraft.util.ResourceLocation
+import net.minecraft.util.Rotation
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.IBlockAccess
@@ -65,8 +68,8 @@ open class CraftingTable : BlockWorkbench() {
      * Makes the crafting table face its placer.
      */
     override fun getStateForPlacement(world: World, pos: BlockPos,
-                               side: EnumFacing, hitX: Float, hitY: Float, hitZ: Float,
-                               meta: Int, placer: EntityLivingBase): IBlockState {
+                                      side: EnumFacing, hitX: Float, hitY: Float, hitZ: Float,
+                                      meta: Int, placer: EntityLivingBase): IBlockState {
         return this.defaultState.withProperty(FACING, placer.horizontalFacing.opposite)
     }
 

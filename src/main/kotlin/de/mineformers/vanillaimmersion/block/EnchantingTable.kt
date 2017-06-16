@@ -4,7 +4,6 @@ import de.mineformers.vanillaimmersion.VanillaImmersion
 import de.mineformers.vanillaimmersion.VanillaImmersion.MODID
 import de.mineformers.vanillaimmersion.tileentity.EnchantingTableLogic
 import de.mineformers.vanillaimmersion.tileentity.EnchantingTableLogic.Companion.Slot
-import de.mineformers.vanillaimmersion.util.Inventories
 import de.mineformers.vanillaimmersion.util.extract
 import de.mineformers.vanillaimmersion.util.insertOrDrop
 import de.mineformers.vanillaimmersion.util.spill
@@ -53,7 +52,7 @@ open class EnchantingTable : BlockEnchantmentTable() {
         if (!stack.isEmpty) {
             // Try to insert the stack, preferring the modifiers slot
             return tryInsertItem(tile, Slot.MODIFIERS, player, hand, stack) ||
-                   tryInsertItem(tile, Slot.OBJECT, player, hand, stack)
+                tryInsertItem(tile, Slot.OBJECT, player, hand, stack)
         } else {
             // Extract the first stack from the table, preferring the object slot
             val extracted = tile.inventory.extract(0 to 1, 1 to 3)
