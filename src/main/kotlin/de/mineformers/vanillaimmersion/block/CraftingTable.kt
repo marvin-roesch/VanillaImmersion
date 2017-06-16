@@ -39,7 +39,7 @@ open class CraftingTable : BlockWorkbench() {
         unlocalizedName = "$MODID.workbench"
         setCreativeTab(VanillaImmersion.CREATIVE_TAB)
         defaultState = blockState.baseState.withProperty(FACING, EnumFacing.NORTH)
-        registryName = ResourceLocation(MODID, "crafting_table")
+        registryName = ResourceLocation("minecraft", "crafting_table")
     }
 
     @Deprecated("Vanilla")

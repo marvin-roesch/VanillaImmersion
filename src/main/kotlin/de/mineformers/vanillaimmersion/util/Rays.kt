@@ -63,14 +63,14 @@ object Rays {
 
             if (t1 >= 0) {
                 val p = origin + t1 * dir
-                if (box.contains(p) && p.squareDistanceTo(origin) < closestPoint.squareDistanceTo(origin)) {
+                if (p.partOf(box) && p.squareDistanceTo(origin) < closestPoint.squareDistanceTo(origin)) {
                     closestPoint = p
                     face = EnumFacing.VALUES[((2 * i + 4) % 6)]
                 }
             }
             if (t2 >= 0) {
                 val p = origin + t2 * dir
-                if (box.contains(p) && p.squareDistanceTo(origin) < closestPoint.squareDistanceTo(origin)) {
+                if (p.partOf(box) && p.squareDistanceTo(origin) < closestPoint.squareDistanceTo(origin)) {
                     closestPoint = p
                     face = EnumFacing.VALUES[((2 * i + 5) % 6)]
                 }

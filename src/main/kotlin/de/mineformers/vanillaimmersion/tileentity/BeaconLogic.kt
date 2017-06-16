@@ -66,6 +66,8 @@ open class BeaconLogic : TileEntityBeacon() {
         val secondary = state.stage == 2
         val current = if (secondary) state.secondary else state.primary
         val available = availableEffects(secondary)
+        if (available.isEmpty())
+            return
         val currentIndex = available.indexOf(current)
         // We're only concerned with the sign of the scrolling, not its magnitude
         val signum = if (direction > 0) 1 else -1

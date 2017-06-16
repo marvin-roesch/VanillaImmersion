@@ -37,13 +37,6 @@ open class Furnace(val lit: Boolean) : BlockFurnace(lit) {
         }
     }
 
-//    @Deprecated("Vanilla")
-//    override fun getItem(worldIn: World?, pos: BlockPos?, state: IBlockState?) =
-//        ItemStack(VanillaImmersion.Blocks.FURNACE)
-//
-//    override fun getItemDropped(state: IBlockState?, rand: Random?, fortune: Int) =
-//        Item.getItemFromBlock(VanillaImmersion.Blocks.FURNACE)
-
     @Deprecated("Vanilla")
     override fun isOpaqueCube(state: IBlockState) = false
 

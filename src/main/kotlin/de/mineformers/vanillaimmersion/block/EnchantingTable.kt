@@ -28,7 +28,7 @@ open class EnchantingTable : BlockEnchantmentTable() {
         setResistance(2000.0F)
         unlocalizedName = "$MODID.enchantmentTable"
         setCreativeTab(VanillaImmersion.CREATIVE_TAB)
-        registryName = ResourceLocation(MODID, "enchanting_table")
+        registryName = ResourceLocation("minecraft", "enchanting_table")
     }
 
     /**

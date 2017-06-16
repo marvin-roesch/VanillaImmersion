@@ -37,7 +37,7 @@ open class BrewingStand : BlockBrewingStand() {
         setLightLevel(0.125F)
         setCreativeTab(VanillaImmersion.CREATIVE_TAB)
         unlocalizedName = "$MODID.brewingStand"
-        registryName = ResourceLocation(MODID, "brewing_stand")
+        registryName = ResourceLocation("minecraft", "brewing_stand")
     }
 
     /**

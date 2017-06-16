@@ -28,7 +28,7 @@ open class Anvil : BlockAnvil() {
         setResistance(2000.0F)
         setCreativeTab(VanillaImmersion.CREATIVE_TAB)
         unlocalizedName = "$MODID.anvil"
-        registryName = ResourceLocation(MODID, "anvil")
+        registryName = ResourceLocation("minecraft", "anvil")
     }
 
     /**

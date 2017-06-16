@@ -19,6 +19,11 @@ val AxisAlignedBB.min: Vec3d
 val AxisAlignedBB.max: Vec3d
     get() = Vec3d(this.maxX, this.maxY, this.maxZ)
 
+fun Vec3d.partOf(box: AxisAlignedBB) =
+    x in box.minX..box.maxX &&
+    y in box.minY..box.maxY &&
+    z in box.minZ..box.maxZ
+
 fun AxisAlignedBB.rotateX(rotation: Rotation) = rotate(Vec3d(1.0, .0, .0), rotation)
 
 fun AxisAlignedBB.rotateY(rotation: Rotation) = rotate(Vec3d(.0, 1.0, .0), rotation)

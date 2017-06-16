@@ -19,6 +19,7 @@ import de.mineformers.vanillaimmersion.config.Configuration
 import de.mineformers.vanillaimmersion.immersion.CraftingHandler
 import de.mineformers.vanillaimmersion.immersion.EnchantingHandler
 import de.mineformers.vanillaimmersion.item.Hammer
+import de.mineformers.vanillaimmersion.item.SpecialBlockItem
 import de.mineformers.vanillaimmersion.network.AnvilLock
 import de.mineformers.vanillaimmersion.network.AnvilText
 import de.mineformers.vanillaimmersion.network.BeaconScroll
@@ -138,74 +139,6 @@ object VanillaImmersion {
         PROXY.preInit(event)
     }
 
-    /**
-     * Runs during the initialization phase of mod loading, registers recipes etc.
-     */
-    @EventHandler
-    fun init(event: FMLInitializationEvent) {
-        LOG.info("Adding recipes...")
-//        GameRegistry.addShapedRecipe(ItemStack(Items.HAMMER),
-//                                     " IS",
-//                                     " SI",
-//                                     "S  ",
-//                                     'I', VItems.IRON_INGOT, 'S', VItems.STICK)
-//        if (Configuration.getBoolean("blocks.replace-vanilla-recipes")) {
-//            LOG.info("Replacing Vanilla recipes...")
-//            // Add replacement recipes
-//            GameRegistry.addShapedRecipe(ItemStack(Blocks.FURNACE),
-//                                         "###",
-//                                         "# #",
-//                                         "###",
-//                                         '#', VBlocks.COBBLESTONE)
-//            GameRegistry.addShapedRecipe(ItemStack(Blocks.CRAFTING_TABLE),
-//                                         "##",
-//                                         "##",
-//                                         '#', VBlocks.PLANKS)
-//            GameRegistry.addShapedRecipe(ItemStack(Blocks.ANVIL),
-//                                         "III",
-//                                         " i ",
-//                                         "iii",
-//                                         'I', VBlocks.IRON_BLOCK, 'i', VItems.IRON_INGOT)
-//            GameRegistry.addShapedRecipe(ItemStack(Blocks.ENCHANTING_TABLE),
-//                                         " B ",
-//                                         "D#D",
-//                                         "###",
-//                                         '#', VBlocks.OBSIDIAN, 'B', VItems.BOOK, 'D', VItems.DIAMOND)
-//            GameRegistry.addShapedRecipe(ItemStack(Blocks.BREWING_STAND),
-//                                         " B ",
-//                                         "###",
-//                                         '#', VBlocks.COBBLESTONE, 'B', VItems.BLAZE_ROD)
-//            GameRegistry.addShapedRecipe(ItemStack(Blocks.BEACON),
-//                                         "GGG",
-//                                         "GSG",
-//                                         "OOO",
-//                                         'G', VBlocks.GLASS, 'S', VItems.NETHER_STAR, 'O', VBlocks.OBSIDIAN)
-//        }
-//        if (Configuration.getBoolean("blocks.conversion-recipes")) {
-//            LOG.info("Adding Vanilla <-> Immersive recipes...")
-//            // Add Vanilla -> immersive block conversion recipes
-//            GameRegistry.addShapelessRecipe(ItemStack(Blocks.FURNACE), ItemStack(VBlocks.FURNACE))
-//            GameRegistry.addShapelessRecipe(ItemStack(Blocks.CRAFTING_TABLE), ItemStack(VBlocks.CRAFTING_TABLE))
-//            // Fully intact, slightly damaged and very damaged anvils
-//            GameRegistry.addShapelessRecipe(ItemStack(Blocks.ANVIL, 1, 0), ItemStack(VBlocks.ANVIL, 1, 0))
-//            GameRegistry.addShapelessRecipe(ItemStack(Blocks.ANVIL, 1, 1), ItemStack(VBlocks.ANVIL, 1, 1))
-//            GameRegistry.addShapelessRecipe(ItemStack(Blocks.ANVIL, 1, 2), ItemStack(VBlocks.ANVIL, 1, 2))
-//            GameRegistry.addShapelessRecipe(ItemStack(Blocks.ENCHANTING_TABLE), ItemStack(VBlocks.ENCHANTING_TABLE))
-//            GameRegistry.addShapelessRecipe(ItemStack(Blocks.BREWING_STAND), ItemStack(VItems.BREWING_STAND))
-//            GameRegistry.addShapelessRecipe(ItemStack(Blocks.BEACON), ItemStack(VBlocks.BEACON))
-//            // Add immersive -> Vanilla block conversion recipes
-//            GameRegistry.addShapelessRecipe(ItemStack(VBlocks.FURNACE), ItemStack(Blocks.FURNACE))
-//            GameRegistry.addShapelessRecipe(ItemStack(VBlocks.CRAFTING_TABLE), ItemStack(Blocks.CRAFTING_TABLE))
-//            // Fully intact, slightly damaged and very damaged anvils
-//            GameRegistry.addShapelessRecipe(ItemStack(VBlocks.ANVIL, 1, 0), ItemStack(Blocks.ANVIL, 1, 0))
-//            GameRegistry.addShapelessRecipe(ItemStack(VBlocks.ANVIL, 1, 1), ItemStack(Blocks.ANVIL, 1, 1))
-//            GameRegistry.addShapelessRecipe(ItemStack(VBlocks.ANVIL, 1, 2), ItemStack(Blocks.ANVIL, 1, 2))
-//            GameRegistry.addShapelessRecipe(ItemStack(VBlocks.ENCHANTING_TABLE), ItemStack(Blocks.ENCHANTING_TABLE))
-//            GameRegistry.addShapelessRecipe(ItemStack(VItems.BREWING_STAND), ItemStack(Blocks.BREWING_STAND))
-//            GameRegistry.addShapelessRecipe(ItemStack(VBlocks.BEACON), ItemStack(Blocks.BEACON))
-//        }
-    }
-
     @EventHandler
     fun onMissingMappings(event: FMLMissingMappingsEvent) {
         for (mapping in event.get()) {
@@ -275,11 +208,11 @@ object VanillaImmersion {
             // TODO: Unify interaction handling?
             GameRegistry.addSubstitutionAlias("minecraft:furnace", GameRegistry.Type.BLOCK, FURNACE)
             GameRegistry.addSubstitutionAlias("minecraft:lit_furnace", GameRegistry.Type.BLOCK, LIT_FURNACE)
-//            GameRegistry.addSubstitutionAlias("minecraft:crafting_table", GameRegistry.Type.BLOCK, CRAFTING_TABLE)
-//            GameRegistry.addSubstitutionAlias("minecraft:anvil", GameRegistry.Type.BLOCK, ANVIL)
-//            GameRegistry.addSubstitutionAlias("minecraft:enchanting_table", GameRegistry.Type.BLOCK, ENCHANTING_TABLE)
-//            GameRegistry.addSubstitutionAlias("minecraft:brewing_stand", GameRegistry.Type.BLOCK, BREWING_STAND)
-//            GameRegistry.addSubstitutionAlias("minecraft:beacon", GameRegistry.Type.BLOCK, BEACON)
+            GameRegistry.addSubstitutionAlias("minecraft:crafting_table", GameRegistry.Type.BLOCK, CRAFTING_TABLE)
+            GameRegistry.addSubstitutionAlias("minecraft:anvil", GameRegistry.Type.BLOCK, ANVIL)
+            GameRegistry.addSubstitutionAlias("minecraft:enchanting_table", GameRegistry.Type.BLOCK, ENCHANTING_TABLE)
+            GameRegistry.addSubstitutionAlias("minecraft:brewing_stand", GameRegistry.Type.BLOCK, BREWING_STAND)
+            GameRegistry.addSubstitutionAlias("minecraft:beacon", GameRegistry.Type.BLOCK, BEACON)
 
             registerTileEntity(FurnaceLogic::class.java, "furnace")
             registerTileEntity(CraftingTableLogic::class.java, "crafting_table")

@@ -149,10 +149,3 @@ fun ItemStack.merge(into: ItemStack, force: Boolean): ItemStack {
     }
     return into
 }
-
-/**
- * Various utilities for dealing with inventories and item stacks.
- */
-object Inventories {
-
-}
