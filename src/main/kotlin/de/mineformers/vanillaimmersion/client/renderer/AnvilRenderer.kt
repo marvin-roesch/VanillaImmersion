@@ -5,7 +5,14 @@ import de.mineformers.vanillaimmersion.client.gui.AnvilTextGui
 import de.mineformers.vanillaimmersion.tileentity.AnvilLogic
 import de.mineformers.vanillaimmersion.tileentity.AnvilLogic.Companion.Slot
 import net.minecraft.client.Minecraft
-import net.minecraft.client.renderer.GlStateManager.*
+import net.minecraft.client.renderer.GlStateManager.color
+import net.minecraft.client.renderer.GlStateManager.disableRescaleNormal
+import net.minecraft.client.renderer.GlStateManager.enableRescaleNormal
+import net.minecraft.client.renderer.GlStateManager.popMatrix
+import net.minecraft.client.renderer.GlStateManager.pushMatrix
+import net.minecraft.client.renderer.GlStateManager.rotate
+import net.minecraft.client.renderer.GlStateManager.scale
+import net.minecraft.client.renderer.GlStateManager.translate
 import net.minecraft.client.renderer.OpenGlHelper
 import net.minecraft.client.renderer.RenderHelper
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType.FIXED
@@ -21,7 +28,7 @@ import org.apache.commons.lang3.StringUtils
 open class AnvilRenderer : TileEntitySpecialRenderer<AnvilLogic>() {
     // TODO: Maybe switch to FastTESR?
     override fun renderTileEntityAt(te: AnvilLogic, x: Double, y: Double, z: Double,
-                                    partialTicks: Float, destroyStage: Int) {
+                               partialTicks: Float, destroyStage: Int, partialAlpha: Float) {
         if (te.blockState.block !is Anvil)
             return
         pushMatrix()
@@ -68,15 +75,15 @@ open class AnvilRenderer : TileEntitySpecialRenderer<AnvilLogic>() {
         rotate(90f, 0f, 1f, 0f)
         translate(0f, 0f, 0.32f)
         scale(0.00625f, -0.00625f, 0.00625f)
-        val font = Minecraft.getMinecraft().fontRendererObj
+        val font = Minecraft.getMinecraft().fontRenderer
         val activeScreen = Minecraft.getMinecraft().currentScreen
 
         if (StringUtils.isNotEmpty(te.itemName)) {
             val label = I18n.format("vimmersion.anvil.itemName")
             font.drawString(label, -font.getStringWidth(label) / 2, 25 - font.FONT_HEIGHT - 2, 0xFFFFFF)
             if (activeScreen is AnvilTextGui && activeScreen.anvil == te) {
-                activeScreen.nameField.xPosition = -font.getStringWidth(te.itemName) / 2
-                activeScreen.nameField.yPosition = 25
+                activeScreen.nameField.x = -font.getStringWidth(te.itemName) / 2
+                activeScreen.nameField.y = 25
                 activeScreen.nameField.drawTextBox()
             } else {
                 font.drawString(te.itemName, -font.getStringWidth(te.itemName) / 2, 25, 0xFFFFFF)
@@ -84,8 +91,8 @@ open class AnvilRenderer : TileEntitySpecialRenderer<AnvilLogic>() {
         } else if (activeScreen is AnvilTextGui && activeScreen.anvil == te) {
             val label = I18n.format("vimmersion.anvil.itemName")
             font.drawString(label, -font.getStringWidth(label) / 2, 25 - font.FONT_HEIGHT - 2, 0xFFFFFF)
-            activeScreen.nameField.xPosition = -font.getStringWidth(activeScreen.nameField.text) / 2
-            activeScreen.nameField.yPosition = 25
+            activeScreen.nameField.x = -font.getStringWidth(activeScreen.nameField.text) / 2
+            activeScreen.nameField.y = 25
             activeScreen.nameField.drawTextBox()
         }
 

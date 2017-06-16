@@ -4,7 +4,14 @@ import de.mineformers.vanillaimmersion.block.CraftingTable
 import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic
 import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic.Companion.Slot
 import net.minecraft.client.Minecraft
-import net.minecraft.client.renderer.GlStateManager.*
+import net.minecraft.client.renderer.GlStateManager.color
+import net.minecraft.client.renderer.GlStateManager.disableRescaleNormal
+import net.minecraft.client.renderer.GlStateManager.enableRescaleNormal
+import net.minecraft.client.renderer.GlStateManager.popMatrix
+import net.minecraft.client.renderer.GlStateManager.pushMatrix
+import net.minecraft.client.renderer.GlStateManager.rotate
+import net.minecraft.client.renderer.GlStateManager.scale
+import net.minecraft.client.renderer.GlStateManager.translate
 import net.minecraft.client.renderer.OpenGlHelper
 import net.minecraft.client.renderer.RenderHelper
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType.FIXED
@@ -18,7 +25,7 @@ import net.minecraftforge.fml.common.Loader
  */
 open class CraftingTableRenderer : TileEntitySpecialRenderer<CraftingTableLogic>() {
     override fun renderTileEntityAt(te: CraftingTableLogic, x: Double, y: Double, z: Double,
-                                    partialTicks: Float, destroyStage: Int) {
+                               partialTicks: Float, destroyStage: Int, partialAlpha: Float) {
         if (te.blockState.block !is CraftingTable)
             return
         pushMatrix()
@@ -59,8 +66,8 @@ open class CraftingTableRenderer : TileEntitySpecialRenderer<CraftingTableLogic>
         RenderHelper.disableStandardItemLighting()
         disableRescaleNormal()
 
-        if (Loader.isModLoaded("JEI")) {
-            val font = Minecraft.getMinecraft().fontRendererObj
+        if (Loader.isModLoaded("jei")) {
+            val font = Minecraft.getMinecraft().fontRenderer
             translate(0f, 0.001f, 0f)
             scale(0.025f, -0.025f, 0.025f)
             rotate(180f, 0f, 1f, 0f)
@@ -80,7 +87,7 @@ open class CraftingTableRenderer : TileEntitySpecialRenderer<CraftingTableLogic>
         translate(x, 0.01, z)
         val stack = te[slot]
         // Most blocks use a block model which requires special treatment
-        if (stack?.item is ItemBlock) {
+        if (stack.item is ItemBlock) {
             translate(0.0, 0.06328125, 0.0)
             scale(2f, 2f, 2f)
         } else {

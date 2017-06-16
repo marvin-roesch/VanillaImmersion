@@ -1,0 +1,29 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "brewing_stand"
+      }
+    },
+    {
+      "apply": {
+        "model": "brewing_stand_empty0"
+      }
+    },
+    {
+      "apply": {
+        "model": "brewing_stand_empty1"
+      }
+    },
+    {
+      "apply": {
+        "model": "brewing_stand_empty2"
+      }
+    },
+    {
+      "apply": {
+        "model": "vimmersion:brewing_stand_bowl"
+      }
+    }
+  ]
+}

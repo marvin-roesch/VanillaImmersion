@@ -14,12 +14,7 @@ open class BeaconLogic : TileEntityBeacon() {
      * The beacon's block state.
      */
     val blockState: IBlockState
-        get() = worldObj.getBlockState(pos)
-    /**
-     * The height of the pyramid beneath the beacon, -1 if there is none.
-     */
-    val levels: Int
-        get() = getField(0)
+        get() = world.getBlockState(pos)
     /**
      * The beacon's primary effect.
      */
@@ -126,8 +121,8 @@ open class BeaconLogic : TileEntityBeacon() {
             this.state = null
         }
         // Since we're inheriting from the Vanilla implementation, rendering updates must be issued here
-        if (worldObj != null && worldObj.isRemote) {
-            worldObj.markBlockRangeForRenderUpdate(pos, pos)
+        if (world != null && world.isRemote) {
+            world.markBlockRangeForRenderUpdate(pos, pos)
         }
     }
 

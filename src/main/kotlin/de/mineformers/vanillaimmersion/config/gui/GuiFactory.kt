@@ -1,6 +1,7 @@
 package de.mineformers.vanillaimmersion.config.gui
 
 import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.GuiScreen
 import net.minecraftforge.fml.client.IModGuiFactory
 
 /**
@@ -14,4 +15,8 @@ class GuiFactory : IModGuiFactory {
     override fun runtimeGuiCategories() = null
 
     override fun getHandlerFor(element: IModGuiFactory.RuntimeOptionCategoryElement?) = null
+
+    override fun hasConfigGui() = true
+
+    override fun createConfigGui(parentScreen: GuiScreen) = ConfigGui(parentScreen)
 }

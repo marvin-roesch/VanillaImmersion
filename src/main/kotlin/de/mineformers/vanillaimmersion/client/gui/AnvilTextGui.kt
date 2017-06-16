@@ -16,7 +16,7 @@ class AnvilTextGui(val anvil: AnvilLogic) : GuiScreen() {
      * The text field making up the main part of the "GUI"
      */
     val nameField by lazy {
-        val field = GuiTextField(0, this.fontRendererObj, 0, 0, 102, 20)
+        val field = GuiTextField(0, this.fontRenderer, 0, 0, 102, 20)
         field.setTextColor(0xFFFFFFFF.toInt())
         field.text = anvil[Slot.INPUT_OBJECT]?.displayName
         field.enableBackgroundDrawing = false

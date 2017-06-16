@@ -1,11 +1,9 @@
 {
   "additions": [
-    "Immersive version of the beacon that is interacted with by enabling and edit mode through right clicking and then scrolling"
   ],
   "changes": [
-    "Hammers now are iron tools and take damage on use"
+    "Update to Minecraft 1.12"
   ],
   "fixes": [
-    "The book on enchantment tables is now correctly textured"
   ]
 }

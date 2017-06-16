@@ -90,7 +90,7 @@ open class AnvilLogic : TileEntity(), SubSelections {
      * Extension of default item stack handler to control insertion and extraction from certain slots.
      */
     internal inner class AnvilInventory : ItemStackHandler(3) {
-        override fun insertItem(slot: Int, stack: ItemStack, simulate: Boolean): ItemStack? {
+        override fun insertItem(slot: Int, stack: ItemStack, simulate: Boolean): ItemStack {
             if (slot == Slot.HAMMER.ordinal && stack.item != Items.HAMMER)
                 return stack
             return super.insertItem(slot, stack, simulate)
@@ -111,7 +111,7 @@ open class AnvilLogic : TileEntity(), SubSelections {
         /**
          * Easy access to the inventory's stacks, for easier iteration.
          */
-        val contents: Array<ItemStack?>
+        val contents: NonNullList<ItemStack>
             get() = stacks
     }
 
@@ -119,7 +119,7 @@ open class AnvilLogic : TileEntity(), SubSelections {
      * The anvil's block state.
      */
     val blockState: IBlockState
-        get() = worldObj.getBlockState(pos)
+        get() = world.getBlockState(pos)
     /**
      * The anvil's orientation.
      */
@@ -182,13 +182,13 @@ open class AnvilLogic : TileEntity(), SubSelections {
      * Gets the ItemStack in a given slot.
      * Marked as operator to allow this: `anvil[slot]`
      */
-    operator fun get(slot: Slot): ItemStack? = inventory.getStackInSlot(slot.ordinal)
+    operator fun get(slot: Slot): ItemStack = inventory.getStackInSlot(slot.ordinal)
 
     /**
      * Sets the ItemStack in a given slot.
      * Marked as operator to allow this: `anvil[slot] = stack`
      */
-    operator fun set(slot: Slot, stack: ItemStack?) = inventory.setStackInSlot(slot.ordinal, stack)
+    operator fun set(slot: Slot, stack: ItemStack) = inventory.setStackInSlot(slot.ordinal, stack)
 
     /**
      * Checks whether a player is allowed to interact with this anvil,
@@ -205,21 +205,21 @@ open class AnvilLogic : TileEntity(), SubSelections {
      */
     fun sendLockMessage(player: EntityPlayer) {
         // Only do this on the server since this might be called from common code
-        if (!player.worldObj.isRemote && !canInteract(player)) {
-            player.addChatMessage(TextComponentTranslation("vimmersion.anvil.inUse"))
+        if (!player.world.isRemote && !canInteract(player)) {
+            player.sendMessage(TextComponentTranslation("vimmersion.anvil.inUse"))
         }
     }
 
     override fun onRightClickBox(box: SelectionBox,
-                                 player: EntityPlayer, hand: EnumHand, stack: ItemStack?,
+                                 player: EntityPlayer, hand: EnumHand, stack: ItemStack,
                                  side: EnumFacing, hitVec: Vec3d): Boolean {
         if (world.isRemote || hand == EnumHand.OFF_HAND)
             return false
         if (box.slot == null) {
             if (side == EnumFacing.EAST &&
-                stack == null &&
+                stack.isEmpty &&
                 hitVec.y >= 0.625 &&
-                this[Slot.INPUT_OBJECT] != null) {
+                !this[Slot.INPUT_OBJECT].isEmpty) {
                 // When you hit the front face, try to edit the text
                 if (canInteract(player)) {
                     playerLock = player.uniqueID
@@ -233,17 +233,12 @@ open class AnvilLogic : TileEntity(), SubSelections {
         }
         var usedStack = stack
         // When the player is sneaking, only insert a single item from the stack
-        if (usedStack != null && player.isSneaking) {
+        if (!usedStack.isEmpty && player.isSneaking) {
             usedStack = usedStack.copy()
-            usedStack.stackSize = 1
+            usedStack.count = 1
         }
         val slot = Slot.values()[box.slot.id]
         val result = interactWithSlot(world, pos, this, player, slot, stack, slot != Slot.HAMMER)
-        // If the item was consumed and it results in the item stack being empty, remove it from the player's hand
-        if (usedStack?.stackSize == 0 && stack != null) {
-            if (--stack.stackSize <= 0)
-                player.setHeldItem(hand, null)
-        }
         return result
     }
 
@@ -254,21 +249,21 @@ open class AnvilLogic : TileEntity(), SubSelections {
                                         tile: AnvilLogic,
                                         player: EntityPlayer,
                                         slot: Slot,
-                                        stack: ItemStack?,
+                                        stack: ItemStack,
                                         blockLocked: Boolean): Boolean {
         // One of the input slots was clicked
         val existing = tile[slot]
         // If there already was an item in there, drop it
-        if (stack == null && existing != null) {
+        if (stack.isEmpty && !existing.isEmpty) {
             // If the anvil is locked, notify the player
             if (!tile.canInteract(player) && blockLocked) {
                 tile.sendLockMessage(player)
                 return false
             }
             val extracted = tile.inventory.extractItem(slot.ordinal, Int.MAX_VALUE, false)
-            Inventories.insertOrDrop(player, extracted)
+            player.insertOrDrop(extracted)
             return true
-        } else if (stack != null) {
+        } else if (!stack.isEmpty) {
             // If the anvil is locked, notify the player
             if (!tile.canInteract(player) && blockLocked) {
                 tile.sendLockMessage(player)
@@ -305,7 +300,7 @@ open class AnvilLogic : TileEntity(), SubSelections {
         val result = outputSlot.stack ?: return null
         if (!simulate) {
             val oldLevel = player.experienceLevel
-            outputSlot.onPickupFromSlot(player, result)
+            outputSlot.onTake(player, result)
             player.experienceLevel = oldLevel
         }
         return RepairResult(objectSlot.stack, materialSlot.stack, result, container.maximumCost)
@@ -314,16 +309,16 @@ open class AnvilLogic : TileEntity(), SubSelections {
     /**
      * A simple wrapper around the result of a repair operation.
      */
-    data class RepairResult(val input: ItemStack?, val material: ItemStack?, val output: ItemStack?, val requiredLevels: Int)
+    data class RepairResult(val input: ItemStack, val material: ItemStack, val output: ItemStack, val requiredLevels: Int)
 
     override fun onLeftClickBox(box: SelectionBox,
-                                player: EntityPlayer, hand: EnumHand, stack: ItemStack?,
+                                player: EntityPlayer, hand: EnumHand, stack: ItemStack,
                                 side: EnumFacing, hitVec: Vec3d): Boolean {
         if (hand == EnumHand.OFF_HAND)
             return false
-        if (stack?.item != Items.HAMMER || side != EnumFacing.UP)
+        if (stack.item != Items.HAMMER || side != EnumFacing.UP)
             return false
-        hammer(player, stack!!)
+        hammer(player, stack)
         return true
     }
 
@@ -352,26 +347,23 @@ open class AnvilLogic : TileEntity(), SubSelections {
             val mY = rand.nextGaussian() * 0.002
             val mZ = rand.nextGaussian() * 0.002
             val material = this[Slot.INPUT_MATERIAL]
-            val item = if (material != null && rand.nextBoolean()) material.item else this[Slot.INPUT_OBJECT]!!.item
+            val item = if (!material.isEmpty && rand.nextBoolean()) material.item else this[Slot.INPUT_OBJECT].item
             world.spawnParticle(EnumParticleTypes.ITEM_CRACK,
                                 pos.x + 0.5 + dX, pos.y + 1.2 + dY, pos.z + 0.5 + dZ, 1,
                                 mX, mY, mZ, .0,
                                 Item.getIdFromItem(item))
         }
         if (!player.capabilities.isCreativeMode) {
-            player.removeExperienceLevel(1)
+            player.addExperienceLevel(-1)
         }
         stack.damageItem(1, player)
-        if (stack.stackSize == 0) {
-            player.setHeldItem(EnumHand.MAIN_HAND, null)
-        }
         if (hammerCount == requiredHammerCount(player) || player.capabilities.isCreativeMode) {
             val output = tryRepair(world, pos, player, false)!!
             this[Slot.INPUT_OBJECT] = output.input
             this[Slot.INPUT_MATERIAL] = output.material
             itemName = null
             hammerCount = 0
-            Inventories.insertOrDrop(player, output.output?.copy())
+            player.insertOrDrop(output.output.copy())
         } else {
             world.playSound(null, pos.x + 0.5, pos.y + 0.5, pos.z + 0.5,
                             SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 0.5f, 1f)
@@ -429,7 +421,7 @@ open class AnvilLogic : TileEntity(), SubSelections {
      * Reads data from the update packet.
      */
     override fun onDataPacket(net: NetworkManager, pkt: SPacketUpdateTileEntity) {
-        Inventories.clear(inventory)
+        inventory.clear()
         val compound = pkt.nbtCompound
         readFromNBT(compound)
         itemName = compound.getString("ItemName")
@@ -444,14 +436,14 @@ open class AnvilLogic : TileEntity(), SubSelections {
      * Checks whether the anvil has a capability attached to the given side.
      * Will definitely return `true` for the item handler capability
      */
-    override fun hasCapability(capability: Capability<*>?, side: EnumFacing?): Boolean {
+    override fun hasCapability(capability: Capability<*>, side: EnumFacing?): Boolean {
         return capability == ITEM_HANDLER_CAPABILITY || super.hasCapability(capability, side)
     }
 
     /**
      * Gets the instance of a capability for the given side, here specifically the item handler.
      */
-    override fun <T : Any?> getCapability(capability: Capability<T>?, side: EnumFacing?): T {
+    override fun <T> getCapability(capability: Capability<T>, side: EnumFacing?): T? {
         @Suppress("UNCHECKED_CAST")
         if (capability == ITEM_HANDLER_CAPABILITY) {
             // Objects may be directly inserted into the left side of the anvil (when looking at its front)

@@ -4,6 +4,7 @@ import de.mineformers.vanillaimmersion.VanillaImmersion
 import de.mineformers.vanillaimmersion.VanillaImmersion.MODID
 import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic
 import de.mineformers.vanillaimmersion.util.Inventories
+import de.mineformers.vanillaimmersion.util.spill
 import net.minecraft.block.BlockHorizontal
 import net.minecraft.block.BlockWorkbench
 import net.minecraft.block.SoundType
@@ -57,13 +58,13 @@ open class CraftingTable : BlockWorkbench() {
      * [CraftingHandler][de.mineformers.vanillaimmersion.immersion.CraftingHandler].
      */
     override fun onBlockActivated(world: World, pos: BlockPos, state: IBlockState,
-                                  player: EntityPlayer, hand: EnumHand, stack: ItemStack?,
+                                  player: EntityPlayer, hand: EnumHand,
                                   side: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) = true
 
     /**
      * Makes the crafting table face its placer.
      */
-    override fun onBlockPlaced(world: World, pos: BlockPos,
+    override fun getStateForPlacement(world: World, pos: BlockPos,
                                side: EnumFacing, hitX: Float, hitY: Float, hitZ: Float,
                                meta: Int, placer: EntityLivingBase): IBlockState {
         return this.defaultState.withProperty(FACING, placer.horizontalFacing.opposite)
@@ -73,7 +74,7 @@ open class CraftingTable : BlockWorkbench() {
      * Makes the crafting table face its placer.
      */
     override fun onBlockPlacedBy(world: World, pos: BlockPos, state: IBlockState,
-                                 placer: EntityLivingBase, stack: ItemStack?) {
+                                 placer: EntityLivingBase, stack: ItemStack) {
         world.setBlockState(pos, state.withProperty(FACING, placer.horizontalFacing.opposite), 2)
     }
 
@@ -84,7 +85,7 @@ open class CraftingTable : BlockWorkbench() {
         val tile = world.getTileEntity(pos)
 
         if (tile is CraftingTableLogic) {
-            Inventories.spill(world, pos, tile.inventory, 1..tile.inventory.slots - 1)
+            tile.inventory.spill(world, pos, 1..tile.inventory.slots - 1)
             world.updateComparatorOutputLevel(pos, this)
         }
         super.breakBlock(world, pos, state)

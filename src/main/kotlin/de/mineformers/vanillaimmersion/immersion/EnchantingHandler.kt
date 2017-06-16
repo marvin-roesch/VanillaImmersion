@@ -54,9 +54,9 @@ object EnchantingHandler {
         // The sorting is required because otherwise an enchantment table further away might be prioritized.
         val enchantingTables =
             surroundingBlocks
-                .filter { player.worldObj.getTileEntity(it) is EnchantingTableLogic }
+                .filter { player.world.getTileEntity(it) is EnchantingTableLogic }
                 .sortedBy { player.getDistanceSq(it) }
-                .map { player.worldObj.getTileEntity(it) as EnchantingTableLogic }
+                .map { player.world.getTileEntity(it) as EnchantingTableLogic }
         if (enchantingTables.isEmpty())
             return
 
@@ -106,10 +106,10 @@ object EnchantingHandler {
             // reference corners
             val pixelHit =
                 if (right)
-                    Vec3d(0.0, 125.0, 0.0) - Vec3d(-hit.x.toDouble(), hit.y.toDouble(), 0.0) / 0.004
+                    Vec3d(0.0, 125.0, 0.0) - Vec3d(-hit.x, hit.y, 0.0) / 0.004
                 else
-                    Vec3d(94.0, 125.0, 0.0) - Vec3d(hit.x.toDouble(), hit.y.toDouble(), 0.0) / 0.004
-            if (!player.worldObj.isRemote) {
+                    Vec3d(94.0, 125.0, 0.0) - Vec3d(hit.x, hit.y, 0.0) / 0.004
+            if (!player.world.isRemote) {
                 handleUIHit(te, right, player, pixelHit.x, pixelHit.y)
             } else {
                 player.swingArm(EnumHand.MAIN_HAND)

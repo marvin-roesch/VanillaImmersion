@@ -20,22 +20,9 @@ internal interface RenderingProxy {
 
         class ClientProxy : RenderingProxy {
             /**
-             * Holds a reference to the Minecraft timer, required since we need access to partial ticks in places where
-             * you usually don't have it.
-             */
-            private val TIMER_FIELD by lazy {
-                ReflectionHelper.findField(Minecraft::class.java, "field_71428_T", "timer")
-            }
-
-            init {
-                TIMER_FIELD.isAccessible = true
-            }
-
-            /**
              * Property holding the current partial ticks.
              */
-            override val partialTicks: Float
-                get() = (TIMER_FIELD.get(Minecraft.getMinecraft()) as Timer).renderPartialTicks
+            override val partialTicks: Float = Minecraft.getMinecraft().renderPartialTicks
 
             override fun getEyePosition(entity: Entity, partialTicks: Float): Vec3d =
                 entity.getPositionEyes(partialTicks)

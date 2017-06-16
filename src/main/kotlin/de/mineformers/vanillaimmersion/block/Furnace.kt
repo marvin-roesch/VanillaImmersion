@@ -31,18 +31,18 @@ open class Furnace(val lit: Boolean) : BlockFurnace(lit) {
         soundType = SoundType.STONE
         unlocalizedName = "$MODID.furnace"
         setCreativeTab(VanillaImmersion.CREATIVE_TAB)
-        registryName = ResourceLocation(MODID, if (lit) "lit_furnace" else "furnace")
+        registryName = ResourceLocation("minecraft", if (lit) "lit_furnace" else "furnace")
         if (lit) {
             setLightLevel(0.875F)
         }
     }
 
-    @Deprecated("Vanilla")
-    override fun getItem(worldIn: World?, pos: BlockPos?, state: IBlockState?) =
-        ItemStack(VanillaImmersion.Blocks.FURNACE)
-
-    override fun getItemDropped(state: IBlockState?, rand: Random?, fortune: Int) =
-        Item.getItemFromBlock(VanillaImmersion.Blocks.FURNACE)
+//    @Deprecated("Vanilla")
+//    override fun getItem(worldIn: World?, pos: BlockPos?, state: IBlockState?) =
+//        ItemStack(VanillaImmersion.Blocks.FURNACE)
+//
+//    override fun getItemDropped(state: IBlockState?, rand: Random?, fortune: Int) =
+//        Item.getItemFromBlock(VanillaImmersion.Blocks.FURNACE)
 
     @Deprecated("Vanilla")
     override fun isOpaqueCube(state: IBlockState) = false
@@ -53,7 +53,7 @@ open class Furnace(val lit: Boolean) : BlockFurnace(lit) {
      * Handles right clicks for the furnace.
      */
     override fun onBlockActivated(world: World, pos: BlockPos, state: IBlockState,
-                                  player: EntityPlayer, hand: EnumHand, stack: ItemStack?,
+                                  player: EntityPlayer, hand: EnumHand,
                                   side: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) = false
 
     /**
@@ -89,16 +89,16 @@ open class Furnace(val lit: Boolean) : BlockFurnace(lit) {
     /**
      * Drops the furnace's contents when it's broken.
      */
-    override fun breakBlock(worldIn: World?, pos: BlockPos?, state: IBlockState?) {
+    override fun breakBlock(world: World, pos: BlockPos, state: IBlockState) {
         // Mad hax: Keep the inventory when the furnace just changes state from unlit to lit
         // TODO: Evaluate whether this could be handled through TileEntity.shouldRefresh
         if (!FurnaceLogic.KEEP_INVENTORY) {
-            val tile = worldIn?.getTileEntity(pos)
+            val tile = world.getTileEntity(pos)
             if (tile is TileEntityFurnace) {
-                InventoryHelper.dropInventoryItems(worldIn, pos, tile)
-                worldIn!!.updateComparatorOutputLevel(pos, this)
+                InventoryHelper.dropInventoryItems(world, pos, tile)
+                world.updateComparatorOutputLevel(pos, this)
             }
         }
-        worldIn?.removeTileEntity(pos)
+        world.removeTileEntity(pos)
     }
 }

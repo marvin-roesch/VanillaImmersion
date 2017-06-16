@@ -39,11 +39,12 @@ open class Beacon : BlockBeacon() {
      * Handles beacon edit mode switching.
      */
     override fun onBlockActivated(world: World, pos: BlockPos, state: IBlockState,
-                                  player: EntityPlayer, hand: EnumHand, stack: ItemStack?,
+                                  player: EntityPlayer, hand: EnumHand,
                                   side: EnumFacing, hitX: Float, hitY: Float, hitZ: Float): Boolean {
         val tile = world.getTileEntity(pos)
+        val stack = player.getHeldItem(hand)
         if (tile is BeaconLogic && !world.isRemote && hand == EnumHand.MAIN_HAND) {
-            if (tile.state == null && stack == null) {
+            if (tile.state == null && stack.isEmpty) {
                 // When right clicked with an empty hand, initiate editing
                 val primary = tile.primaryEffect
                 val secondary = tile.secondaryEffect
@@ -74,7 +75,7 @@ open class Beacon : BlockBeacon() {
                     // If there was an effect selected, check whether the player has the required payment or
                     // whether he is in creative mode
                     if (beacon.primary != null) {
-                        if ((stack == null || !stack.item.isBeaconPayment(stack)) &&
+                        if ((stack.isEmpty || !stack.item.isBeaconPayment(stack)) &&
                             !player.capabilities.isCreativeMode)
                             return true
                     }
@@ -84,9 +85,7 @@ open class Beacon : BlockBeacon() {
                     tile.state = null
                     // Take away the payment item
                     if (stack != null && !player.capabilities.isCreativeMode) {
-                        stack.stackSize--
-                        if (stack.stackSize == 0)
-                            player.setHeldItem(hand, null)
+                        stack.shrink(1)
                     }
                 }
 

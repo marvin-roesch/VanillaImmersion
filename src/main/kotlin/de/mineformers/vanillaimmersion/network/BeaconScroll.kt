@@ -28,10 +28,10 @@ object BeaconScroll {
 
     object Handler : IMessageHandler<Message, IMessage> {
         override fun onMessage(msg: Message, ctx: MessageContext): IMessage? {
-            val player = ctx.serverHandler.playerEntity
+            val player = ctx.serverHandler.player
             // We interact with the world, hence schedule our action
             player.serverWorld.addScheduledTask {
-                val tile = player.worldObj.getTileEntity(msg.pos)
+                val tile = player.world.getTileEntity(msg.pos)
                 // Ensure the player can interact and "show" them the text "GUI" to insert some text
                 if (tile is BeaconLogic) {
                     tile.onScroll(msg.direction)

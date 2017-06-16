@@ -1,8 +1,5 @@
 package de.mineformers.vanillaimmersion.client.renderer
 
-import de.mineformers.vanillaimmersion.util.x
-import de.mineformers.vanillaimmersion.util.y
-import de.mineformers.vanillaimmersion.util.z
 import gnu.trove.map.hash.TObjectIntHashMap
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.math.Vec3d

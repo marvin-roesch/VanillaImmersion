@@ -4,6 +4,7 @@ import de.mineformers.vanillaimmersion.VanillaImmersion
 import de.mineformers.vanillaimmersion.VanillaImmersion.MODID
 import de.mineformers.vanillaimmersion.tileentity.AnvilLogic
 import de.mineformers.vanillaimmersion.util.Inventories
+import de.mineformers.vanillaimmersion.util.spill
 import net.minecraft.block.BlockAnvil
 import net.minecraft.block.SoundType
 import net.minecraft.block.state.IBlockState
@@ -36,7 +37,7 @@ open class Anvil : BlockAnvil() {
      * [RepairHandler][de.mineformers.vanillaimmersion.immersion.RepairHandler].
      */
     override fun onBlockActivated(world: World, pos: BlockPos, state: IBlockState,
-                                  player: EntityPlayer, hand: EnumHand, stack: ItemStack?,
+                                  player: EntityPlayer, hand: EnumHand,
                                   side: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) = true
 
     /**
@@ -45,7 +46,7 @@ open class Anvil : BlockAnvil() {
     override fun breakBlock(world: World, pos: BlockPos, state: IBlockState) {
         val tile = world.getTileEntity(pos)
         if (tile is AnvilLogic) {
-            Inventories.spill(world, pos, tile.inventory)
+            tile.inventory.spill(world, pos)
             world.updateComparatorOutputLevel(pos, this)
         }
         super.breakBlock(world, pos, state)

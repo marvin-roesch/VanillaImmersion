@@ -5,7 +5,9 @@ import de.mineformers.vanillaimmersion.VanillaImmersion.Blocks.LIT_FURNACE
 import de.mineformers.vanillaimmersion.util.Inventories
 import de.mineformers.vanillaimmersion.util.SelectionBox
 import de.mineformers.vanillaimmersion.util.SubSelections
+import de.mineformers.vanillaimmersion.util.insertOrDrop
 import de.mineformers.vanillaimmersion.util.selectionBox
+import de.mineformers.vanillaimmersion.util.spawn
 import net.minecraft.block.BlockFurnace
 import net.minecraft.block.BlockFurnace.FACING
 import net.minecraft.block.state.IBlockState
@@ -56,7 +58,7 @@ open class FurnaceLogic : TileEntityFurnace(), SubSelections {
 
         val INPUT_SELECTION =
             selectionBox(AxisAlignedBB(3 * 0.0625, 9 * 0.0625, 0.0625,
-                                       13 * 0.0625, 12 * 0.0625, 13 * 0.0625).contract(0.004)) {
+                                       13 * 0.0625, 12 * 0.0625, 13 * 0.0625).shrink(0.004)) {
                 slot(Slot.INPUT.ordinal) {
                     renderFilled = true
                 }
@@ -65,7 +67,7 @@ open class FurnaceLogic : TileEntityFurnace(), SubSelections {
             }
         val FUEL_SELECTION =
             selectionBox(AxisAlignedBB(3 * 0.0625, 0.0625, 0.0625,
-                                       13 * 0.0625, 5 * 0.0625, 13 * 0.0625).contract(0.004)) {
+                                       13 * 0.0625, 5 * 0.0625, 13 * 0.0625).shrink(0.004)) {
                 slot(Slot.FUEL.ordinal) {
                     renderFilled = true
                 }
@@ -79,7 +81,7 @@ open class FurnaceLogic : TileEntityFurnace(), SubSelections {
      * The furnace's block state.
      */
     val blockState: IBlockState
-        get() = worldObj.getBlockState(pos)
+        get() = world.getBlockState(pos)
     /**
      * The furnace's orientation.
      */
@@ -128,18 +130,18 @@ open class FurnaceLogic : TileEntityFurnace(), SubSelections {
      * Gets the ItemStack in a given slot.
      * Marked as operator to allow this: `furnace[slot]`
      */
-    operator fun get(slot: Slot): ItemStack? = getStackInSlot(slot.ordinal)
+    operator fun get(slot: Slot): ItemStack = getStackInSlot(slot.ordinal)
 
     /**
      * Sets the ItemStack in a given slot.
      * Marked as operator to allow this: `furnace[slot] = stack`
      */
-    operator fun set(slot: Slot, stack: ItemStack?) = setInventorySlotContents(slot.ordinal, stack)
+    operator fun set(slot: Slot, stack: ItemStack) = setInventorySlotContents(slot.ordinal, stack)
 
     override val boxes: List<SelectionBox>
         get() = SELECTIONS.map { it.withRotation(rotation) }
 
-    override fun onRightClickBox(box: SelectionBox, player: EntityPlayer, hand: EnumHand, stack: ItemStack?,
+    override fun onRightClickBox(box: SelectionBox, player: EntityPlayer, hand: EnumHand, stack: ItemStack,
                                  side: EnumFacing, hitVec: Vec3d): Boolean {
         // When clicking the front, insert or extract items from the furnace
         if (side == EnumFacing.NORTH && hand == EnumHand.MAIN_HAND) {
@@ -147,14 +149,14 @@ open class FurnaceLogic : TileEntityFurnace(), SubSelections {
                 return true
             val slot = Slot.values()[box.slot!!.id]
             val existing = this[slot]
-            if (stack == null && existing != null) {
+            if (stack.isEmpty && !existing.isEmpty) {
                 // Extract item
                 val extracted = inventory.extractItem(slot.ordinal, Int.MAX_VALUE, false)
-                Inventories.insertOrDrop(player, extracted)
+                player.insertOrDrop(extracted)
                 sync()
                 player.addStat(StatList.FURNACE_INTERACTION)
                 return true
-            } else if (stack != null) {
+            } else if (!stack.isEmpty) {
                 // Insert item
                 val remaining =
                     if (player.isSneaking) {
@@ -162,11 +164,11 @@ open class FurnaceLogic : TileEntityFurnace(), SubSelections {
                         inventory.insertItem(slot.ordinal, stack, false)
                     } else {
                         val single = stack.copy()
-                        single.stackSize = 1
+                        single.count = 1
                         // Only insert one by default
-                        val consumed = inventory.insertItem(slot.ordinal, single, false) == null
+                        val consumed = inventory.insertItem(slot.ordinal, single, false).isEmpty
                         if (consumed)
-                            stack.stackSize--
+                            stack.shrink(1)
                         stack
                     }
                 player.setHeldItem(hand, remaining)
@@ -185,19 +187,19 @@ open class FurnaceLogic : TileEntityFurnace(), SubSelections {
         val input = this[Slot.INPUT]
         val output = this[Slot.OUTPUT]
         // If there is no input, there is nothing to smelt
-        if (input == null) {
+        if (input.isEmpty) {
             return false
         } else {
             val result = FurnaceRecipes.instance().getSmeltingResult(input) ?: return false
             // If there currently is no output, the item can definitely be smelted
-            if (output == null) {
+            if (output.isEmpty) {
                 return true
             }
             // If the current output is different from the new result, the input can't be smelted
             if (!output.isItemEqual(result)) {
                 return false
             }
-            val amountSum = output.stackSize + result.stackSize
+            val amountSum = output.count + result.count
             return amountSum <= inventoryStackLimit && amountSum <= output.maxStackSize //Forge BugFix: Make it respect stack sizes properly.
         }
     }
@@ -207,7 +209,7 @@ open class FurnaceLogic : TileEntityFurnace(), SubSelections {
      */
     override fun update() {
         // We may only do logic on the server
-        if (this.worldObj.isRemote)
+        if (this.world.isRemote)
             return
 
         val wasBurning = this.isBurning
@@ -229,8 +231,8 @@ open class FurnaceLogic : TileEntityFurnace(), SubSelections {
             sync = true
 
             // Reduce the fuel stack's size, replacing it with the container item if necessary
-            if (fuelStack != null)
-                if (fuelLeft > 0 && --fuelStack.stackSize == 0) {
+            if (!fuelStack.isEmpty)
+                if (fuelLeft > 0 && --fuelStack.count == 0) {
                     this[Slot.FUEL] = fuelStack.item.getContainerItem(fuelStack)
                     markDirty = true
                 }
@@ -260,10 +262,10 @@ open class FurnaceLogic : TileEntityFurnace(), SubSelections {
         }
 
         // If there is an item in the output slot, directly drop it to the ground in front of the furnace
-        if (this[Slot.OUTPUT] != null) {
+        if (!this[Slot.OUTPUT].isEmpty) {
             markDirty = true
-            Inventories.spawn(world, pos, worldObj.getBlockState(pos).getValue(FACING), this[Slot.OUTPUT])
-            this[Slot.OUTPUT] = null
+            world.spawn(pos, world.getBlockState(pos).getValue(FACING), this[Slot.OUTPUT])
+            this[Slot.OUTPUT] = ItemStack.EMPTY
         }
 
         if (markDirty) {
@@ -285,23 +287,23 @@ open class FurnaceLogic : TileEntityFurnace(), SubSelections {
      * Updates the furnace block according to its burning state.
      */
     private fun updateState() {
-        val state = worldObj.getBlockState(pos)
-        val tile = worldObj.getTileEntity(pos)
+        val state = world.getBlockState(pos)
+        val tile = world.getTileEntity(pos)
 
         // Vanilla hacks
         KEEP_INVENTORY = true
         // Swap between lit and unlit variant
         if (isBurning) {
-            worldObj.setBlockState(pos, getLitState(state), 3)
+            world.setBlockState(pos, getLitState(state), 3)
         } else {
-            worldObj.setBlockState(pos, getDefaultState(state), 3)
+            world.setBlockState(pos, getDefaultState(state), 3)
         }
         KEEP_INVENTORY = false
 
         // More Vanilla hacks
         if (tile != null) {
             tile.validate()
-            worldObj.setTileEntity(pos, tile)
+            world.setTileEntity(pos, tile)
         }
     }
 
@@ -324,7 +326,7 @@ open class FurnaceLogic : TileEntityFurnace(), SubSelections {
      * Creates a packet for updates of the tile entity at runtime.
      */
     override fun onDataPacket(net: NetworkManager, pkt: SPacketUpdateTileEntity) {
-        Inventories.clear(this)
+        this.clear()
         readFromNBT(pkt.nbtCompound)
     }
 

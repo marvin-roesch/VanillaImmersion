@@ -5,6 +5,9 @@ import de.mineformers.vanillaimmersion.VanillaImmersion.MODID
 import de.mineformers.vanillaimmersion.tileentity.EnchantingTableLogic
 import de.mineformers.vanillaimmersion.tileentity.EnchantingTableLogic.Companion.Slot
 import de.mineformers.vanillaimmersion.util.Inventories
+import de.mineformers.vanillaimmersion.util.extract
+import de.mineformers.vanillaimmersion.util.insertOrDrop
+import de.mineformers.vanillaimmersion.util.spill
 import net.minecraft.block.BlockEnchantmentTable
 import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.player.EntityPlayer
@@ -36,27 +39,25 @@ open class EnchantingTable : BlockEnchantmentTable() {
      * @see de.mineformers.vanillaimmersion.client.EnchantingUIHandler
      */
     override fun onBlockActivated(world: World, pos: BlockPos, state: IBlockState,
-                                  player: EntityPlayer, hand: EnumHand, stack: ItemStack?,
+                                  player: EntityPlayer, hand: EnumHand,
                                   side: EnumFacing, hitX: Float, hitY: Float, hitZ: Float): Boolean {
         if (world.isRemote || hand == EnumHand.OFF_HAND)
             return true
         val tile = world.getTileEntity(pos)
+        val stack = player.getHeldItem(hand)
         if (tile !is EnchantingTableLogic)
             return false
         // Prevent interaction when enchantment is in progress
-        if (tile.result != null)
+        if (!tile.result.isEmpty)
             return false
-        if (stack != null) {
+        if (!stack.isEmpty) {
             // Try to insert the stack, preferring the modifiers slot
             return tryInsertItem(tile, Slot.MODIFIERS, player, hand, stack) ||
                    tryInsertItem(tile, Slot.OBJECT, player, hand, stack)
         } else {
             // Extract the first stack from the table, preferring the object slot
-            val extracted = tile.inventory.extractItem(0, 1, false) ?: tile.inventory.extractItem(1, 3, false)
-            Inventories.insertOrDrop(player, extracted)
-        }
-        if (stack?.stackSize == 0) {
-            player.setHeldItem(hand, null)
+            val extracted = tile.inventory.extract(0 to 1, 1 to 3)
+            player.insertOrDrop(extracted)
         }
         return false
     }
@@ -67,12 +68,9 @@ open class EnchantingTable : BlockEnchantmentTable() {
     private fun tryInsertItem(table: EnchantingTableLogic, slot: Slot,
                               player: EntityPlayer, hand: EnumHand, stack: ItemStack): Boolean {
         val result = table.inventory.insertItem(slot.ordinal, stack.copy(), false)
-        if (result == null || result.stackSize != stack.stackSize) {
+        if (result.isEmpty || result.count != stack.count) {
             // It seems like the insertion was successful, modify the player's held item.
-            stack.stackSize = result?.stackSize ?: 0
-            // The game should remove empty stacks automatically, it doesn't however
-            if (stack.stackSize == 0)
-                player.setHeldItem(hand, null)
+            stack.count = result.count
             table.updateEnchantment(player)
             return true
         }
@@ -86,7 +84,7 @@ open class EnchantingTable : BlockEnchantmentTable() {
         val tile = world.getTileEntity(pos)
 
         if (tile is EnchantingTableLogic) {
-            Inventories.spill(world, pos, tile.inventory)
+            tile.inventory.spill(world, pos)
             world.updateComparatorOutputLevel(pos, this)
         }
         super.breakBlock(world, pos, state)

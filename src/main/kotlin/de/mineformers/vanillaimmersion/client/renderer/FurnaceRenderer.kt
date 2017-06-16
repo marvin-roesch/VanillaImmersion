@@ -5,7 +5,13 @@ import de.mineformers.vanillaimmersion.tileentity.FurnaceLogic
 import de.mineformers.vanillaimmersion.tileentity.FurnaceLogic.Companion.Slot.FUEL
 import de.mineformers.vanillaimmersion.tileentity.FurnaceLogic.Companion.Slot.INPUT
 import net.minecraft.client.Minecraft
-import net.minecraft.client.renderer.GlStateManager.*
+import net.minecraft.client.renderer.GlStateManager.color
+import net.minecraft.client.renderer.GlStateManager.enableRescaleNormal
+import net.minecraft.client.renderer.GlStateManager.popMatrix
+import net.minecraft.client.renderer.GlStateManager.pushMatrix
+import net.minecraft.client.renderer.GlStateManager.rotate
+import net.minecraft.client.renderer.GlStateManager.scale
+import net.minecraft.client.renderer.GlStateManager.translate
 import net.minecraft.client.renderer.OpenGlHelper
 import net.minecraft.client.renderer.RenderHelper
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType.NONE
@@ -17,7 +23,7 @@ import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer
  */
 open class FurnaceRenderer : TileEntitySpecialRenderer<FurnaceLogic>() {
     override fun renderTileEntityAt(te: FurnaceLogic, x: Double, y: Double, z: Double,
-                                    partialTicks: Float, destroyStage: Int) {
+                               partialTicks: Float, destroyStage: Int, partialAlpha: Float) {
         if (te.blockState.block !is Furnace)
             return
         pushMatrix()

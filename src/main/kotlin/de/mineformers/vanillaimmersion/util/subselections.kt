@@ -43,7 +43,7 @@ interface SubSelections {
      * @return `true` if the further processing of the click should be prevented, `false` otherwise
      */
     fun onRightClickBox(box: SelectionBox,
-                        player: EntityPlayer, hand: EnumHand, stack: ItemStack?,
+                        player: EntityPlayer, hand: EnumHand, stack: ItemStack,
                         side: EnumFacing, hitVec: Vec3d) = false
 
     /**
@@ -53,7 +53,7 @@ interface SubSelections {
      * @return `true` if the further processing of the click should be prevented, `false` otherwise
      */
     fun onLeftClickBox(box: SelectionBox,
-                       player: EntityPlayer, hand: EnumHand, stack: ItemStack?,
+                       player: EntityPlayer, hand: EnumHand, stack: ItemStack,
                        side: EnumFacing, hitVec: Vec3d) = false
 
     /**
@@ -61,7 +61,7 @@ interface SubSelections {
      *
      * @return `true` if the further processing of the click should be prevented, `false` otherwise
      */
-    fun onRightClickBlock(player: EntityPlayer, hand: EnumHand, stack: ItemStack?,
+    fun onRightClickBlock(player: EntityPlayer, hand: EnumHand, stack: ItemStack,
                           side: EnumFacing, hitVec: Vec3d) = false
 
     /**
@@ -69,7 +69,7 @@ interface SubSelections {
      *
      * @return `true` if the further processing of the click should be prevented, `false` otherwise
      */
-    fun onLeftClickBlock(player: EntityPlayer, hand: EnumHand, stack: ItemStack?,
+    fun onLeftClickBlock(player: EntityPlayer, hand: EnumHand, stack: ItemStack,
                          side: EnumFacing, hitVec: Vec3d) = false
 }
 
@@ -293,7 +293,7 @@ object SubSelectionRenderer {
     fun onRenderHighlight(event: DrawBlockHighlightEvent) {
         // Mostly ripped from Vanilla
         val player = event.player
-        val world = player.worldObj
+        val world = player.world
         if (event.target.typeOfHit != RayTraceResult.Type.BLOCK)
             return
         val pos = event.target.blockPos
@@ -311,7 +311,7 @@ object SubSelectionRenderer {
             (box.slot == null ||
              (tile.hasCapability(ITEM_HANDLER_CAPABILITY, null) &&
               (box.slot.renderFilled ||
-               itemHandler.getStackInSlot(box.slot.id) == null)))
+               itemHandler!!.getStackInSlot(box.slot.id).isEmpty)))
 
         pushMatrix()
         enableBlend()
@@ -335,7 +335,7 @@ object SubSelectionRenderer {
                 val color = if (hovered == box) hoverColor else Vec3d.ZERO
                 color(color.x.toFloat(), color.y.toFloat(), color.z.toFloat(), 0.4f)
                 val rotated = box.bounds.rotateY(box.rotation).offset(pos)
-                drawSelectionBoundingBox(rotated.expandXyz(0.002),
+                drawSelectionBoundingBox(rotated.grow(0.002),
                                          color.x.toFloat(), color.y.toFloat(), color.z.toFloat(), 0.4f)
             }
 

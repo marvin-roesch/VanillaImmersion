@@ -50,7 +50,7 @@ object CraftingDragHandler {
     /**
      * The stack to be distributed across the crafting grid.
      */
-    private var dragStack: ItemStack? = null
+    private var dragStack: ItemStack = ItemStack.EMPTY
     /**
      * A list of slots covered by the current dragging process.
      */
@@ -89,7 +89,7 @@ object CraftingDragHandler {
     fun onClientTick(event: TickEvent.ClientTickEvent) {
         if (event.phase == TickEvent.Phase.START)
             return
-        if (Minecraft.getMinecraft().theWorld == null || // Covers things like the main menu
+        if (Minecraft.getMinecraft().world == null || // Covers things like the main menu
             Minecraft.getMinecraft().currentScreen != null) { // We do not want this to happen when a GUI is open
             stopDragging(null)
             return
@@ -103,7 +103,7 @@ object CraftingDragHandler {
         val wasDragging = dragging
         val target = dragTarget
         updateDragTarget()
-        val heldItem = Minecraft.getMinecraft().thePlayer.getHeldItem(EnumHand.MAIN_HAND)
+        val heldItem = Minecraft.getMinecraft().player.getHeldItem(EnumHand.MAIN_HAND)
         if (wasDragging && (dragTarget == null || !keyDown || dragStack != heldItem)) {
             stopDragging(target)
         }
@@ -117,7 +117,7 @@ object CraftingDragHandler {
      */
     fun startDragging() {
         dragging = true
-        dragStack = Minecraft.getMinecraft().thePlayer.getHeldItem(EnumHand.MAIN_HAND)
+        dragStack = Minecraft.getMinecraft().player.getHeldItem(EnumHand.MAIN_HAND)
         dragSlots.clear()
         dragAmounts.clear()
     }
@@ -131,8 +131,8 @@ object CraftingDragHandler {
         if (!dragSlots.contains(slot)) {
             dragSlots.add(x + y * 3)
             dragAmounts.clear()
-            val player = Minecraft.getMinecraft().thePlayer
-            val table = player.worldObj.getTileEntity(dragTarget) as CraftingTableLogic
+            val player = Minecraft.getMinecraft().player
+            val table = player.world.getTileEntity(dragTarget) as CraftingTableLogic
             for (s in dragSlots) {
                 dragAmounts[s] = splitDrag(table, player, dragStack, dragSlots, s)
             }
@@ -145,8 +145,8 @@ object CraftingDragHandler {
      */
     fun stopDragging(pos: BlockPos?) {
         if (pos != null && dragTarget == pos) {
-            val tile = Minecraft.getMinecraft().theWorld.getTileEntity(pos)
-            if (tile is CraftingTableLogic && dragStack != null) {
+            val tile = Minecraft.getMinecraft().world.getTileEntity(pos)
+            if (tile is CraftingTableLogic && !dragStack.isEmpty) {
                 VanillaImmersion.NETWORK.sendToServer(CraftingDrag.Message(pos, dragSlots))
             }
         }
@@ -155,14 +155,14 @@ object CraftingDragHandler {
         dragging = false
         dragTarget = null
         dragPosition = null
-        dragStack = null
+        dragStack = ItemStack.EMPTY
     }
 
     /**
      * Analyses the block under the user's cursor and checks if its viable for dragging.
      */
     fun updateDragTarget() {
-        val world = Minecraft.getMinecraft().theWorld
+        val world = Minecraft.getMinecraft().world
         val hovered = Minecraft.getMinecraft().objectMouseOver
         // We're only interested in blocks, although a crafting table entity might be interesting
         if (hovered != null && hovered.typeOfHit == RayTraceResult.Type.BLOCK) {
@@ -206,7 +206,7 @@ object CraftingDragHandler {
         if (!dragging || dragSlots.isEmpty()) {
             return
         }
-        val te = Minecraft.getMinecraft().theWorld.getTileEntity(dragTarget) as CraftingTableLogic
+        val te = Minecraft.getMinecraft().world.getTileEntity(dragTarget) as CraftingTableLogic
 
         // The camera is the origin when this event is called, get its position to translate to the world origin
         val camera = Minecraft.getMinecraft().renderViewEntity ?: return
@@ -243,7 +243,7 @@ object CraftingDragHandler {
         // Render the preview for each slot
         for (slot in dragSlots) {
             val (x, y) = Pair(slot % 3 - 1, slot / 3 - 1)
-            if (dragAmounts.getOrPut(slot, { -1 }) > -1 && te.inventory.getStackInSlot(slot + 1) == null) {
+            if (dragAmounts.getOrPut(slot, { -1 }) > -1 && te.inventory.getStackInSlot(slot + 1).isEmpty) {
                 renderDragStack(x * -0.1875, y * -0.1875)
             }
         }
@@ -256,14 +256,14 @@ object CraftingDragHandler {
         // Render the amount each slot will contain after dragging
         for (slot in dragSlots) {
             val (x, y) = Pair(slot % 3 - 1, slot / 3 - 1)
-            val existing = te.inventory.getStackInSlot(slot + 1)?.stackSize ?: 0
+            val existing = te.inventory.getStackInSlot(slot + 1).count
             val amount = dragAmounts.getOrPut(slot, { -1 })
             if (amount > -1) {
                 pushMatrix()
                 translate(x * -0.1875, 0.2, y * -0.1875)
                 scale(0.00625f, -0.00625f, 0.00625f)
                 rotate(180f, 0f, 1f, 0f)
-                val font = Minecraft.getMinecraft().fontRendererObj
+                val font = Minecraft.getMinecraft().fontRenderer
                 // If there's already something in the slot, display a sum
                 val s = "${if (existing > 0) existing.toString() + "+" else ""}$amount"
                 font.drawString(s, -font.getStringWidth(s) / 2, -font.FONT_HEIGHT, 0xFFFFFF)
@@ -288,7 +288,7 @@ object CraftingDragHandler {
         translate(x, 0.015, z)
         val stack = dragStack
         // Most blocks use a block model which requires special treatment
-        if (stack?.item is ItemBlock) {
+        if (stack.item is ItemBlock) {
             translate(0.0, 0.06328125, 0.0)
             scale(2f, 2f, 2f)
         } else {

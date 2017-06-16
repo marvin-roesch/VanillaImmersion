@@ -13,6 +13,7 @@ import net.minecraft.network.NetworkManager
 import net.minecraft.network.play.server.SPacketUpdateTileEntity
 import net.minecraft.tileentity.TileEntityEnchantmentTable
 import net.minecraft.util.EnumFacing
+import net.minecraft.util.NonNullList
 import net.minecraft.util.SoundCategory
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.WorldServer
@@ -49,7 +50,7 @@ open class EnchantingTableLogic : TileEntityEnchantmentTable() {
          */
         val lapis = OreDictionary.getOres("gemLapis")
 
-        override fun getStackLimit(slot: Int, stack: ItemStack?) =
+        override fun getStackLimit(slot: Int, stack: ItemStack) =
             if (slot == Slot.OBJECT.ordinal)
                 1 // The input slot may only take 1 item
             else if (lapis.any { OreDictionary.itemMatches(it, stack, false) })
@@ -59,8 +60,8 @@ open class EnchantingTableLogic : TileEntityEnchantmentTable() {
 
         override fun onContentsChanged(slot: Int) {
             // Update the output if the inputs were modified
-            if (worldObj is WorldServer)
-                updateEnchantment(FakePlayerFactory.getMinecraft(worldObj as WorldServer))
+            if (world is WorldServer)
+                updateEnchantment(FakePlayerFactory.getMinecraft(world as WorldServer))
             // Sync any inventory changes to the client
             markDirty()
             sync()
@@ -69,7 +70,7 @@ open class EnchantingTableLogic : TileEntityEnchantmentTable() {
         /**
          * Easy access to the inventory's stacks, for easier iteration.
          */
-        val contents: Array<ItemStack?>
+        val contents: NonNullList<ItemStack>
             get() = stacks
     }
 
@@ -109,7 +110,7 @@ open class EnchantingTableLogic : TileEntityEnchantmentTable() {
     /**
      * The result of enchanting an item.
      */
-    var result: ItemStack? = null
+    var result: ItemStack = ItemStack.EMPTY
     /**
      * The last tick count (+ partial ticks) before the enchanting process was started.
      * Required for rendering.
@@ -120,13 +121,13 @@ open class EnchantingTableLogic : TileEntityEnchantmentTable() {
      * Gets the ItemStack in a given slot.
      * Marked as operator to allow this: `table[slot]`
      */
-    operator fun get(slot: Slot): ItemStack? = inventory.getStackInSlot(slot.ordinal)
+    operator fun get(slot: Slot): ItemStack = inventory.getStackInSlot(slot.ordinal)
 
     /**
      * Sets the ItemStack in a given slot.
      * Marked as operator to allow this: `table[slot] = stack`
      */
-    operator fun set(slot: Slot, stack: ItemStack?) = inventory.setStackInSlot(slot.ordinal, stack)
+    operator fun set(slot: Slot, stack: ItemStack) = inventory.setStackInSlot(slot.ordinal, stack)
 
     /**
      * Updates the enchantment table's animation etc.
@@ -142,37 +143,37 @@ open class EnchantingTableLogic : TileEntityEnchantmentTable() {
         flipT = 0f
 
         // If there is a result, update the process
-        if (result != null) {
+        if (!result.isEmpty) {
             // As soon as the client knows about the result, stop bobbing
-            if (progress == 0 && worldObj.isRemote) {
+            if (progress == 0 && world.isRemote) {
                 // Super client-safe code, believe me ;)
                 bobStop = tickCount + Rendering.partialTicks
             }
             progress++
             // Start spawning particles between second 2 and 4 of the process
-            if ((40..80).contains(progress) && worldObj.isRemote) {
+            if ((40..80).contains(progress) && world.isRemote) {
                 // Same here, very safe code
                 val p = Vec3d(Math.random(), 0.75, Math.random()) + pos
                 val d = Vec3d(0.5, 1.75, 0.5) + pos
-                val entity = EnchantingParticle(worldObj, p.x, p.y, p.z, d.x, d.y, d.z)
+                val entity = EnchantingParticle(world, p.x, p.y, p.z, d.x, d.y, d.z)
                 Minecraft.getMinecraft().effectRenderer.addEffect(entity)
             }
             // Once the process is finished, drop the result and clean up all affected fields
-            if (progress > 120 && !worldObj.isRemote) {
-                Inventories.spawn(worldObj, pos, EnumFacing.UP, result)
-                this[Slot.OBJECT] = null
+            if (progress > 120 && !world.isRemote) {
+                world.spawn(pos, EnumFacing.UP, result)
+                this[Slot.OBJECT] = ItemStack.EMPTY
                 inventory.extractItem(Slot.MODIFIERS.ordinal, consumedModifiers, false)
                 consumedModifiers = 0
                 progress = 0
                 bobStop = 0f
-                result = null
+                result = ItemStack.EMPTY
             }
             markDirty = true
         }
 
         // Drop all items in the table if there is no enchanting in progress and there's no player nearby (configurable)
         if (Configuration.getBoolean("blocks.enchantment-table.drop-items")
-            && result == null && bookSpread <= 0.0 && !worldObj.isRemote) {
+            && result.isEmpty && bookSpread <= 0.0 && !world.isRemote) {
             dropContents()
             markDirty = true
         }
@@ -187,8 +188,8 @@ open class EnchantingTableLogic : TileEntityEnchantmentTable() {
     open fun dropContents() {
         for (i in inventory.contents.indices) {
             val stack = inventory.getStackInSlot(i)
-            if (stack != null) {
-                Inventories.spawn(worldObj, pos, EnumFacing.UP, inventory.extractItem(i, Int.MAX_VALUE, false))
+            if (!stack.isEmpty) {
+                world.spawn(pos, EnumFacing.UP, inventory.extractItem(i, Int.MAX_VALUE, false))
             }
         }
     }
@@ -198,9 +199,9 @@ open class EnchantingTableLogic : TileEntityEnchantmentTable() {
      */
     open fun updateEnchantment(player: EntityPlayer) {
         // Use Vanilla container for maximum compatibility
-        val container = ContainerEnchantment(player.inventory, worldObj, pos)
-        container.tableInventory.setInventorySlotContents(0, this[Slot.OBJECT]?.copy())
-        container.tableInventory.setInventorySlotContents(1, this[Slot.MODIFIERS]?.copy())
+        val container = ContainerEnchantment(player.inventory, world, pos)
+        container.tableInventory.setInventorySlotContents(0, this[Slot.OBJECT].copy())
+        container.tableInventory.setInventorySlotContents(1, this[Slot.MODIFIERS].copy())
         for (i in requiredLevels.indices) {
             requiredLevels[i] = container.enchantLevels[i]
             enchantmentIds[i] = container.enchantClue[i]
@@ -220,16 +221,16 @@ open class EnchantingTableLogic : TileEntityEnchantmentTable() {
      * Tries to start an enchanting process.
      */
     open protected fun tryEnchantment(player: EntityPlayer, enchantment: Int) {
-        val container = ContainerEnchantment(player.inventory, worldObj, pos)
-        container.tableInventory.setInventorySlotContents(0, this[Slot.OBJECT]?.copy())
-        container.tableInventory.setInventorySlotContents(1, this[Slot.MODIFIERS]?.copy())
+        val container = ContainerEnchantment(player.inventory, world, pos)
+        container.tableInventory.setInventorySlotContents(0, this[Slot.OBJECT].copy())
+        container.tableInventory.setInventorySlotContents(1, this[Slot.MODIFIERS].copy())
         // Only if Vanilla allows the enchantment, we do
         if (container.enchantItem(player, enchantment)) {
             // Set up all variables for process and initialize it
             result = container.tableInventory.getStackInSlot(0)
             progress = 0
-            val oldModifiers = this[Slot.MODIFIERS]?.stackSize ?: 0
-            val modifiers = container.tableInventory.getStackInSlot(1)?.stackSize ?: 0
+            val oldModifiers = this[Slot.MODIFIERS].count
+            val modifiers = container.tableInventory.getStackInSlot(1).count
             consumedModifiers = oldModifiers - modifiers
             // Notify clients about the change
             markDirty()
@@ -242,7 +243,7 @@ open class EnchantingTableLogic : TileEntityEnchantmentTable() {
      */
     fun performPageAction(player: EntityPlayer, page: Int, x: Double, y: Double) {
         // Block interaction while enchanting is in progress
-        if (result != null)
+        if (!result.isEmpty)
             return
         var sync = false
         // Magic numbers, yes, but this covers "button" clicks on all pages
@@ -253,7 +254,7 @@ open class EnchantingTableLogic : TileEntityEnchantmentTable() {
                 // Drop all items and update the enchantment data
                 for (i in 0..(inventory.slots - 1)) {
                     val extracted = inventory.extractItem(i, Int.MAX_VALUE, false)
-                    Inventories.insertOrDrop(player, extracted)
+                    player.insertOrDrop(extracted)
                 }
                 updateEnchantment(player)
             } else {
@@ -263,12 +264,12 @@ open class EnchantingTableLogic : TileEntityEnchantmentTable() {
         } else if ((x <= 47 || x <= 16 && y >= 98 && y <= 118) && page == 2) {
             // Handle the left page turn button
             this.page = Math.max(this.page - 2, 0)
-            worldObj.playSound(null, pos, VanillaImmersion.Sounds.ENCHANTING_PAGE_TURN, SoundCategory.BLOCKS, 1f, 1f)
+            world.playSound(null, pos, VanillaImmersion.Sounds.ENCHANTING_PAGE_TURN, SoundCategory.BLOCKS, 1f, 1f)
             sync = true
         } else if ((x >= 47 || x >= 78 && y >= 98 && y <= 118) && page == 1) {
             // Handle the right page turn button
             this.page = Math.min(this.page + 2, 2)
-            worldObj.playSound(null, pos, VanillaImmersion.Sounds.ENCHANTING_PAGE_TURN, SoundCategory.BLOCKS, 1f, 1f)
+            world.playSound(null, pos, VanillaImmersion.Sounds.ENCHANTING_PAGE_TURN, SoundCategory.BLOCKS, 1f, 1f)
             sync = true
         }
         if (sync)
@@ -303,8 +304,8 @@ open class EnchantingTableLogic : TileEntityEnchantmentTable() {
         compound.setLong("XPSeed", xpSeed)
         compound.setInteger("Page", page)
         compound.setInteger("Progress", progress)
-        if (result != null) {
-            compound.setTag("Result", result?.writeToNBT(NBTTagCompound()))
+        if (!result.isEmpty) {
+            compound.setTag("Result", result.writeToNBT(NBTTagCompound()))
         }
         compound.setInteger("ConsumedModifiers", consumedModifiers)
         return compound
@@ -319,7 +320,7 @@ open class EnchantingTableLogic : TileEntityEnchantmentTable() {
      * Reads data from the update packet.
      */
     override fun onDataPacket(net: NetworkManager, pkt: SPacketUpdateTileEntity) {
-        Inventories.clear(inventory)
+        inventory.clear()
         val compound = pkt.nbtCompound
         readFromNBT(compound)
         val requiredLevels = compound.getIntArray("RequiredLevels")
@@ -339,9 +340,9 @@ open class EnchantingTableLogic : TileEntityEnchantmentTable() {
         progress = compound.getInteger("Progress")
         result =
             if (compound.hasKey("Result"))
-                ItemStack.loadItemStackFromNBT(compound.getCompoundTag("Result"))
+                ItemStack(compound.getCompoundTag("Result"))
             else
-                null
+                ItemStack.EMPTY
         consumedModifiers = compound.getInteger("ConsumedModifiers")
     }
 
@@ -349,14 +350,14 @@ open class EnchantingTableLogic : TileEntityEnchantmentTable() {
      * Checks whether the enchantment table has a capability attached to the given side.
      * Will definitely return `true` for the item handler capability
      */
-    override fun hasCapability(capability: Capability<*>?, side: EnumFacing?): Boolean {
-        return (result == null && capability == ITEM_HANDLER_CAPABILITY) || super.hasCapability(capability, side)
+    override fun hasCapability(capability: Capability<*>, side: EnumFacing?): Boolean {
+        return (result.isEmpty && capability == ITEM_HANDLER_CAPABILITY) || super.hasCapability(capability, side)
     }
 
     /**
      * Gets the instance of a capability for the given side, here specifically the item handler.
      */
-    override fun <T : Any?> getCapability(capability: Capability<T>?, side: EnumFacing?): T {
+    override fun <T : Any?> getCapability(capability: Capability<T>, side: EnumFacing?): T? {
         @Suppress("UNCHECKED_CAST")
         if (capability == ITEM_HANDLER_CAPABILITY) {
             return inventory as T

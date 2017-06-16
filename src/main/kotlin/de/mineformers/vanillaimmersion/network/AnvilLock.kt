@@ -30,8 +30,8 @@ object AnvilLock {
         override fun onMessage(msg: Message, ctx: MessageContext): IMessage? {
             // We interact with the world, hence schedule our action
             Minecraft.getMinecraft().addScheduledTask {
-                val player = Minecraft.getMinecraft().thePlayer
-                val tile = player.worldObj.getTileEntity(msg.pos)
+                val player = Minecraft.getMinecraft().player
+                val tile = player.world.getTileEntity(msg.pos)
                 // Ensure the player can interact and "show" them the text "GUI" to insert some text
                 if (tile is AnvilLogic && tile.canInteract(player)) {
                     Minecraft.getMinecraft().displayGuiScreen(AnvilTextGui(tile))

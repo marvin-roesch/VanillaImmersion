@@ -1,14 +1,20 @@
 package de.mineformers.vanillaimmersion.tileentity
 
 import de.mineformers.vanillaimmersion.block.CraftingTable
-import de.mineformers.vanillaimmersion.immersion.CraftingHandler
-import de.mineformers.vanillaimmersion.util.Inventories
 import de.mineformers.vanillaimmersion.util.SelectionBox
 import de.mineformers.vanillaimmersion.util.SubSelections
+import de.mineformers.vanillaimmersion.util.clear
+import de.mineformers.vanillaimmersion.util.equal
+import de.mineformers.vanillaimmersion.util.insertOrDrop
 import de.mineformers.vanillaimmersion.util.selectionBox
 import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.inventory.*
+import net.minecraft.inventory.Container
+import net.minecraft.inventory.ContainerWorkbench
+import net.minecraft.inventory.InventoryCraftResult
+import net.minecraft.inventory.InventoryCrafting
+import net.minecraft.inventory.Slot
+import net.minecraft.inventory.SlotCrafting
 import net.minecraft.item.ItemStack
 import net.minecraft.item.crafting.CraftingManager
 import net.minecraft.nbt.NBTTagCompound
@@ -16,7 +22,13 @@ import net.minecraft.network.NetworkManager
 import net.minecraft.network.play.server.SPacketUpdateTileEntity
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.EnumFacing
-import net.minecraft.util.EnumFacing.*
+import net.minecraft.util.EnumFacing.DOWN
+import net.minecraft.util.EnumFacing.EAST
+import net.minecraft.util.EnumFacing.NORTH
+import net.minecraft.util.EnumFacing.SOUTH
+import net.minecraft.util.EnumFacing.UP
+import net.minecraft.util.EnumFacing.WEST
+import net.minecraft.util.NonNullList
 import net.minecraft.util.Rotation
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.Vec3d
@@ -87,8 +99,8 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
                         continue
                     builder.add(
                         selectionBox(AxisAlignedBB((13 - x * 3) * .0625, .8751, (12 - y * 3) * .0625,
-                                                   (13 - x * 3 - 2) * .0625, .89, (12 - y * 3 - 2) * .0625)
-                                         .contract(0.004)) {
+                            (13 - x * 3 - 2) * .0625, .89, (12 - y * 3 - 2) * .0625)
+                            .shrink(0.004)) {
                             rightClicks = false
                             leftClicks = false
 
@@ -107,21 +119,21 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
      * Extension of default item stack handler to control insertion and extraction from certain slots.
      */
     internal inner class CraftingTableInventory : ItemStackHandler(10) {
-        override fun insertItem(slot: Int, stack: ItemStack?, simulate: Boolean): ItemStack? {
+        override fun insertItem(slot: Int, stack: ItemStack, simulate: Boolean): ItemStack {
             // No stacks may be inserted into the output slot
             if (slot == Slot.OUTPUT.ordinal)
                 return stack
             return super.insertItem(slot, stack, simulate)
         }
 
-        override fun extractItem(slot: Int, amount: Int, simulate: Boolean): ItemStack? {
+        override fun extractItem(slot: Int, amount: Int, simulate: Boolean): ItemStack {
             // Items may only be extracted from the output slot if the recipe does not require any player data etc.
             if (slot == Slot.OUTPUT.ordinal) {
                 // Simulate the extraction first to get the likely result
                 val extracted = super.extractItem(slot, amount, true)
                 // Check the "craftability" again and indicate failure if it was unsuccessful
                 if (!takeCraftingResult(null, extracted, simulate))
-                    return null
+                    return ItemStack.EMPTY
             }
             return super.extractItem(slot, amount, simulate)
         }
@@ -139,7 +151,7 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
         /**
          * Easy access to the inventory's stacks, for easier iteration.
          */
-        val contents: Array<ItemStack?>
+        val contents: NonNullList<ItemStack>
             get() = stacks
     }
 
@@ -147,7 +159,7 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
      * The crafting table's block state.
      */
     val blockState: IBlockState
-        get() = worldObj.getBlockState(pos)
+        get() = world.getBlockState(pos)
     /**
      * The crafting table's orientation.
      */
@@ -205,25 +217,25 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
     }
 
     inner class CraftingTableContainer(player: EntityPlayer, simulate: Boolean) :
-        ContainerWorkbench(player.inventory, worldObj, pos) {
+        ContainerWorkbench(player.inventory, world, pos) {
         init {
             if (!simulate) {
                 craftMatrix = object : InventoryCrafting(this, 3, 3) {
                     override fun getStackInSlot(index: Int) =
                         this@CraftingTableLogic.inventory.getStackInSlot(index + 1)
 
-                    override fun setInventorySlotContents(index: Int, stack: ItemStack?) {
+                    override fun setInventorySlotContents(index: Int, stack: ItemStack) {
                         this@CraftingTableLogic.inventory.setStackInSlot(index + 1, stack)
                         onCraftMatrixChanged(this)
                     }
 
-                    override fun removeStackFromSlot(index: Int): ItemStack? {
+                    override fun removeStackFromSlot(index: Int): ItemStack {
                         val result = this@CraftingTableLogic.inventory.extractItem(index + 1, Integer.MAX_VALUE, false)
                         onCraftMatrixChanged(this)
                         return result
                     }
 
-                    override fun decrStackSize(index: Int, count: Int): ItemStack? {
+                    override fun decrStackSize(index: Int, count: Int): ItemStack {
                         val result = this@CraftingTableLogic.inventory.extractItem(index + 1, count, false)
                         onCraftMatrixChanged(this)
                         return result
@@ -231,20 +243,20 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
 
                     override fun clear() {
                         for (i in 1..sizeInventory)
-                            this@CraftingTableLogic.inventory.setStackInSlot(i, null)
+                            this@CraftingTableLogic.inventory.setStackInSlot(i, ItemStack.EMPTY)
                     }
                 }
                 craftResult = object : InventoryCraftResult() {
                     override fun getStackInSlot(index: Int) =
                         this@CraftingTableLogic.inventory.getStackInSlot(0)
 
-                    override fun setInventorySlotContents(index: Int, stack: ItemStack?) {
+                    override fun setInventorySlotContents(index: Int, stack: ItemStack) {
                         this@CraftingTableLogic.inventory.contents[0] = stack
                         this@CraftingTableLogic.markDirty()
                         sync()
                     }
 
-                    override fun removeStackFromSlot(index: Int): ItemStack? {
+                    override fun removeStackFromSlot(index: Int): ItemStack {
                         val result = this@CraftingTableLogic.inventory.getStackInSlot(0)
                         this@CraftingTableLogic.inventory.contents[0] = null
                         this@CraftingTableLogic.markDirty()
@@ -287,7 +299,7 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
 
             if (inventory.itemStack != null) {
                 player.dropItem(inventory.itemStack, false)
-                inventory.itemStack = null
+                inventory.itemStack = ItemStack.EMPTY
             }
         }
 
@@ -301,13 +313,13 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
      * Gets the ItemStack in a given slot.
      * Marked as operator to allow this: `table[slot]`
      */
-    operator fun get(slot: Slot): ItemStack? = inventory.getStackInSlot(slot.ordinal)
+    operator fun get(slot: Slot): ItemStack = inventory.getStackInSlot(slot.ordinal)
 
     /**
      * Sets the ItemStack in a given slot.
      * Marked as operator to allow this: `table[slot] = stack`
      */
-    operator fun set(slot: Slot, stack: ItemStack?) = inventory.setStackInSlot(slot.ordinal, stack)
+    operator fun set(slot: Slot, stack: ItemStack) = inventory.setStackInSlot(slot.ordinal, stack)
 
     override val boxes: List<SelectionBox>
         get() = SELECTIONS.map { it.withRotation(rotation) }
@@ -335,9 +347,9 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
                     inventory.setInventorySlotContents(i - 1, this.inventory.getStackInSlot(i))
                 inventory
             }
-        val result = CraftingManager.getInstance().findMatchingRecipe(matrix, world)
+        val result = CraftingManager.findMatchingResult(matrix, world)
         // There is no need to craft if there already is the same result
-        if (Inventories.equal(this[Slot.OUTPUT], result))
+        if (this[Slot.OUTPUT].equal(result))
             return
         this[Slot.OUTPUT] = result
     }
@@ -345,9 +357,9 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
     /**
      * Takes the crafting result from a crafting table, optionally with a player.
      */
-    fun takeCraftingResult(player: EntityPlayer?, result: ItemStack?, simulate: Boolean): Boolean {
+    fun takeCraftingResult(player: EntityPlayer?, result: ItemStack, simulate: Boolean): Boolean {
         // Only take the result on the server and if it exists
-        if (world.isRemote || result == null)
+        if (world.isRemote || result.isEmpty)
             return true
         val tile = world.getTileEntity(pos)
         if (tile !is CraftingTableLogic)
@@ -361,13 +373,13 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
         if (craftingSlot.stack == null)
             return false
         // Imitate a player picking up an item from the output slot
-        craftingSlot.onPickupFromSlot(craftingPlayer, result)
+        craftingSlot.onTake(craftingPlayer, result)
         // Only manipulate the table's inventory when we're not simulating the action
         if (!simulate) {
             // Grant the player the result
             if (player != null) {
                 dropResult(player, result)
-                tile[Slot.OUTPUT] = null
+                tile[Slot.OUTPUT] = ItemStack.EMPTY
             }
         }
         // Try to craft a new item right away
@@ -378,8 +390,8 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
     /**
      * Drops the result of the current crafting operation.
      */
-    open protected fun dropResult(player: EntityPlayer, result: ItemStack?) {
-        Inventories.insertOrDrop(player, result)
+    open protected fun dropResult(player: EntityPlayer, result: ItemStack) {
+        player.insertOrDrop(result)
     }
 
     /**
@@ -413,7 +425,7 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
      * Reads data from the update packet.
      */
     override fun onDataPacket(net: NetworkManager, pkt: SPacketUpdateTileEntity) {
-        Inventories.clear(inventory)
+        inventory.clear()
         readFromNBT(pkt.nbtCompound)
     }
 
@@ -421,14 +433,14 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
      * Checks whether the crafting table has a capability attached to the given side.
      * Will definitely return `true` for the item handler capability
      */
-    override fun hasCapability(capability: Capability<*>?, side: EnumFacing?): Boolean {
+    override fun hasCapability(capability: Capability<*>, side: EnumFacing?): Boolean {
         return capability == ITEM_HANDLER_CAPABILITY || super.hasCapability(capability, side)
     }
 
     /**
      * Gets the instance of a capability for the given side, here specifically the item handler.
      */
-    override fun <T : Any?> getCapability(capability: Capability<T>?, side: EnumFacing?): T {
+    override fun <T : Any?> getCapability(capability: Capability<T>, side: EnumFacing?): T? {
         @Suppress("UNCHECKED_CAST")
         if (capability == ITEM_HANDLER_CAPABILITY) {
             // Return the appropriate inventory for the vertical sides

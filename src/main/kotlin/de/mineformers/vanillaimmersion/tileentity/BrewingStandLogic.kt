@@ -106,7 +106,7 @@ open class BrewingStandLogic : TileEntityBrewingStand(), SubSelections {
      * The brewing stand's block state.
      */
     val blockState: IBlockState
-        get() = worldObj.getBlockState(pos)
+        get() = world.getBlockState(pos)
     /**
      * The brewing stand's inventory.
      */
@@ -116,19 +116,19 @@ open class BrewingStandLogic : TileEntityBrewingStand(), SubSelections {
      * Gets the ItemStack in a given slot.
      * Marked as operator to allow this: `stand[slot]`
      */
-    operator fun get(slot: Slot): ItemStack? = getStackInSlot(slot.ordinal)
+    operator fun get(slot: Slot): ItemStack = getStackInSlot(slot.ordinal)
 
     /**
      * Sets the ItemStack in a given slot.
      * Marked as operator to allow this: `stand[slot] = stack`
      */
-    operator fun set(slot: Slot, stack: ItemStack?) = setInventorySlotContents(slot.ordinal, stack)
+    operator fun set(slot: Slot, stack: ItemStack) = setInventorySlotContents(slot.ordinal, stack)
 
     override val boxes = SELECTIONS
 
     override fun cancelsVanillaSelectionRendering() = true
 
-    override fun onRightClickBox(box: SelectionBox, player: EntityPlayer, hand: EnumHand, stack: ItemStack?,
+    override fun onRightClickBox(box: SelectionBox, player: EntityPlayer, hand: EnumHand, stack: ItemStack,
                                  side: EnumFacing, hitVec: Vec3d): Boolean {
         if (hand == EnumHand.OFF_HAND || box == ROD_SELECTION)
             return false
@@ -141,14 +141,14 @@ open class BrewingStandLogic : TileEntityBrewingStand(), SubSelections {
             else
                 box.slot!!.id
         val existing = getStackInSlot(slot)
-        if (stack == null && existing != null) {
+        if (stack.isEmpty && existing != null) {
             // Extract item
             val extracted = inventory.extractItem(slot, Int.MAX_VALUE, false)
-            Inventories.insertOrDrop(player, extracted)
+            player.insertOrDrop(extracted)
             sync()
             player.addStat(StatList.BREWINGSTAND_INTERACTION)
             return true
-        } else if (stack != null) {
+        } else if (!stack.isEmpty) {
             // Insert item
             val remaining =
                 if (player.isSneaking) {
@@ -156,11 +156,11 @@ open class BrewingStandLogic : TileEntityBrewingStand(), SubSelections {
                     inventory.insertItem(slot, stack, false)
                 } else {
                     val single = stack.copy()
-                    single.stackSize = 1
+                    single.count = 1
                     // Only insert one by default
-                    val consumed = inventory.insertItem(slot, single, false) == null
+                    val consumed = inventory.insertItem(slot, single, false).isEmpty
                     if (consumed)
-                        stack.stackSize--
+                        stack.shrink(1)
                     stack
                 }
             player.setHeldItem(hand, remaining)
@@ -174,38 +174,38 @@ open class BrewingStandLogic : TileEntityBrewingStand(), SubSelections {
     /**
      * Checks whether a given item stack may be inserted as fuel into this brewing stand.
      */
-    fun canInsertFuel(stack: ItemStack?): Boolean {
+    fun canInsertFuel(stack: ItemStack): Boolean {
         // Only actual fuel can be inserted, obviously
-        if (stack == null || !isItemValidForSlot(4, stack))
+        if (stack.isEmpty || !isItemValidForSlot(4, stack))
             return false
         val existingIngredient = get(Slot.INPUT_INGREDIENT)
         val existingFuel = get(Slot.INPUT_POWDER)
         // Prefer the ingredient slot, if the stack is a valid ingredient
-        if (existingIngredient == null && isItemValidForSlot(3, stack))
+        if (existingIngredient.isEmpty && isItemValidForSlot(3, stack))
             return false
         // Prefer the ingredient slot, if it still has space for the stack
-        if (existingIngredient != null && existingIngredient.item === stack.item)
-            return existingIngredient.stackSize == existingIngredient.maxStackSize
+        if (!existingIngredient.isEmpty && existingIngredient.item === stack.item)
+            return existingIngredient.count == existingIngredient.maxStackSize
         // Only allow insertion if there is no fuel already or there is more space
-        return existingFuel == null ||
-               (existingFuel.item === stack.item && existingFuel.stackSize != existingFuel.maxStackSize)
+        return existingFuel.isEmpty ||
+               (existingFuel.item === stack.item && existingFuel.count != existingFuel.maxStackSize)
     }
 
     /**
      * Checks the collision with an item and inserts it into the ingredient stack, if suitable.
      */
     fun onItemCollision(item: EntityItem) {
-        if (worldObj.isRemote)
+        if (world.isRemote)
             return
         // Cast a ray straight down onto the "bowl" to check if the item is on top of it
         val hit = Rays.rayTraceBox(item.positionVector, Vec3d(.0, -1.0, .0), BrewingStand.BOWL_AABB.offset(pos))
         if (hit != null) {
             // Try to insert the item
-            val remaining = inventory.insertItem(3, item.entityItem, false)
-            if (remaining == null) {
+            val remaining = inventory.insertItem(3, item.item, false)
+            if (remaining.isEmpty) {
                 item.setDead()
             } else {
-                item.setEntityItemStack(remaining)
+                item.item = remaining
             }
             sync()
         }
@@ -231,7 +231,7 @@ open class BrewingStandLogic : TileEntityBrewingStand(), SubSelections {
      * Reads data from the update packet.
      */
     override fun onDataPacket(net: NetworkManager, pkt: SPacketUpdateTileEntity) {
-        Inventories.clear(this)
+        this.clear()
         val compound = pkt.nbtCompound
         readFromNBT(compound)
     }

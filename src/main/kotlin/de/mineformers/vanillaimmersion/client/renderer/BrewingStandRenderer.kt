@@ -3,7 +3,14 @@ package de.mineformers.vanillaimmersion.client.renderer
 import de.mineformers.vanillaimmersion.tileentity.BrewingStandLogic
 import de.mineformers.vanillaimmersion.tileentity.BrewingStandLogic.Companion.Slot
 import net.minecraft.client.Minecraft
-import net.minecraft.client.renderer.GlStateManager.*
+import net.minecraft.client.renderer.GlStateManager.color
+import net.minecraft.client.renderer.GlStateManager.disableRescaleNormal
+import net.minecraft.client.renderer.GlStateManager.enableRescaleNormal
+import net.minecraft.client.renderer.GlStateManager.popMatrix
+import net.minecraft.client.renderer.GlStateManager.pushMatrix
+import net.minecraft.client.renderer.GlStateManager.rotate
+import net.minecraft.client.renderer.GlStateManager.scale
+import net.minecraft.client.renderer.GlStateManager.translate
 import net.minecraft.client.renderer.OpenGlHelper
 import net.minecraft.client.renderer.RenderHelper
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms
@@ -16,7 +23,7 @@ import net.minecraft.item.ItemBlock
  */
 open class BrewingStandRenderer : TileEntitySpecialRenderer<BrewingStandLogic>() {
     override fun renderTileEntityAt(te: BrewingStandLogic, x: Double, y: Double, z: Double,
-                                    partialTicks: Float, destroyStage: Int) {
+                               partialTicks: Float, destroyStage: Int, partialAlpha: Float) {
         pushMatrix()
         color(1f, 1f, 1f, 1f)
 
@@ -64,7 +71,7 @@ open class BrewingStandRenderer : TileEntitySpecialRenderer<BrewingStandLogic>()
         translate(x, .0, z)
         val stack = te[slot]
         // Most blocks use a block model which requires special treatment
-        if (stack?.item is ItemBlock) {
+        if (stack.item is ItemBlock) {
             scale(2f, 2f, 2f)
         }
         // Again, magic numbers

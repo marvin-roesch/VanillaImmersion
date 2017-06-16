@@ -34,10 +34,10 @@ object CraftingDrag {
 
     object Handler : IMessageHandler<Message, IMessage> {
         override fun onMessage(msg: Message, ctx: MessageContext): IMessage? {
-            val player = ctx.serverHandler.playerEntity
+            val player = ctx.serverHandler.player
             // We interact with the world, hence schedule our action
             player.serverWorld.addScheduledTask {
-                val tile = player.worldObj.getTileEntity(msg.pos)
+                val tile = player.world.getTileEntity(msg.pos)
                 if (tile is CraftingTableLogic) {
                     // Delegate the dragging to the dedicated method
                     CraftingHandler.performDrag(tile, player, msg.slots)

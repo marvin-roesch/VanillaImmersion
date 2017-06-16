@@ -30,8 +30,8 @@ class EnchantingParticle(world: World,
         this.setParticleTextureIndex((Math.random() * 26.0 + 1.0 + 224.0).toInt())
     }
 
-    override fun moveEntity(x: Double, y: Double, z: Double) {
-        this.entityBoundingBox = this.entityBoundingBox.offset(x, y, z)
+    override fun move(x: Double, y: Double, z: Double) {
+        this.boundingBox = this.boundingBox.offset(x, y, z)
         this.resetPositionToBB()
     }
 

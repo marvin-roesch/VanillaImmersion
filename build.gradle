@@ -1,6 +1,6 @@
 // For those who want the bleeding edge
 buildscript {
-    ext.kotlin_version = '1.0.3'
+    ext.kotlin_version = '1.1.2'
 
     repositories {
         jcenter()
@@ -15,7 +15,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.3'
         classpath 'com.matthewprenger:CurseGradle:1.0-SNAPSHOT'
@@ -65,7 +65,7 @@ minecraft {
 
     replace '@VERSION@', config.mod_version
     replace 'acceptedMinecraftVersions = "*",', """acceptedMinecraftVersions = "[${config.mc_version}]","""
-    replace 'required-after:Forge', "required-after:Forge@[${config.forge_version},)"
+    replace 'required-after:forge', "required-after:forge@[${config.forge_version},)"
     replace '@UPDATE_URL@', updateUrl
 
     replaceIn 'VanillaImmersion.kt'
@@ -75,6 +75,11 @@ repositories {
     maven {
         url "http://dvs1.progwml6.com/files/maven"
     }
+    maven {
+        url "http://mvn.rx14.co.uk/shadowfacts/"
+    }
+    jcenter()
+    mavenCentral()
 }
 
 configurations {
@@ -83,13 +88,12 @@ configurations {
 }
 
 dependencies {
-    shade "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    shade "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    compile "net.shadowfacts:Forgelin:${config.forgelin_version}"
     deobfCompile "mezz.jei:jei_${config.mc_version}:${config.jei_version}"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
 }
 
 shadowJar {
-    relocate 'org.jetbrains.annotations', 'vimmersion_shade.org.jetbrains.annotations'
     configurations = [project.configurations.shade]
     classifier ''
 }
@@ -220,6 +224,7 @@ if (cfApi != null) {
             addGameVersion config.mc_version
 
             relations {
+                requiredLibrary 'shadowfacts-forgelin'
                 optionalLibrary 'just-enough-items-jei'
             }
 

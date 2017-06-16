@@ -44,7 +44,7 @@ open class BrewingStand : BlockBrewingStand() {
      * Handles right clicks for the brewing stand.
      */
     override fun onBlockActivated(world: World, pos: BlockPos, state: IBlockState,
-                                  player: EntityPlayer, hand: EnumHand, stack: ItemStack?,
+                                  player: EntityPlayer, hand: EnumHand,
                                   side: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) = false
 
     /**
@@ -86,11 +86,11 @@ open class BrewingStand : BlockBrewingStand() {
 
     @Deprecated("Vanilla")
     override fun addCollisionBoxToList(state: IBlockState, world: World, pos: BlockPos, mask: AxisAlignedBB,
-                                       collidingBoxes: MutableList<AxisAlignedBB>, entity: Entity?) {
-        super.addCollisionBoxToList(state, world, pos, mask, collidingBoxes, entity)
+                                       collidingBoxes: MutableList<AxisAlignedBB>, entity: Entity?, isActualState: Boolean) {
+        super.addCollisionBoxToList(state, world, pos, mask, collidingBoxes, entity, isActualState)
         // Add the bowl for correct collisions
         addCollisionBoxToList(pos, mask, collidingBoxes,
-                              BOWL_AABB.expand(.0, -0.0625 * 0.5, .0).offset(.0, -0.0625 * 0.5, .0))
+                              BOWL_AABB.grow(.0, -0.0625 * 0.5, .0).offset(.0, -0.0625 * 0.5, .0))
     }
 
     @Deprecated("Vanilla")

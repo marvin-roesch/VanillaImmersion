@@ -33,10 +33,10 @@ object AnvilText {
 
     object Handler : IMessageHandler<Message, IMessage> {
         override fun onMessage(msg: Message, ctx: MessageContext): IMessage? {
-            val player = ctx.serverHandler.playerEntity
+            val player = ctx.serverHandler.player
             // We interact with the world, hence schedule our action
             player.serverWorld.addScheduledTask {
-                val tile = player.worldObj.getTileEntity(msg.pos)
+                val tile = player.world.getTileEntity(msg.pos)
                 // Ensure the player has acquired the lock on the anvil
                 if (tile is AnvilLogic && tile.canInteract(player)) {
                     // Release the lock, change the name and try to "repair"

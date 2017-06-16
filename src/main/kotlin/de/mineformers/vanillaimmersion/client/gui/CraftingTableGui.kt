@@ -36,6 +36,6 @@ class CraftingTableGui(container: Container) : GuiContainer(container) {
 
     override fun keyTyped(typedChar: Char, keyCode: Int) {
         if (keyCode == Keyboard.KEY_ESCAPE)
-            Minecraft.getMinecraft().thePlayer.closeScreen()
+            Minecraft.getMinecraft().player.closeScreen()
     }
 }

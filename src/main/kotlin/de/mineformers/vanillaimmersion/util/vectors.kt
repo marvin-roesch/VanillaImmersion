@@ -37,20 +37,6 @@ fun AxisAlignedBB.rotate(axis: Vec3d, rotation: Rotation): AxisAlignedBB {
                          offset.max.rotate(axis, angle)).offset(.5, .5, .5)
 }
 
-fun AxisAlignedBB.contains(p: Vec3d) =
-    p.x in minX..maxX &&
-    p.y in minY..maxY &&
-    p.z in minZ..maxZ
-
-val Vec3d.x: Double
-    get() = this.xCoord
-
-val Vec3d.y: Double
-    get() = this.yCoord
-
-val Vec3d.z: Double
-    get() = this.zCoord
-
 val Vec3d.blockPos: BlockPos
     get() = BlockPos(this)
 

@@ -89,7 +89,7 @@ open class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
 
     // TODO: Maybe switch to FastTESR?
     override fun renderTileEntityAt(te: TileEntityEnchantmentTable, x: Double, y: Double, z: Double,
-                                    partialTicks: Float, destroyStage: Int) {
+                                    partialTicks: Float, destroyStage: Int, partialAlpha: Float) {
         // Since we derive from the vanilla renderer, we can't change the type parameters
         if (te !is EnchantingTableLogic || te.blockType !is EnchantingTable) {
             return
@@ -104,7 +104,7 @@ open class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
 
         // We need to know how much lapis lazuli modifiers the table holds to tell whether its sufficient
         val modifiers = te[Slot.MODIFIERS]
-        val lapis = modifiers?.stackSize ?: 0
+        val lapis = modifiers.count
 
         pushMatrix()
         // Translate to the table's center
@@ -130,8 +130,8 @@ open class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
 
         var flipLeft = te.pageFlipPrev + (te.pageFlip - te.pageFlipPrev) * partialTicks + 0.25f
         var flipRight = te.pageFlipPrev + (te.pageFlip - te.pageFlipPrev) * partialTicks + 0.75f
-        flipLeft = (flipLeft - MathHelper.truncateDoubleToInt(flipLeft.toDouble()).toFloat()) * 1.6f - 0.3f
-        flipRight = (flipRight - MathHelper.truncateDoubleToInt(flipRight.toDouble()).toFloat()) * 1.6f - 0.3f
+        flipLeft = (flipLeft - MathHelper.floor(flipLeft.toDouble()).toFloat()) * 1.6f - 0.3f
+        flipRight = (flipRight - MathHelper.floor(flipRight.toDouble()).toFloat()) * 1.6f - 0.3f
         if (flipLeft < 0.0f) {
             flipLeft = 0.0f
         }
@@ -171,17 +171,17 @@ open class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
         val rand = Random(te.pos.toLong())
         val bobRand = rand.nextInt(100)
         // The bobbing should stop momentarily when there is a result
-        val bobTicks = if (te.result == null) te.tickCount + partialTicks else te.bobStop
+        val bobTicks = if (te.result.isEmpty) te.tickCount + partialTicks else te.bobStop
         val bob = MathHelper.sin((bobTicks + bobRand) / 10.0f) * 0.1 + 0.1
         // Only perform the upwards animation if there is a result
         val t =
-            if (te.result == null)
+            if (te.result.isEmpty)
                 0.0
             else
                 Math.min(te.progress + partialTicks, 40f) / 40.0
         // Only perform the upwards animation if there is a result
         val inputAnim =
-            if (te.result != null)
+            if (!te.result.isEmpty)
                 bob + (0.3 - bob) * t
             else
                 0.0
@@ -196,7 +196,7 @@ open class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
         for (i in 1..lapis) {
             val offset = te.tickCount + rotationOffset + partialTicks
             val bobAngle = Math.toRadians(offset * 4.0 + lapisOffsets[i - 1])
-            val angle = Math.toRadians((360.0 / modifiers!!.stackSize) * i + offset).toFloat()
+            val angle = Math.toRadians((360.0 / modifiers.count) * i + offset).toFloat()
             val currentX = MathHelper.sin(angle) * 0.5
             val currentZ = MathHelper.cos(angle) * 0.5
             renderItem(te, Slot.MODIFIERS, currentX, Math.sin(bobAngle) * 0.1, currentZ)
@@ -253,11 +253,11 @@ open class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
             // Page 0 shows the "Cancel" button
             drawWrappedText("~fa" + generateRandomLore(30..40), 4, 4, 86, 0x685E4A, 98 / 9 - 1)
             // Only allow cancelling as long as there is no result
-            if (te.result == null) {
+            if (te.result.isEmpty) {
                 Minecraft.getMinecraft().textureManager.bindTexture(ENCHANTING_LABEL_TEXTURE)
                 color(1f, 1f, 1f, 1f)
                 Gui.drawModalRectWithCustomSizedTexture((94 - 70) / 2 + 5, 98, 0f, 0f, 70, 20, 70f, 20f)
-                val font = Minecraft.getMinecraft().fontRendererObj
+                val font = Minecraft.getMinecraft().fontRenderer
                 val text = I18n.format("gui.cancel")
                 val width = font.getStringWidth(text)
                 font.drawString(text, (94 - width) / 2 + 5, 98 + (20 - font.FONT_HEIGHT) / 2 + 1, 0x685E4A)
@@ -334,7 +334,7 @@ open class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
         drawWrappedText(information, 4, 76, 86, 0x685E4A, 2)
 
         // When there is a result, don't draw the "Enchant" button
-        if (te.result != null)
+        if (!te.result.isEmpty)
             return
         // Draw the "Enchant" button
         val buttonOffset = if (index % 2 == 1) 5 else -5
@@ -342,7 +342,7 @@ open class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
         color(1f, 1f, 1f, 1f)
         Gui.drawModalRectWithCustomSizedTexture((94 - 70) / 2 + buttonOffset, 98, 0f, 0f, 70, 20, 70f, 20f)
         val enchantText = I18n.format("container.enchant")
-        val font = Minecraft.getMinecraft().fontRendererObj
+        val font = Minecraft.getMinecraft().fontRenderer
         val width = font.getStringWidth(enchantText)
         font.drawString(enchantText, (94 - width) / 2 + buttonOffset, 98 + (20 - font.FONT_HEIGHT) / 2 + 1, 0x685E4A)
     }
@@ -353,7 +353,7 @@ open class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
      */
     private fun drawWrappedText(text: String, x: Int, y: Int, width: Int, color: Int, maxLines: Int = -1) {
         // TODO: Clean this mess up
-        var font = Minecraft.getMinecraft().fontRendererObj
+        var font = Minecraft.getMinecraft().fontRenderer
         var words = text.split(" ")
         var consumedWidth = 0
         var x1 = x
@@ -372,7 +372,7 @@ open class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
                 if (word[2].toLowerCase() == 'a')
                     font = Minecraft.getMinecraft().standardGalacticFontRenderer
                 else
-                    font = Minecraft.getMinecraft().fontRendererObj
+                    font = Minecraft.getMinecraft().fontRenderer
                 word = word.substring(3)
             }
 
@@ -381,7 +381,7 @@ open class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
             if (word.startsWith("~m")) {
                 val lapis = word[2].toString().toInt()
                 val required = word.substring(4).trim('\n').toInt()
-                val red = !Minecraft.getMinecraft().thePlayer.capabilities.isCreativeMode && lapis < required
+                val red = !Minecraft.getMinecraft().player.capabilities.isCreativeMode && lapis < required
                 word = "  : " + (if (red) TextFormatting.RED else TextFormatting.RESET) + word.substring(4)
                 drawLapis = true
             }
@@ -392,8 +392,8 @@ open class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
             if (word.startsWith("~l")) {
                 drawnXP = word[2].toString().toInt()
                 val requiredLevel = word.substring(4).toInt()
-                val insufficient = Minecraft.getMinecraft().thePlayer.experienceLevel < requiredLevel &&
-                                   !Minecraft.getMinecraft().thePlayer.capabilities.isCreativeMode
+                val insufficient = Minecraft.getMinecraft().player.experienceLevel < requiredLevel &&
+                                   !Minecraft.getMinecraft().player.capabilities.isCreativeMode
                 if (insufficient)
                     xpV = 239f
                 word = "   : ${if (insufficient) TextFormatting.RED else TextFormatting.RESET}$requiredLevel"
@@ -460,7 +460,7 @@ open class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
         scale(0.5, 0.5, 0.5)
         val stack = te[slot]
         // Most blocks use a block model which requires special treatment
-        if (stack?.item is ItemBlock) {
+        if (stack.item is ItemBlock) {
             scale(1.5f, 1.5f, 1.5f)
         }
         // The modifiers shouldn't be quite as big

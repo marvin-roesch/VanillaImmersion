@@ -18,8 +18,8 @@ class BubbleParticle(world: World, xCoord: Double, yCoord: Double, zCoord: Doubl
         setParticleTextureIndex(32)
         setPosition(xCoord, yCoord, zCoord)
         setSize(0.02f, 0.02f)
-        entityBoundingBox = AxisAlignedBB(xCoord - width * 0.5, yCoord - height * 0.5, zCoord - width * 0.5,
-                                          xCoord + width * 0.5, yCoord + height * 0.5, zCoord + width * 0.5)
+        boundingBox = AxisAlignedBB(xCoord - width * 0.5, yCoord - height * 0.5, zCoord - width * 0.5,
+            xCoord + width * 0.5, yCoord + height * 0.5, zCoord + width * 0.5)
         prevPosX = xCoord
         prevPosY = yCoord
         prevPosZ = zCoord
@@ -35,7 +35,7 @@ class BubbleParticle(world: World, xCoord: Double, yCoord: Double, zCoord: Doubl
         prevPosY = posY
         prevPosZ = posZ
         motionY += 0.002
-        moveEntity(motionX, motionY, motionZ)
+        move(motionX, motionY, motionZ)
         motionX *= 0.85
         motionY *= 0.85
         motionZ *= 0.85

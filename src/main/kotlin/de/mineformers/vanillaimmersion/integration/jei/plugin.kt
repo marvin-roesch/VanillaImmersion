@@ -2,14 +2,18 @@ package de.mineformers.vanillaimmersion.integration.jei
 
 import de.mineformers.vanillaimmersion.VanillaImmersion
 import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic.CraftingTableContainer
-import mezz.jei.Internal
-import mezz.jei.api.*
+import mezz.jei.api.BlankModPlugin
+import mezz.jei.api.IIngredientListOverlay
+import mezz.jei.api.IJeiRuntime
+import mezz.jei.api.IModRegistry
+import mezz.jei.api.IRecipeRegistry
+import mezz.jei.api.JEIPlugin
 import mezz.jei.api.gui.IRecipeLayout
 import mezz.jei.api.recipe.VanillaRecipeCategoryUid
 import mezz.jei.api.recipe.transfer.IRecipeTransferError
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandler
-import mezz.jei.gui.RecipeLayout
-import mezz.jei.input.IKeyable
+import mezz.jei.gui.overlay.IngredientListOverlay
+import mezz.jei.gui.recipes.RecipeLayout
 import mezz.jei.transfer.RecipeTransferErrorInternal
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.inventory.ContainerWorkbench
@@ -23,29 +27,32 @@ import net.minecraftforge.fml.common.Optional
 @JEIPlugin
 class JEIIntegration : BlankModPlugin() {
     companion object {
-        lateinit var itemListOverlay: IItemListOverlay
+        lateinit var ingredientListOverlay: IIngredientListOverlay
+            private set
+        lateinit var recipeRegistry: IRecipeRegistry
             private set
     }
 
     override fun register(registry: IModRegistry) {
-        registry.recipeTransferRegistry.addRecipeTransferHandler(CraftingTransferHandler())
+        registry.recipeTransferRegistry.addRecipeTransferHandler(CraftingTransferHandler(), VanillaRecipeCategoryUid.CRAFTING)
     }
 
     override fun onRuntimeAvailable(jeiRuntime: IJeiRuntime) {
-        itemListOverlay = jeiRuntime.itemListOverlay
+        ingredientListOverlay = jeiRuntime.ingredientListOverlay
+        recipeRegistry = jeiRuntime.recipeRegistry
     }
 }
 
 object JEIProxy {
     fun focusSearch() {
-        if (Loader.isModLoaded("JEI"))
+        if (Loader.isModLoaded("jei"))
             focusSearchImpl()
     }
 
-    @Optional.Method(modid = "JEI")
+    @Optional.Method(modid = "jei")
     private fun focusSearchImpl() {
-        val overlay = JEIIntegration.itemListOverlay
-        if (overlay is IKeyable)
+        val overlay = JEIIntegration.ingredientListOverlay
+        if (overlay is IngredientListOverlay)
             overlay.setKeyboardFocus(true)
     }
 }
@@ -54,9 +61,9 @@ class CraftingTransferHandler : IRecipeTransferHandler<CraftingTableContainer> {
     override fun transferRecipe(container: CraftingTableContainer, recipeLayout: IRecipeLayout, player: EntityPlayer,
                                 maxTransfer: Boolean, doTransfer: Boolean): IRecipeTransferError? {
         val category = (recipeLayout as RecipeLayout).recipeCategory
-        val vanillaContainer = ContainerWorkbench(player.inventory, player.worldObj, BlockPos.ORIGIN)
+        val vanillaContainer = ContainerWorkbench(player.inventory, player.world, BlockPos.ORIGIN)
         val transferHandler =
-            Internal.getRuntime().recipeRegistry.getRecipeTransferHandler(vanillaContainer, category)
+            JEIIntegration.recipeRegistry.getRecipeTransferHandler(vanillaContainer, category)
         if (transferHandler == null) {
             if (doTransfer) {
                 VanillaImmersion.LOG.error("No Recipe Transfer handler for container {}", container.javaClass)
@@ -72,6 +79,4 @@ class CraftingTransferHandler : IRecipeTransferHandler<CraftingTableContainer> {
     }
 
     override fun getContainerClass() = CraftingTableContainer::class.java
-
-    override fun getRecipeCategoryUid() = VanillaRecipeCategoryUid.CRAFTING
 }
