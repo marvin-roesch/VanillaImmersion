@@ -13,12 +13,15 @@ buildscript {
             name = "sonatype"
             url = "https://oss.sonatype.org/content/repositories/snapshots/"
         }
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.3'
-        classpath 'com.matthewprenger:CurseGradle:1.0-SNAPSHOT'
+        classpath 'gradle.plugin.com.matthewprenger:CurseGradle:1.0.9'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.1'
     }
 }
@@ -44,7 +47,9 @@ if (privateConfig)
     ext.priv = parseConfig(file('private.properties'))
 def tagMatcher = "git tag --contains HEAD".execute().text =~ /v[-\d.]+/
 ext["gitTag"] = tagMatcher.count > 0 ? tagMatcher[0] : null
+
 def isRelease() { return project.gitTag == "v${project.version}" && System.getenv("CI") == "true" }
+
 def forgeVersion = "${config.mc_version}-${config.forge_version}${config.forge_branch != '' ? '-' : ''}${config.forge_branch}"
 
 def updateUrl = "https://raw.githubusercontent.com/PaleoCrafter/VanillaImmersion/master/metadata/promotions.json"
@@ -110,7 +115,6 @@ tasks.build.dependsOn reobfShadowJar
 
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
-import net.minecraftforge.gradle.user.TaskSourceCopy
 
 processResources {
     // this will ensure that this task is redone when the versions change.
@@ -258,8 +262,7 @@ task generateChangelogs() {
         }
         def promotionText = promotionTexts.join("\n")
         promotions.promos["${config.mc_version}-latest"] = config.mod_version
-        if (!promotions.containsKey(config.mc_version))
-        {
+        if (!promotions.containsKey(config.mc_version)) {
             promotions[config.mc_version] = [:]
         }
         promotions[config.mc_version][config.mod_version] = promotionText

@@ -1,6 +1,11 @@
 Changelog
 =========
 
+### Version 1.1.0.2 for Minecraft 1.12
+**Note:** This version of the mod requires at least Forge version *1.12-14.21.0.2373*.
+  - **Fixes**
+    - Switch to newer CurseGradle version
+
 ### Version 1.1.0.1 for Minecraft 1.12
 **Note:** This version of the mod requires at least Forge version *1.12-14.21.0.2373*.
   - **Fixes**

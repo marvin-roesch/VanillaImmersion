@@ -6,7 +6,8 @@
     },
     "1.12": {
         "1.1.0.0": "Change: Update to Minecraft 1.12\nChange: Blocks no longer are separate from their Vanilla counterparts but replace them completely\nChange: Removed conversion unnecessary recipes",
-        "1.1.0.1": "Fix: Switch to CurseForge Maven for Forgelin dependency"
+        "1.1.0.1": "Fix: Switch to CurseForge Maven for Forgelin dependency",
+        "1.1.0.2": "Fix: Switch to newer CurseGradle version"
     },
     "1.9.4": {
         "0.0.0.1": "Initial alpha release",
@@ -24,7 +25,7 @@
     "homepage": "http://minecraft.curseforge.com/projects/vanilla-immersion",
     "promos": {
         "1.10.2-latest": "0.0.9.0",
-        "1.12-latest": "1.1.0.1",
+        "1.12-latest": "1.1.0.2",
         "1.9.4-latest": "0.0.6.0"
     }
 }
