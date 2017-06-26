@@ -78,6 +78,10 @@ repositories {
     maven {
         url "http://mvn.rx14.co.uk/shadowfacts/"
     }
+    maven {
+        name = "CurseForge"
+        url = "https://minecraft.curseforge.com/api/maven/"
+    }
     jcenter()
     mavenCentral()
 }
@@ -88,7 +92,7 @@ configurations {
 }
 
 dependencies {
-    compile "net.shadowfacts:Forgelin:${config.forgelin_version}"
+    compile "shadowfacts-forgelin:Forgelin:${config.forgelin_version}"
     deobfCompile "mezz.jei:jei_${config.mc_version}:${config.jei_version}"
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
 }
