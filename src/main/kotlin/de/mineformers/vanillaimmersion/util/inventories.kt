@@ -7,7 +7,6 @@ import net.minecraft.entity.Entity
 import net.minecraft.entity.item.EntityItem
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.init.SoundEvents
-import net.minecraft.inventory.IInventory
 import net.minecraft.inventory.InventoryHelper
 import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
@@ -77,7 +76,7 @@ fun World.spawn(pos: BlockPos, side: EnumFacing, stack: ItemStack) {
     this.spawnEntity(entity)
     // Play the drop sound
     this.playSound(null, offset.x, offset.y, offset.z, SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.BLOCKS, 0.2f,
-        ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7f + 1.0f) * 2.0f)
+                   ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7f + 1.0f) * 2.0f)
 }
 
 /**
@@ -98,9 +97,10 @@ fun EntityPlayer.insertOrDrop(stack: ItemStack) {
         InventoryHelper.spawnItemStack(this.world, this.posX, this.posY, this.posZ, stack)
     else
         this.world.playSound(null, this.posX, this.posY, this.posZ,
-            SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS,
-            .2f, ((this.rng.nextFloat() - this.rng.nextFloat()) * .7f + 1f) * 2f)
+                             SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS,
+                             .2f, ((this.rng.nextFloat() - this.rng.nextFloat()) * .7f + 1f) * 2f)
 }
+
 /**
  * Checks whether to item stacks are to be considered equal in regards to their
  * <ul>
@@ -109,10 +109,11 @@ fun EntityPlayer.insertOrDrop(stack: ItemStack) {
  *     <li>NBT Tag Compound</li>
  * </ul>
  */
-fun ItemStack.equal(b: ItemStack) = this == b || this != null && b != null && equalsImpl(this, b)
+fun ItemStack.equal(b: ItemStack) = this == b || equalsImpl(this, b)
 
-private fun equalsImpl(a: ItemStack, b: ItemStack) = a.item === b.item && a.metadata == b.metadata
-    && Objects.equal(a.tagCompound, b.tagCompound)
+private fun equalsImpl(a: ItemStack, b: ItemStack) =
+    a.item === b.item && a.metadata == b.metadata
+        && Objects.equal(a.tagCompound, b.tagCompound)
 
 /**
  * Tries to merge an item stack into another one if they are equal.

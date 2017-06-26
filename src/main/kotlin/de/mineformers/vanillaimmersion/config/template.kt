@@ -29,19 +29,19 @@ sealed class ConfigEntry(val name: String, val type: ConfigGuiType, val language
             /**
              * Reference to the "config value from object" method.
              */
-            private final lateinit var CONFIG_FROM_ANY_REF: Method
+            private var CONFIG_FROM_ANY_REF: Method
             /**
              * Reference to the "set comment for config value" method.
              */
-            private final lateinit var SET_ORIGIN_COMMENT: Method
+            private var SET_ORIGIN_COMMENT: Method
             /**
              * Reference to the [com.typesafe.config.impl.FromMapMode.KEYS_ARE_KEYS] field.
              */
-            private final lateinit var KEYS_ARE_KEYS: Any
+            private var KEYS_ARE_KEYS: Any
             /**
              * Reference to the [ConfigImpl.defaultValueOrigin] field.
              */
-            private final lateinit var DEFAULT_ORIGIN: ConfigOrigin
+            private var DEFAULT_ORIGIN: ConfigOrigin
 
             init {
                 val fromMapModeClass = Class.forName("com.typesafe.config.impl.FromMapMode")

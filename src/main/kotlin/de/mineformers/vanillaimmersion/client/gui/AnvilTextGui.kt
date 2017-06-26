@@ -18,7 +18,7 @@ class AnvilTextGui(val anvil: AnvilLogic) : GuiScreen() {
     val nameField by lazy {
         val field = GuiTextField(0, this.fontRenderer, 0, 0, 102, 20)
         field.setTextColor(0xFFFFFFFF.toInt())
-        field.text = anvil[Slot.INPUT_OBJECT]?.displayName
+        field.text = anvil[Slot.INPUT_OBJECT].displayName
         field.enableBackgroundDrawing = false
         field.maxStringLength = 30
         field.isFocused = true

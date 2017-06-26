@@ -55,7 +55,7 @@ open class AnvilRenderer : TileEntitySpecialRenderer<AnvilLogic>() {
 
         // Render the hammer, if present
         val hammer = te[Slot.HAMMER]
-        if (hammer != null) {
+        if (!hammer.isEmpty) {
             pushMatrix()
             // Magic numbers, but this appears to be the perfect offset
             translate(.0, .05, -.32)
@@ -109,7 +109,7 @@ open class AnvilRenderer : TileEntitySpecialRenderer<AnvilLogic>() {
         rotate(-90f, 0f, 1f, 0f)
         val stack = te[slot]
         // Most blocks use a block model which requires special treatment
-        if (stack?.item is ItemBlock) {
+        if (stack.item is ItemBlock) {
             translate(0.0, 0.135, 0.0)
             scale(2f, 2f, 2f)
         } else {

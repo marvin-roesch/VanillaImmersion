@@ -2,12 +2,7 @@ package de.mineformers.vanillaimmersion.integration.jei
 
 import de.mineformers.vanillaimmersion.VanillaImmersion
 import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic.CraftingTableContainer
-import mezz.jei.api.BlankModPlugin
-import mezz.jei.api.IIngredientListOverlay
-import mezz.jei.api.IJeiRuntime
-import mezz.jei.api.IModRegistry
-import mezz.jei.api.IRecipeRegistry
-import mezz.jei.api.JEIPlugin
+import mezz.jei.api.*
 import mezz.jei.api.gui.IRecipeLayout
 import mezz.jei.api.recipe.VanillaRecipeCategoryUid
 import mezz.jei.api.recipe.transfer.IRecipeTransferError
@@ -25,7 +20,7 @@ import net.minecraftforge.fml.common.Optional
  * Vanilla Immersion JEI Integration plugin
  */
 @JEIPlugin
-class JEIIntegration : BlankModPlugin() {
+class JEIIntegration : IModPlugin {
     companion object {
         lateinit var ingredientListOverlay: IIngredientListOverlay
             private set
