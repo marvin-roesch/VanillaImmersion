@@ -10,11 +10,7 @@ import net.minecraftforge.fml.client.IModGuiFactory
 class GuiFactory : IModGuiFactory {
     override fun initialize(minecraftInstance: Minecraft?) = Unit
 
-    override fun mainConfigGuiClass() = ConfigGui::class.java
-
     override fun runtimeGuiCategories() = null
-
-    override fun getHandlerFor(element: IModGuiFactory.RuntimeOptionCategoryElement?) = null
 
     override fun hasConfigGui() = true
 

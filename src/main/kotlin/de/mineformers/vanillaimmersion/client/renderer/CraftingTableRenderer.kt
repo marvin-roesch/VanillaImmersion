@@ -24,8 +24,8 @@ import net.minecraftforge.fml.common.Loader
  * Renders the items on top of a crafting table.
  */
 open class CraftingTableRenderer : TileEntitySpecialRenderer<CraftingTableLogic>() {
-    override fun renderTileEntityAt(te: CraftingTableLogic, x: Double, y: Double, z: Double,
-                               partialTicks: Float, destroyStage: Int, partialAlpha: Float) {
+    override fun render(te: CraftingTableLogic, x: Double, y: Double, z: Double,
+                        partialTicks: Float, destroyStage: Int, partialAlpha: Float) {
         if (te.blockState.block !is CraftingTable)
             return
         pushMatrix()

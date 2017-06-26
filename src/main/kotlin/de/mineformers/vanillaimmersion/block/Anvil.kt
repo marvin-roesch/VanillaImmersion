@@ -24,8 +24,7 @@ open class Anvil : BlockAnvil() {
         setHardness(5.0F)
         soundType = SoundType.ANVIL
         setResistance(2000.0F)
-        setCreativeTab(VanillaImmersion.CREATIVE_TAB)
-        unlocalizedName = "$MODID.anvil"
+        unlocalizedName = "anvil"
         registryName = ResourceLocation("minecraft", "anvil")
     }
 

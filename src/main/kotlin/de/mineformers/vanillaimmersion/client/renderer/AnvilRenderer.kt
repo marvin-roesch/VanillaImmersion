@@ -27,8 +27,8 @@ import org.apache.commons.lang3.StringUtils
  */
 open class AnvilRenderer : TileEntitySpecialRenderer<AnvilLogic>() {
     // TODO: Maybe switch to FastTESR?
-    override fun renderTileEntityAt(te: AnvilLogic, x: Double, y: Double, z: Double,
-                               partialTicks: Float, destroyStage: Int, partialAlpha: Float) {
+    override fun render(te: AnvilLogic, x: Double, y: Double, z: Double,
+                        partialTicks: Float, destroyStage: Int, partialAlpha: Float) {
         if (te.blockState.block !is Anvil)
             return
         pushMatrix()

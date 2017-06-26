@@ -1,22 +1,9 @@
-tile.vimmersion.anvil.name=Immersive Anvil
-tile.vimmersion.anvil.intact.name=Immersive Anvil
-tile.vimmersion.anvil.slightlyDamaged.name=Slightly Damaged Immersive Anvil
-tile.vimmersion.anvil.veryDamaged.name=Very Damaged Immersive Anvil
-tile.vimmersion.enchantmentTable.name=Immersive Enchantment Table
-tile.vimmersion.furnace.name=Immersive Furnace
-tile.vimmersion.workbench.name=Immersive Crafting Table
-tile.vimmersion.beacon.name=Immersive Beacon
-item.vimmersion.brewingStand.name=Immersive Brewing Stand
 item.vimmersion.hammer.name=Hammer
 
 vimmersion.anvil.itemName=Item Name:
 vimmersion.anvil.inUse=This anvil is currently in use by another player.
 
-itemGroup.vimmersion=Vanilla Immersion
-
 # Configuration
 config.vimmersion.blocks=Blocks
-config.vimmersion.blocks.replaceVanillaRecipes=Replace Vanilla Recipes
-config.vimmersion.blocks.conversionRecipes=Add Conversion Recipes
 config.vimmersion.blocks.enchantmentTable=Enchantment Table
 config.vimmersion.blocks.enchantmentTable.dropItems=Drop Items

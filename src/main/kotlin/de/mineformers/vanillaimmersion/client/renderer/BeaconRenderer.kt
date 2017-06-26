@@ -38,9 +38,9 @@ import java.lang.Math.sin
 open class BeaconRenderer : TileEntityBeaconRenderer() {
     val POTION_LEVEL_TEXTURE = ResourceLocation(VanillaImmersion.MODID, "textures/icons/potion_level.png")
 
-    override fun renderTileEntityAt(te: TileEntityBeacon?, x: Double, y: Double, z: Double,
-                               partialTicks: Float, destroyStage: Int, partialAlpha: Float) {
-        super.renderTileEntityAt(te, x, y, z, partialTicks, destroyStage, partialAlpha)
+    override fun render(te: TileEntityBeacon?, x: Double, y: Double, z: Double,
+                        partialTicks: Float, destroyStage: Int, partialAlpha: Float) {
+        super.render(te, x, y, z, partialTicks, destroyStage, partialAlpha)
         if (te !is BeaconLogic || te.levels <= 0) {
             return
         }

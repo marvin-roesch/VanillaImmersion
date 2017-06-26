@@ -7,7 +7,18 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.Gui
 import net.minecraft.client.model.ModelBook
 import net.minecraft.client.model.ModelRenderer
-import net.minecraft.client.renderer.GlStateManager.*
+import net.minecraft.client.renderer.GlStateManager.color
+import net.minecraft.client.renderer.GlStateManager.depthMask
+import net.minecraft.client.renderer.GlStateManager.disableLighting
+import net.minecraft.client.renderer.GlStateManager.disableRescaleNormal
+import net.minecraft.client.renderer.GlStateManager.enableCull
+import net.minecraft.client.renderer.GlStateManager.enableLighting
+import net.minecraft.client.renderer.GlStateManager.enableRescaleNormal
+import net.minecraft.client.renderer.GlStateManager.popMatrix
+import net.minecraft.client.renderer.GlStateManager.pushMatrix
+import net.minecraft.client.renderer.GlStateManager.rotate
+import net.minecraft.client.renderer.GlStateManager.scale
+import net.minecraft.client.renderer.GlStateManager.translate
 import net.minecraft.client.renderer.OpenGlHelper
 import net.minecraft.client.renderer.RenderHelper
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType.FIXED
@@ -22,7 +33,7 @@ import net.minecraft.util.ResourceLocation
 import net.minecraft.util.math.MathHelper
 import net.minecraft.util.text.TextFormatting
 import net.minecraftforge.fml.relauncher.ReflectionHelper
-import java.util.*
+import java.util.Random
 
 /**
  * Renders the items on top of a crafting table as well as the book "GUI".
@@ -88,8 +99,8 @@ open class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
     }
 
     // TODO: Maybe switch to FastTESR?
-    override fun renderTileEntityAt(te: TileEntityEnchantmentTable, x: Double, y: Double, z: Double,
-                                    partialTicks: Float, destroyStage: Int, partialAlpha: Float) {
+    override fun render(te: TileEntityEnchantmentTable, x: Double, y: Double, z: Double,
+                        partialTicks: Float, destroyStage: Int, partialAlpha: Float) {
         // Since we derive from the vanilla renderer, we can't change the type parameters
         if (te !is EnchantingTableLogic || te.blockType !is EnchantingTable) {
             return
@@ -329,7 +340,7 @@ open class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
         val text = "~fa${generateRandomLore(5..8)} ~fn$clue ~fa${generateRandomLore(25..36)}"
         // Give some actually useful information at the end
         val information = "~faModifiers ~fn~m${lapis}_${index + 1}\n " +
-                          "~faLevels ~fn~l${index}_$requiredLevel"
+            "~faLevels ~fn~l${index}_$requiredLevel"
         drawWrappedText(text, 4, 4, 86, 0x685E4A, 98 / 9 - 3)
         drawWrappedText(information, 4, 76, 86, 0x685E4A, 2)
 
@@ -393,7 +404,7 @@ open class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
                 drawnXP = word[2].toString().toInt()
                 val requiredLevel = word.substring(4).toInt()
                 val insufficient = Minecraft.getMinecraft().player.experienceLevel < requiredLevel &&
-                                   !Minecraft.getMinecraft().player.capabilities.isCreativeMode
+                    !Minecraft.getMinecraft().player.capabilities.isCreativeMode
                 if (insufficient)
                     xpV = 239f
                 word = "   : ${if (insufficient) TextFormatting.RED else TextFormatting.RESET}$requiredLevel"

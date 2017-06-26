@@ -22,8 +22,8 @@ import net.minecraft.item.ItemBlock
  * Renders the items held by a brewing stand.
  */
 open class BrewingStandRenderer : TileEntitySpecialRenderer<BrewingStandLogic>() {
-    override fun renderTileEntityAt(te: BrewingStandLogic, x: Double, y: Double, z: Double,
-                               partialTicks: Float, destroyStage: Int, partialAlpha: Float) {
+    override fun render(te: BrewingStandLogic, x: Double, y: Double, z: Double,
+                        partialTicks: Float, destroyStage: Int, partialAlpha: Float) {
         pushMatrix()
         color(1f, 1f, 1f, 1f)
 

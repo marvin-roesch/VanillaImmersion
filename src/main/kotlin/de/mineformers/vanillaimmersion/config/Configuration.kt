@@ -18,16 +18,6 @@ object Configuration : Config {
     val TEMPLATE =
         config("vanilla-immersion") {
             category("blocks") {
-                boolean("replace-vanilla-recipes") {
-                    default = false
-                    comment = "Determines whether Vanilla crafting recipes should be replaced to return immersive variants of the respective blocks."
-                    requiresGameRestart = true
-                }
-                boolean("conversion-recipes") {
-                    default = true
-                    comment = "Determines whether conversion recipes between Vanilla and Immersive variants of blocks should be added."
-                    requiresGameRestart = true
-                }
                 category("enchantment-table") {
                     boolean("drop-items") {
                         default = true

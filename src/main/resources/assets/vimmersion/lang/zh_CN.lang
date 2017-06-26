@@ -1,16 +1,7 @@
-tile.vimmersion.anvil.name=沉浸式铁砧
-tile.vimmersion.anvil.intact.name=沉浸式铁砧
-tile.vimmersion.anvil.slightlyDamaged.name=沉浸式铁砧(轻微损坏)
-tile.vimmersion.anvil.veryDamaged.name=沉浸式铁砧(严重损坏)
-tile.vimmersion.enchantmentTable.name=沉浸式附魔台
-tile.vimmersion.furnace.name=沉浸式熔炉
-tile.vimmersion.workbench.name=沉浸式工作台
-item.vimmersion.brewingStand.name=沉浸式酿造台
+item.vimmersion.hammer.name=锤子
 
 vimmersion.anvil.itemName=物品名称：
 vimmersion.anvil.inUse=这张铁砧正在被别的玩家使用着。
-
-#itemGroup.vimmersion=Vanilla Immersion
 
 # Configuration
 config.vimmersion.blocks=方块

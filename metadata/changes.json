@@ -2,7 +2,9 @@
   "additions": [
   ],
   "changes": [
-    "Update to Minecraft 1.12"
+    "Update to Minecraft 1.12",
+    "Blocks no longer are separate from their Vanilla counterparts but replace them completely",
+    "Removed conversion unnecessary recipes"
   ],
   "fixes": [
   ]

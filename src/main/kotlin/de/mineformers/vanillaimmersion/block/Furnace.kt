@@ -1,16 +1,14 @@
 package de.mineformers.vanillaimmersion.block
 
-import de.mineformers.vanillaimmersion.VanillaImmersion
 import de.mineformers.vanillaimmersion.VanillaImmersion.MODID
 import de.mineformers.vanillaimmersion.tileentity.FurnaceLogic
 import net.minecraft.block.BlockFurnace
 import net.minecraft.block.SoundType
 import net.minecraft.block.state.IBlockState
+import net.minecraft.creativetab.CreativeTabs
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.init.SoundEvents
 import net.minecraft.inventory.InventoryHelper
-import net.minecraft.item.Item
-import net.minecraft.item.ItemStack
 import net.minecraft.tileentity.TileEntityFurnace
 import net.minecraft.util.*
 import net.minecraft.util.math.BlockPos
@@ -29,11 +27,12 @@ open class Furnace(val lit: Boolean) : BlockFurnace(lit) {
     init {
         setHardness(3.5F)
         soundType = SoundType.STONE
-        unlocalizedName = "$MODID.furnace"
-        setCreativeTab(VanillaImmersion.CREATIVE_TAB)
+        unlocalizedName = "furnace"
         registryName = ResourceLocation("minecraft", if (lit) "lit_furnace" else "furnace")
         if (lit) {
             setLightLevel(0.875F)
+        } else {
+            setCreativeTab(CreativeTabs.DECORATIONS)
         }
     }
 

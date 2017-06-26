@@ -22,8 +22,8 @@ import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer
  * Renders the items inside a furnace
  */
 open class FurnaceRenderer : TileEntitySpecialRenderer<FurnaceLogic>() {
-    override fun renderTileEntityAt(te: FurnaceLogic, x: Double, y: Double, z: Double,
-                               partialTicks: Float, destroyStage: Int, partialAlpha: Float) {
+    override fun render(te: FurnaceLogic, x: Double, y: Double, z: Double,
+                        partialTicks: Float, destroyStage: Int, partialAlpha: Float) {
         if (te.blockState.block !is Furnace)
             return
         pushMatrix()

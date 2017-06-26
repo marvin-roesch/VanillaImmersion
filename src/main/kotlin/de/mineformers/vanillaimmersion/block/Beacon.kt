@@ -28,8 +28,7 @@ open class Beacon : BlockBeacon() {
 
     init {
         setHardness(3F)
-        unlocalizedName = "$MODID.beacon"
-        setCreativeTab(VanillaImmersion.CREATIVE_TAB)
+        unlocalizedName = "beacon"
         registryName = ResourceLocation("minecraft", "beacon")
         setLightLevel(1F)
         defaultState = blockState.baseState.withProperty(EDITING_STAGE, 0)

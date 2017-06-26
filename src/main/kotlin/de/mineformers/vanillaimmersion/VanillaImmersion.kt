@@ -19,7 +19,6 @@ import de.mineformers.vanillaimmersion.config.Configuration
 import de.mineformers.vanillaimmersion.immersion.CraftingHandler
 import de.mineformers.vanillaimmersion.immersion.EnchantingHandler
 import de.mineformers.vanillaimmersion.item.Hammer
-import de.mineformers.vanillaimmersion.item.SpecialBlockItem
 import de.mineformers.vanillaimmersion.network.AnvilLock
 import de.mineformers.vanillaimmersion.network.AnvilText
 import de.mineformers.vanillaimmersion.network.BeaconScroll
@@ -51,8 +50,6 @@ import net.minecraftforge.fml.client.registry.ClientRegistry
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.Mod.EventHandler
 import net.minecraftforge.fml.common.SidedProxy
-import net.minecraftforge.fml.common.event.FMLInitializationEvent
-import net.minecraftforge.fml.common.event.FMLMissingMappingsEvent
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.network.NetworkRegistry
@@ -73,7 +70,7 @@ import net.minecraft.init.Items as VItems
     acceptedMinecraftVersions = "*",
     dependencies = "required-after:forgelin;required-after:forge",
     updateJSON = "@UPDATE_URL@",
-    modLanguageAdapter = "de.mineformers.vanillaimmersion.KotlinAdapter",
+    modLanguageAdapter = "net.shadowfacts.forgelin.KotlinAdapter",
     guiFactory = "de.mineformers.vanillaimmersion.config.gui.GuiFactory")
 object VanillaImmersion {
     const val MOD_NAME = "Vanilla Immersion"
@@ -97,16 +94,11 @@ object VanillaImmersion {
     val LOG by lazy {
         LogManager.getLogger(MODID)
     }
-    /**
-     * Temporary creative tab for the mod
-     * To be removed once substitutions are fixed
-     */
-    val CREATIVE_TAB = object : CreativeTabs(MODID) {
-        override fun getTabIconItem() = ItemStack(Blocks.CRAFTING_TABLE)
-    }
 
     init {
         MinecraftForge.EVENT_BUS.register(Blocks)
+        MinecraftForge.EVENT_BUS.register(Items)
+        MinecraftForge.EVENT_BUS.register(Sounds)
     }
 
     /**
@@ -115,9 +107,6 @@ object VanillaImmersion {
     @EventHandler
     fun preInit(event: FMLPreInitializationEvent) {
         Configuration.load(event.modConfigurationDirectory, "vimmersion")
-//        Blocks.init()
-        Items.init()
-        Sounds.init()
 
         MinecraftForge.EVENT_BUS.register(CraftingHandler)
         MinecraftForge.EVENT_BUS.register(EnchantingHandler)
@@ -137,18 +126,6 @@ object VanillaImmersion {
         NetworkRegistry.INSTANCE.registerGuiHandler(this, GuiHandler())
 
         PROXY.preInit(event)
-    }
-
-    @EventHandler
-    fun onMissingMappings(event: FMLMissingMappingsEvent) {
-        for (mapping in event.get()) {
-            if (mapping.type == GameRegistry.Type.ITEM) {
-                mapping.remap(ForgeRegistries.ITEMS.getValue(ResourceLocation("minecraft", mapping.resourceLocation.resourcePath)))
-            }
-            if (mapping.type == GameRegistry.Type.BLOCK) {
-                mapping.remap(ForgeRegistries.BLOCKS.getValue(ResourceLocation("minecraft", mapping.resourceLocation.resourcePath)))
-            }
-        }
     }
 
     /**
@@ -206,13 +183,7 @@ object VanillaImmersion {
         @SubscribeEvent
         fun init(event: RegistryEvent.Register<Block>) {
             // TODO: Unify interaction handling?
-            GameRegistry.addSubstitutionAlias("minecraft:furnace", GameRegistry.Type.BLOCK, FURNACE)
-            GameRegistry.addSubstitutionAlias("minecraft:lit_furnace", GameRegistry.Type.BLOCK, LIT_FURNACE)
-            GameRegistry.addSubstitutionAlias("minecraft:crafting_table", GameRegistry.Type.BLOCK, CRAFTING_TABLE)
-            GameRegistry.addSubstitutionAlias("minecraft:anvil", GameRegistry.Type.BLOCK, ANVIL)
-            GameRegistry.addSubstitutionAlias("minecraft:enchanting_table", GameRegistry.Type.BLOCK, ENCHANTING_TABLE)
-            GameRegistry.addSubstitutionAlias("minecraft:brewing_stand", GameRegistry.Type.BLOCK, BREWING_STAND)
-            GameRegistry.addSubstitutionAlias("minecraft:beacon", GameRegistry.Type.BLOCK, BEACON)
+            event.registry.registerAll(FURNACE, LIT_FURNACE, CRAFTING_TABLE, ANVIL, ENCHANTING_TABLE, BREWING_STAND, BEACON)
 
             registerTileEntity(FurnaceLogic::class.java, "furnace")
             registerTileEntity(CraftingTableLogic::class.java, "crafting_table")
@@ -222,24 +193,15 @@ object VanillaImmersion {
             registerTileEntity(BeaconLogic::class.java, "beacon")
         }
 
-        private fun <T : TileEntity> registerTileEntity(clazz: Class<T>, name: String) {
-            GameRegistry.registerTileEntityWithAlternatives(clazz, "minecraft:$name", "$MODID:$name")
+        @SubscribeEvent
+        fun onMissingMappings(event: RegistryEvent.MissingMappings<Block>) {
+            for (mapping in event.mappings) {
+                mapping.remap(ForgeRegistries.BLOCKS.getValue(ResourceLocation("minecraft", mapping.key.resourcePath)))
+            }
         }
 
-        /**
-         * Helper method for registering blocks.
-         *
-         * @param block       the block to register
-         * @param itemFactory a function reference serving as factory for the block's item representation,
-         *                     may be null if no item is necessary
-         */
-        private fun register(block: Block, itemFactory: ((Block) -> Item)? = ::ItemBlock) {
-            GameRegistry.register(block)
-            val item = itemFactory?.invoke(block)
-            if (item != null) {
-                item.registryName = block.registryName
-                GameRegistry.register(item)
-            }
+        private fun <T : TileEntity> registerTileEntity(clazz: Class<T>, name: String) {
+            GameRegistry.registerTileEntity(clazz, "minecraft:$name")
         }
     }
 
@@ -254,8 +216,16 @@ object VanillaImmersion {
         /**
          * Initializes and registers blocks and related data
          */
-        fun init() {
-            GameRegistry.register(HAMMER)
+        @SubscribeEvent
+        fun init(event: RegistryEvent.Register<Item>) {
+            event.registry.register(HAMMER)
+        }
+
+        @SubscribeEvent
+        fun onMissingMappings(event: RegistryEvent.MissingMappings<Item>) {
+            for (mapping in event.mappings) {
+                mapping.remap(ForgeRegistries.ITEMS.getValue(ResourceLocation("minecraft", mapping.key.resourcePath)))
+            }
         }
     }
 
@@ -271,8 +241,9 @@ object VanillaImmersion {
         /**
          * Initializes and registers sounds and related data
          */
-        fun init() {
-            GameRegistry.register(ENCHANTING_PAGE_TURN, ResourceLocation("$MODID:enchanting.page_turn"))
+        @SubscribeEvent
+        fun init(event: RegistryEvent.Register<SoundEvent>) {
+            event.registry.register(ENCHANTING_PAGE_TURN.setRegistryName(ENCHANTING_PAGE_TURN.soundName))
         }
     }
 
@@ -296,16 +267,6 @@ object VanillaImmersion {
             // Initialize (i.e. compile) shaders now, removes delay on initial use later on
             Shaders.init()
 
-            // Register block item models
-//            setItemModel(Blocks.FURNACE, 0, "minecraft:furnace")
-//            setItemModel(Blocks.CRAFTING_TABLE, 0, "minecraft:crafting_table")
-//            setItemModel(Blocks.ANVIL, 0, "minecraft:anvil_intact")
-//            setItemModel(Blocks.ANVIL, 1, "minecraft:anvil_slightly_damaged")
-//            setItemModel(Blocks.ANVIL, 2, "minecraft:anvil_very_damaged")
-//            setItemModel(Blocks.ENCHANTING_TABLE, 0, "minecraft:enchanting_table")
-//            setItemModel(Blocks.BREWING_STAND, 0, "minecraft:brewing_stand")
-//            setItemModel(Blocks.BEACON, 0, "minecraft:beacon")
-
             // Register TESRs
             ClientRegistry.bindTileEntitySpecialRenderer(FurnaceLogic::class.java, FurnaceRenderer())
             ClientRegistry.bindTileEntitySpecialRenderer(CraftingTableLogic::class.java, CraftingTableRenderer())
@@ -324,21 +285,13 @@ object VanillaImmersion {
         }
 
         /**
-         * Sets the model associated with the item representation of a block.
-         * Assumes the default variant is to be used ("inventory").
-         */
-        private fun setItemModel(block: Block, meta: Int, resource: String) {
-            setItemModel(Item.getItemFromBlock(block)!!, meta, resource)
-        }
-
-        /**
          * Sets the model associated with an item.
          * Assumes the default variant is to be used ("inventory").
          */
         private fun setItemModel(item: Item, meta: Int, resource: String) {
             ModelLoader.setCustomModelResourceLocation(item,
                 meta,
-                ModelResourceLocation(resource, "inventory"))
+                ModelResourceLocation(resource, "normal"))
         }
     }
 
