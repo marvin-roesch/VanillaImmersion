@@ -254,6 +254,10 @@ task generateChangelogs() {
         }
         def promotionText = promotionTexts.join("\n")
         promotions.promos["${config.mc_version}-latest"] = config.mod_version
+        if (!promotions.containsKey(config.mc_version))
+        {
+            promotions[config.mc_version] = [:]
+        }
         promotions[config.mc_version][config.mod_version] = promotionText
         def newPromos = JsonOutput.prettyPrint(JsonOutput.toJson(promotions))
         promotionFile.text = newPromos
