@@ -1,6 +1,13 @@
 Changelog
 =========
 
+### Version 1.1.0.0 for Minecraft 1.12
+**Note:** This version of the mod requires at least Forge version *1.12-14.21.0.2373*.
+  - **Changes**
+    - Update to Minecraft 1.12
+    - Blocks no longer are separate from their Vanilla counterparts but replace them completely
+    - Removed conversion unnecessary recipes
+
 ### Version 0.0.9.0 for Minecraft 1.10.2
 **Note:** This version of the mod requires at least Forge version *1.10.2-12.18.1.2077*.
   - **Additions**

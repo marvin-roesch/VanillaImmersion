@@ -4,6 +4,9 @@
         "0.0.8.0": "Addition: Hammer that can be used to get the output of a repair operation on the anvil\nAddition: Naming an item on the anvil now displays a cursor\nAddition: Individual selection boxes for all slots in all blocks apart from the enchantment table\nChange: Anvil output no longer is displayed in favor of a hammer slot\nChange: Naming an item on the anvil now defaults to the item's current name, mimicking Vanilla behavior\nChange: Items now appear flat on the crafting table and it was reduced in height for easier access\nFix: Middle-clicking and breaking the Furnace now selects the immersive variant",
         "0.0.9.0": "Addition: Immersive version of the beacon that is interacted with by enabling and edit mode through right clicking and then scrolling\nChange: Hammers now are iron tools and take damage on use\nFix: The book on enchantment tables is now correctly textured"
     },
+    "1.12": {
+        "1.1.0.0": "Change: Update to Minecraft 1.12\nChange: Blocks no longer are separate from their Vanilla counterparts but replace them completely\nChange: Removed conversion unnecessary recipes"
+    },
     "1.9.4": {
         "0.0.0.1": "Initial alpha release",
         "0.0.1.0": "Fix: Crafting Table now respects changing output while automating\nFix: Enchantment table interaction won't trigger hovered blocks anymore\nFix: All automatable blocks don't crash your game with an NPE anymore",
@@ -20,6 +23,7 @@
     "homepage": "http://minecraft.curseforge.com/projects/vanilla-immersion",
     "promos": {
         "1.10.2-latest": "0.0.9.0",
+        "1.12-latest": "1.1.0.0",
         "1.9.4-latest": "0.0.6.0"
     }
 }
