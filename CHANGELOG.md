@@ -1,6 +1,13 @@
 Changelog
 =========
 
+### Version 1.1.1.0 for Minecraft 1.12
+**Note:** This version of the mod requires at least Forge version *1.12-14.21.0.2373*.
+  - **Additions**
+    - Configuration options to disable immersive variants selectively
+  - **Changes**
+    - The crafting table no longer uses metadata for storing its facing but the TileEntity
+
 ### Version 1.1.0.2 for Minecraft 1.12
 **Note:** This version of the mod requires at least Forge version *1.12-14.21.0.2373*.
   - **Fixes**
