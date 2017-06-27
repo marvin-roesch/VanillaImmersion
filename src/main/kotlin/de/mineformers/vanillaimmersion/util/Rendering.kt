@@ -2,10 +2,8 @@ package de.mineformers.vanillaimmersion.util
 
 import net.minecraft.client.Minecraft
 import net.minecraft.entity.Entity
-import net.minecraft.util.Timer
 import net.minecraft.util.math.Vec3d
 import net.minecraftforge.fml.common.SidedProxy
-import net.minecraftforge.fml.relauncher.ReflectionHelper
 
 /**
  * Utilities dealing with rendering.

@@ -1,7 +1,5 @@
 package de.mineformers.vanillaimmersion.block
 
-import de.mineformers.vanillaimmersion.VanillaImmersion
-import de.mineformers.vanillaimmersion.VanillaImmersion.MODID
 import de.mineformers.vanillaimmersion.client.particle.BubbleParticle
 import de.mineformers.vanillaimmersion.tileentity.BrewingStandLogic
 import net.minecraft.block.BlockBrewingStand
@@ -10,7 +8,6 @@ import net.minecraft.client.Minecraft
 import net.minecraft.entity.Entity
 import net.minecraft.entity.item.EntityItem
 import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.item.ItemStack
 import net.minecraft.tileentity.TileEntityBrewingStand
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumHand

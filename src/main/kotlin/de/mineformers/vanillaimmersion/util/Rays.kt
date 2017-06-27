@@ -116,7 +116,7 @@ object Rays {
         // Intersect with both triangles making up the quad
 
         val hit = Rays.moellerTrumbore(origin, dir, quad[0], quad[1], quad[2], epsilon) ?:
-                  Rays.moellerTrumbore(origin, dir, quad[0], quad[2], quad[3], epsilon)
+            Rays.moellerTrumbore(origin, dir, quad[0], quad[2], quad[3], epsilon)
         if (hit != null && transformations != null) {
             val invertedMatrix = Matrix4f(transformations)
             invertedMatrix.invert()

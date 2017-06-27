@@ -243,16 +243,16 @@ object SubSelectionHandler {
             return
         // Perform a ray trace on all selection boxes and forward the call to the block if there was no result
         val (box, ray) = getBoxHit(player, pos, tile, { it.rightClicks }) ?:
-                         if (tile.onRightClickBlock(player, hand, stack, side, event.hitVec)) {
-                             event.isCanceled = true
-                             return
-                         } else {
-                             return
-                         }
+            if (tile.onRightClickBlock(player, hand, stack, side, event.hitVec)) {
+                event.isCanceled = true
+                return
+            } else {
+                return
+            }
         // Invert the rotation applied to the box
         val face = box.rotation.inverse.rotate(ray.sideHit)
         val hitVec = ((ray.hitVec - pos) - Vec3d(.5, .5, .5)).rotateY(box.rotation.inverse) +
-                     Vec3d(.5, .5, .5) - box.bounds.min
+            Vec3d(.5, .5, .5) - box.bounds.min
         if (tile.onRightClickBox(box, player, hand, stack, face, hitVec))
             event.isCanceled = true
     }
@@ -270,16 +270,16 @@ object SubSelectionHandler {
             return
         // Perform a ray trace on all selection boxes and forward the call to the block if there was no result
         val (box, ray) = getBoxHit(player, pos, tile, { it.rightClicks }) ?:
-                         if (tile.onLeftClickBlock(player, hand, stack, side, event.hitVec)) {
-                             event.isCanceled = true
-                             return
-                         } else {
-                             return
-                         }
+            if (tile.onLeftClickBlock(player, hand, stack, side, event.hitVec)) {
+                event.isCanceled = true
+                return
+            } else {
+                return
+            }
         // Invert the rotation applied to the box
         val face = box.rotation.inverse.rotate(ray.sideHit)
         val hitVec = ((ray.hitVec - pos) - Vec3d(.5, .5, .5)).rotateY(box.rotation.inverse) +
-                     Vec3d(.5, .5, .5) - box.bounds.min
+            Vec3d(.5, .5, .5) - box.bounds.min
         if (tile.onLeftClickBox(box, player, hand, stack, face, hitVec))
             event.isCanceled = true
     }
@@ -307,11 +307,11 @@ object SubSelectionRenderer {
         // Decides based on render and slot options
         fun renderFilter(box: SelectionBox) =
             box.rendering != null &&
-            !(box.rendering.hoveredOnly && hovered != box) &&
-            (box.slot == null ||
-             (tile.hasCapability(ITEM_HANDLER_CAPABILITY, null) &&
-              (box.slot.renderFilled ||
-               itemHandler!!.getStackInSlot(box.slot.id).isEmpty)))
+                !(box.rendering.hoveredOnly && hovered != box) &&
+                (box.slot == null ||
+                    (tile.hasCapability(ITEM_HANDLER_CAPABILITY, null) &&
+                        (box.slot.renderFilled ||
+                            itemHandler!!.getStackInSlot(box.slot.id).isEmpty)))
 
         pushMatrix()
         enableBlend()

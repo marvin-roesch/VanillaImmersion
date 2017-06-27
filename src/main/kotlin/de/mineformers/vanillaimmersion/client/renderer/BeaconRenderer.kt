@@ -4,21 +4,7 @@ import de.mineformers.vanillaimmersion.VanillaImmersion
 import de.mineformers.vanillaimmersion.tileentity.BeaconLogic
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.inventory.GuiContainer
-import net.minecraft.client.renderer.GlStateManager.DestFactor
-import net.minecraft.client.renderer.GlStateManager.SourceFactor
-import net.minecraft.client.renderer.GlStateManager.color
-import net.minecraft.client.renderer.GlStateManager.depthFunc
-import net.minecraft.client.renderer.GlStateManager.disableAlpha
-import net.minecraft.client.renderer.GlStateManager.disableBlend
-import net.minecraft.client.renderer.GlStateManager.disableLighting
-import net.minecraft.client.renderer.GlStateManager.enableAlpha
-import net.minecraft.client.renderer.GlStateManager.enableBlend
-import net.minecraft.client.renderer.GlStateManager.enableLighting
-import net.minecraft.client.renderer.GlStateManager.popMatrix
-import net.minecraft.client.renderer.GlStateManager.pushMatrix
-import net.minecraft.client.renderer.GlStateManager.rotate
-import net.minecraft.client.renderer.GlStateManager.translate
-import net.minecraft.client.renderer.GlStateManager.tryBlendFuncSeparate
+import net.minecraft.client.renderer.GlStateManager.*
 import net.minecraft.client.renderer.Tessellator
 import net.minecraft.client.renderer.tileentity.TileEntityBeaconRenderer
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
@@ -28,9 +14,7 @@ import net.minecraft.tileentity.TileEntityBeacon
 import net.minecraft.util.ResourceLocation
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL11.GL_QUADS
-import java.lang.Math.PI
-import java.lang.Math.abs
-import java.lang.Math.sin
+import java.lang.Math.*
 
 /**
  * Renders effect icons for the beacon.
@@ -56,8 +40,8 @@ open class BeaconRenderer : TileEntityBeaconRenderer() {
                 // If editing, decide whether to display barrier (= no selection) or active selection
                 val state = te.state!!
                 val barrierIcon = BeaconIcon(ResourceLocation("textures/items/barrier.png"),
-                    listOf(.0, .0, 1.0, 1.0),
-                    false)
+                                             listOf(.0, .0, 1.0, 1.0),
+                                             false)
                 val active = if (state.stage <= 1) state.primary else state.secondary
                 if (active == null) {
                     mapOf(0 to barrierIcon, 1 to barrierIcon, 2 to barrierIcon, 3 to barrierIcon)
@@ -67,7 +51,7 @@ open class BeaconRenderer : TileEntityBeaconRenderer() {
                     val uMax = uMin + 18 / 256f
                     val vMax = vMin + 18 / 256f
                     val icon = BeaconIcon(GuiContainer.INVENTORY_BACKGROUND, listOf(uMin, vMin, uMax, vMax),
-                        (state.stage > 1 && active != MobEffects.REGENERATION))
+                                          (state.stage > 1 && active != MobEffects.REGENERATION))
                     mapOf(0 to icon, 1 to icon, 2 to icon, 3 to icon)
                 }
             }
@@ -79,7 +63,7 @@ open class BeaconRenderer : TileEntityBeaconRenderer() {
         // Override the depth function to allow correct overlaying of secondary effect icons
         depthFunc(GL11.GL_LESS)
         tryBlendFuncSeparate(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA,
-            SourceFactor.ONE, DestFactor.ZERO)
+                             SourceFactor.ONE, DestFactor.ZERO)
         disableLighting()
         disableAlpha()
         color(1f, 1f, 1f, 1f)
@@ -110,9 +94,9 @@ open class BeaconRenderer : TileEntityBeaconRenderer() {
         val t = Minecraft.getMinecraft().world.totalWorldTime % 90.0
         val alpha = pulsate(t, 0.1, 0.3, 90.0)
         val primaryIcon = BeaconIcon(GuiContainer.INVENTORY_BACKGROUND,
-            listOf(uMin, vMin, uMax, vMax),
-            false,
-            alpha)
+                                     listOf(uMin, vMin, uMax, vMax),
+                                     false,
+                                     alpha)
         if (secondary != null) {
             // If the secondary effect is just the level 2 effect, display only that
             if (secondary == primary) {
@@ -124,9 +108,9 @@ open class BeaconRenderer : TileEntityBeaconRenderer() {
             uMax = uMin + 18 / 256f
             vMax = vMin + 18 / 256f
             val secondaryIcon = BeaconIcon(GuiContainer.INVENTORY_BACKGROUND,
-                listOf(uMin, vMin, uMax, vMax),
-                secondary != MobEffects.REGENERATION,
-                alpha)
+                                           listOf(uMin, vMin, uMax, vMax),
+                                           secondary != MobEffects.REGENERATION,
+                                           alpha)
             return mapOf(0 to primaryIcon, 1 to secondaryIcon, 2 to primaryIcon, 3 to secondaryIcon)
         } else {
             return mapOf(0 to primaryIcon, 1 to primaryIcon, 2 to primaryIcon, 3 to primaryIcon)

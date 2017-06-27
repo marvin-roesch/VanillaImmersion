@@ -1,7 +1,5 @@
 package de.mineformers.vanillaimmersion.block
 
-import de.mineformers.vanillaimmersion.VanillaImmersion
-import de.mineformers.vanillaimmersion.VanillaImmersion.MODID
 import de.mineformers.vanillaimmersion.tileentity.AnvilLogic
 import de.mineformers.vanillaimmersion.util.spill
 import net.minecraft.block.BlockAnvil

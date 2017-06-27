@@ -27,7 +27,7 @@ open class CraftingTable : BlockWorkbench() {
         /**
          * Facing property indicating the table's front.
          */
-        final val FACING = BlockHorizontal.FACING
+        val FACING = BlockHorizontal.FACING
     }
 
     init {
@@ -71,7 +71,9 @@ open class CraftingTable : BlockWorkbench() {
      */
     override fun onBlockPlacedBy(world: World, pos: BlockPos, state: IBlockState,
                                  placer: EntityLivingBase, stack: ItemStack) {
-        world.setBlockState(pos, state.withProperty(FACING, placer.horizontalFacing.opposite), 2)
+        val tile = world.getTileEntity(pos) as? CraftingTableLogic ?: return
+        tile.facing = placer.horizontalFacing.opposite
+        world.notifyBlockUpdate(pos, state, state, 3)
     }
 
     /**
@@ -101,45 +103,36 @@ open class CraftingTable : BlockWorkbench() {
      */
     private fun setDefaultFacing(world: World, pos: BlockPos, state: IBlockState) {
         if (!world.isRemote) {
+            val tile = world.getTileEntity(pos) as? CraftingTableLogic ?: return
             val north = world.getBlockState(pos.north())
             val south = world.getBlockState(pos.south())
             val west = world.getBlockState(pos.west())
             val east = world.getBlockState(pos.east())
-            var facing = state.getValue(FACING)
+            val facing = tile.facing
 
             if (facing == EnumFacing.NORTH && north.isFullBlock && !south.isFullBlock) {
-                facing = EnumFacing.SOUTH
+                tile.facing = EnumFacing.SOUTH
             } else if (facing == EnumFacing.SOUTH && south.isFullBlock && !north.isFullBlock) {
-                facing = EnumFacing.NORTH
+                tile.facing = EnumFacing.NORTH
             } else if (facing == EnumFacing.WEST && west.isFullBlock && !east.isFullBlock) {
-                facing = EnumFacing.EAST
+                tile.facing = EnumFacing.EAST
             } else if (facing == EnumFacing.EAST && east.isFullBlock && !west.isFullBlock) {
-                facing = EnumFacing.WEST
+                tile.facing = EnumFacing.WEST
             }
 
-            world.setBlockState(pos, state.withProperty(FACING, facing), 2)
+            world.notifyBlockUpdate(pos, state, state, 2)
         }
     }
 
-    /**
-     * Turns the crafting table's numeric metadata (e.g. from a save file) into a valid block state.
-     */
-    override fun getStateFromMeta(meta: Int): IBlockState {
-        var facing = EnumFacing.getFront(meta)
+    @Deprecated("Vanilla")
+    override fun getStateFromMeta(meta: Int) = defaultState!!
 
-        // In the rare case that we get a vertical orientation (up or down), default to north
-        if (facing.axis == EnumFacing.Axis.Y) {
-            facing = EnumFacing.NORTH
-        }
+    @Deprecated("Vanilla")
+    override fun getMetaFromState(state: IBlockState) = 0
 
-        return this.defaultState.withProperty(FACING, facing)
-    }
-
-    /**
-     * Converts the passed block state into valid metadata for crafting table.
-     */
-    override fun getMetaFromState(state: IBlockState): Int {
-        return state.getValue(FACING).index
+    override fun getActualState(state: IBlockState, world: IBlockAccess, pos: BlockPos): IBlockState {
+        val tile = world.getTileEntity(pos) as? CraftingTableLogic ?: return super.getActualState(state, world, pos)
+        return state.withProperty(FACING, tile.facing)
     }
 
     /**

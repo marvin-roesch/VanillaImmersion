@@ -16,7 +16,7 @@ class ConfigElement(val path: String, val entry: ConfigEntry, val storage: Confi
 
     override fun getLanguageKey() =
         entry.languageKey ?:
-        "config.${VanillaImmersion.MODID}.${CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, path)}"
+            "config.${VanillaImmersion.MODID}.${CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, path)}"
 
     override fun getComment() = entry.comment
 

@@ -188,7 +188,7 @@ open class BrewingStandLogic : TileEntityBrewingStand(), SubSelections {
             return existingIngredient.count == existingIngredient.maxStackSize
         // Only allow insertion if there is no fuel already or there is more space
         return existingFuel.isEmpty ||
-               (existingFuel.item === stack.item && existingFuel.count != existingFuel.maxStackSize)
+            (existingFuel.item === stack.item && existingFuel.count != existingFuel.maxStackSize)
     }
 
     /**

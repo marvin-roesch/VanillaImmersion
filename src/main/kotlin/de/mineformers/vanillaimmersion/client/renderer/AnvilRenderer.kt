@@ -5,14 +5,7 @@ import de.mineformers.vanillaimmersion.client.gui.AnvilTextGui
 import de.mineformers.vanillaimmersion.tileentity.AnvilLogic
 import de.mineformers.vanillaimmersion.tileentity.AnvilLogic.Companion.Slot
 import net.minecraft.client.Minecraft
-import net.minecraft.client.renderer.GlStateManager.color
-import net.minecraft.client.renderer.GlStateManager.disableRescaleNormal
-import net.minecraft.client.renderer.GlStateManager.enableRescaleNormal
-import net.minecraft.client.renderer.GlStateManager.popMatrix
-import net.minecraft.client.renderer.GlStateManager.pushMatrix
-import net.minecraft.client.renderer.GlStateManager.rotate
-import net.minecraft.client.renderer.GlStateManager.scale
-import net.minecraft.client.renderer.GlStateManager.translate
+import net.minecraft.client.renderer.GlStateManager.*
 import net.minecraft.client.renderer.OpenGlHelper
 import net.minecraft.client.renderer.RenderHelper
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType.FIXED

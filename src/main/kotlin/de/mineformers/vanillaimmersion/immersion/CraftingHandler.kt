@@ -4,11 +4,7 @@ import de.mineformers.vanillaimmersion.block.CraftingTable
 import de.mineformers.vanillaimmersion.client.CraftingDragHandler
 import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic
 import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic.Companion.Slot
-import de.mineformers.vanillaimmersion.util.blockPos
-import de.mineformers.vanillaimmersion.util.equal
-import de.mineformers.vanillaimmersion.util.insertOrDrop
-import de.mineformers.vanillaimmersion.util.minus
-import de.mineformers.vanillaimmersion.util.times
+import de.mineformers.vanillaimmersion.util.*
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.stats.StatList

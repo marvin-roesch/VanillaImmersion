@@ -3,14 +3,7 @@ package de.mineformers.vanillaimmersion.client.renderer
 import de.mineformers.vanillaimmersion.tileentity.BrewingStandLogic
 import de.mineformers.vanillaimmersion.tileentity.BrewingStandLogic.Companion.Slot
 import net.minecraft.client.Minecraft
-import net.minecraft.client.renderer.GlStateManager.color
-import net.minecraft.client.renderer.GlStateManager.disableRescaleNormal
-import net.minecraft.client.renderer.GlStateManager.enableRescaleNormal
-import net.minecraft.client.renderer.GlStateManager.popMatrix
-import net.minecraft.client.renderer.GlStateManager.pushMatrix
-import net.minecraft.client.renderer.GlStateManager.rotate
-import net.minecraft.client.renderer.GlStateManager.scale
-import net.minecraft.client.renderer.GlStateManager.translate
+import net.minecraft.client.renderer.GlStateManager.*
 import net.minecraft.client.renderer.OpenGlHelper
 import net.minecraft.client.renderer.RenderHelper
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms

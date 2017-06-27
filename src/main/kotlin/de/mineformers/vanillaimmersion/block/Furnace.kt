@@ -1,6 +1,5 @@
 package de.mineformers.vanillaimmersion.block
 
-import de.mineformers.vanillaimmersion.VanillaImmersion.MODID
 import de.mineformers.vanillaimmersion.tileentity.FurnaceLogic
 import net.minecraft.block.BlockFurnace
 import net.minecraft.block.SoundType

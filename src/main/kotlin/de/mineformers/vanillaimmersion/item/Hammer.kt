@@ -1,6 +1,5 @@
 package de.mineformers.vanillaimmersion.item
 
-import de.mineformers.vanillaimmersion.VanillaImmersion
 import de.mineformers.vanillaimmersion.VanillaImmersion.MODID
 import net.minecraft.creativetab.CreativeTabs
 import net.minecraft.item.ItemTool

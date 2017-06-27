@@ -7,18 +7,7 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.Gui
 import net.minecraft.client.model.ModelBook
 import net.minecraft.client.model.ModelRenderer
-import net.minecraft.client.renderer.GlStateManager.color
-import net.minecraft.client.renderer.GlStateManager.depthMask
-import net.minecraft.client.renderer.GlStateManager.disableLighting
-import net.minecraft.client.renderer.GlStateManager.disableRescaleNormal
-import net.minecraft.client.renderer.GlStateManager.enableCull
-import net.minecraft.client.renderer.GlStateManager.enableLighting
-import net.minecraft.client.renderer.GlStateManager.enableRescaleNormal
-import net.minecraft.client.renderer.GlStateManager.popMatrix
-import net.minecraft.client.renderer.GlStateManager.pushMatrix
-import net.minecraft.client.renderer.GlStateManager.rotate
-import net.minecraft.client.renderer.GlStateManager.scale
-import net.minecraft.client.renderer.GlStateManager.translate
+import net.minecraft.client.renderer.GlStateManager.*
 import net.minecraft.client.renderer.OpenGlHelper
 import net.minecraft.client.renderer.RenderHelper
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType.FIXED
@@ -33,7 +22,7 @@ import net.minecraft.util.ResourceLocation
 import net.minecraft.util.math.MathHelper
 import net.minecraft.util.text.TextFormatting
 import net.minecraftforge.fml.relauncher.ReflectionHelper
-import java.util.Random
+import java.util.*
 
 /**
  * Renders the items on top of a crafting table as well as the book "GUI".

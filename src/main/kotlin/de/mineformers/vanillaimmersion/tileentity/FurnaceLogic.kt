@@ -1,10 +1,6 @@
 package de.mineformers.vanillaimmersion.tileentity
 
-import de.mineformers.vanillaimmersion.util.SelectionBox
-import de.mineformers.vanillaimmersion.util.SubSelections
-import de.mineformers.vanillaimmersion.util.insertOrDrop
-import de.mineformers.vanillaimmersion.util.selectionBox
-import de.mineformers.vanillaimmersion.util.spawn
+import de.mineformers.vanillaimmersion.util.*
 import net.minecraft.block.BlockFurnace
 import net.minecraft.block.BlockFurnace.FACING
 import net.minecraft.block.state.IBlockState
@@ -56,7 +52,7 @@ open class FurnaceLogic : TileEntityFurnace(), SubSelections {
 
         val INPUT_SELECTION =
             selectionBox(AxisAlignedBB(3 * 0.0625, 9 * 0.0625, 0.0625,
-                13 * 0.0625, 12 * 0.0625, 13 * 0.0625).shrink(0.004)) {
+                                       13 * 0.0625, 12 * 0.0625, 13 * 0.0625).shrink(0.004)) {
                 slot(Slot.INPUT.ordinal) {
                     renderFilled = true
                 }
@@ -65,7 +61,7 @@ open class FurnaceLogic : TileEntityFurnace(), SubSelections {
             }
         val FUEL_SELECTION =
             selectionBox(AxisAlignedBB(3 * 0.0625, 0.0625, 0.0625,
-                13 * 0.0625, 5 * 0.0625, 13 * 0.0625).shrink(0.004)) {
+                                       13 * 0.0625, 5 * 0.0625, 13 * 0.0625).shrink(0.004)) {
                 slot(Slot.FUEL.ordinal) {
                     renderFilled = true
                 }

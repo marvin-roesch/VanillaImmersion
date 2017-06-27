@@ -1,9 +1,9 @@
 {
     "additions": [
-        
+        "Configuration options to disable immersive variants selectively"
     ],
     "changes": [
-        
+        "The crafting table no longer uses metadata for storing its facing but the TileEntity"
     ],
     "fixes": [
         
