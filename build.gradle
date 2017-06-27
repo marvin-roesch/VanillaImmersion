@@ -276,7 +276,6 @@ task generateChangelogs() {
 **Note:** This version of the mod requires at least Forge version *$forgeVersion*.
 ${lists.join("\n")}
 ${changelogFile.text.readLines().drop(2).join("\n")}"""
-        changeFile.text = JsonOutput.prettyPrint(JsonOutput.toJson(["additions": [], "changes": [], "fixes": []]))
     }
 }
 

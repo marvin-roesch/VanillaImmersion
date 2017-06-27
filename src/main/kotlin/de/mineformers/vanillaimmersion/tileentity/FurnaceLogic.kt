@@ -1,7 +1,5 @@
 package de.mineformers.vanillaimmersion.tileentity
 
-import de.mineformers.vanillaimmersion.VanillaImmersion.Blocks.FURNACE
-import de.mineformers.vanillaimmersion.VanillaImmersion.Blocks.LIT_FURNACE
 import de.mineformers.vanillaimmersion.util.SelectionBox
 import de.mineformers.vanillaimmersion.util.SubSelections
 import de.mineformers.vanillaimmersion.util.insertOrDrop
@@ -11,6 +9,7 @@ import net.minecraft.block.BlockFurnace
 import net.minecraft.block.BlockFurnace.FACING
 import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.init.Blocks
 import net.minecraft.item.ItemStack
 import net.minecraft.item.crafting.FurnaceRecipes
 import net.minecraft.nbt.NBTTagCompound
@@ -309,12 +308,12 @@ open class FurnaceLogic : TileEntityFurnace(), SubSelections {
     /**
      * Converts a given state into one of the default (unlit) furnace.
      */
-    open fun getDefaultState(state: IBlockState) = FURNACE.defaultState.withProperty(FACING, state.getValue(FACING))
+    open fun getDefaultState(state: IBlockState) = Blocks.FURNACE.defaultState.withProperty(FACING, state.getValue(FACING))
 
     /**
      * Converts a given state into one of the lit furnace.
      */
-    open fun getLitState(state: IBlockState) = LIT_FURNACE.defaultState.withProperty(FACING, state.getValue(FACING))
+    open fun getLitState(state: IBlockState) = Blocks.LIT_FURNACE.defaultState.withProperty(FACING, state.getValue(FACING))
 
     /**
      * Composes a tag for updates of the TE (both initial chunk data and later updates).

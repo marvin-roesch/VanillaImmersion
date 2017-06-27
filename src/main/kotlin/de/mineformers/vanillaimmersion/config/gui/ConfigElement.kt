@@ -62,7 +62,11 @@ class ConfigElement(val path: String, val entry: ConfigEntry, val storage: Confi
             else -> null
         }
 
-    override fun get() = storage.get(path)
+    override fun get() =
+        when (entry) {
+            is ConfigEntry.ListProperty<*> -> (storage.get(path) as? List<*>?)?.toTypedArray()
+            else -> storage.get(path)
+        }
 
     override fun setToDefault() {
         set(default)
@@ -116,7 +120,7 @@ class ConfigElement(val path: String, val entry: ConfigEntry, val storage: Confi
 
     override fun getList() =
         when (entry) {
-            is ConfigEntry.ListProperty<*> -> entry.default?.toTypedArray()
+            is ConfigEntry.ListProperty<*> -> get() as? Array<Any>?
             else -> null
         }
 

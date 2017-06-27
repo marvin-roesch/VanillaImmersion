@@ -1,6 +1,7 @@
 package de.mineformers.vanillaimmersion.config
 
 import com.typesafe.config.*
+import de.mineformers.vanillaimmersion.config.gui.KeepVanillaEntry
 import java.io.File
 import java.nio.file.Files
 import java.util.concurrent.TimeUnit
@@ -18,6 +19,13 @@ object Configuration : Config {
     val TEMPLATE =
         config("vanilla-immersion") {
             category("blocks") {
+                list<String>("keep-vanilla") {
+                    default = emptyList()
+                    comment = "Specifies which blocks should retain Vanilla behaviour, none by default.\n" +
+                        "Allowed values: [anvil, beacon, brewing_stand, crafting_table, enchanting_table, furnace]"
+                    guiClass = KeepVanillaEntry::class.java
+                    requiresGameRestart = true
+                }
                 category("enchantment-table") {
                     boolean("drop-items") {
                         default = true
@@ -26,6 +34,8 @@ object Configuration : Config {
                 }
             }
         }
+
+    fun shouldKeepVanilla(block: String) = getStringList("blocks.keep-vanilla").contains(block)
 
     /**
      * Load a configuration file for the mod.

@@ -1,44 +1,20 @@
 package de.mineformers.vanillaimmersion
 
-import de.mineformers.vanillaimmersion.block.Anvil
-import de.mineformers.vanillaimmersion.block.Beacon
-import de.mineformers.vanillaimmersion.block.BrewingStand
-import de.mineformers.vanillaimmersion.block.CraftingTable
-import de.mineformers.vanillaimmersion.block.EnchantingTable
-import de.mineformers.vanillaimmersion.block.Furnace
+import de.mineformers.vanillaimmersion.block.*
 import de.mineformers.vanillaimmersion.client.BeaconHandler
 import de.mineformers.vanillaimmersion.client.CraftingDragHandler
-import de.mineformers.vanillaimmersion.client.renderer.AnvilRenderer
-import de.mineformers.vanillaimmersion.client.renderer.BeaconRenderer
-import de.mineformers.vanillaimmersion.client.renderer.BrewingStandRenderer
-import de.mineformers.vanillaimmersion.client.renderer.CraftingTableRenderer
-import de.mineformers.vanillaimmersion.client.renderer.EnchantingTableRenderer
-import de.mineformers.vanillaimmersion.client.renderer.FurnaceRenderer
-import de.mineformers.vanillaimmersion.client.renderer.Shaders
+import de.mineformers.vanillaimmersion.client.renderer.*
 import de.mineformers.vanillaimmersion.config.Configuration
 import de.mineformers.vanillaimmersion.immersion.CraftingHandler
 import de.mineformers.vanillaimmersion.immersion.EnchantingHandler
 import de.mineformers.vanillaimmersion.item.Hammer
-import de.mineformers.vanillaimmersion.network.AnvilLock
-import de.mineformers.vanillaimmersion.network.AnvilText
-import de.mineformers.vanillaimmersion.network.BeaconScroll
-import de.mineformers.vanillaimmersion.network.CraftingDrag
-import de.mineformers.vanillaimmersion.network.GuiHandler
-import de.mineformers.vanillaimmersion.network.OpenGui
-import de.mineformers.vanillaimmersion.tileentity.AnvilLogic
-import de.mineformers.vanillaimmersion.tileentity.BeaconLogic
-import de.mineformers.vanillaimmersion.tileentity.BrewingStandLogic
-import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic
-import de.mineformers.vanillaimmersion.tileentity.EnchantingTableLogic
-import de.mineformers.vanillaimmersion.tileentity.FurnaceLogic
+import de.mineformers.vanillaimmersion.network.*
+import de.mineformers.vanillaimmersion.tileentity.*
 import de.mineformers.vanillaimmersion.util.SubSelectionHandler
 import de.mineformers.vanillaimmersion.util.SubSelectionRenderer
 import net.minecraft.block.Block
 import net.minecraft.client.renderer.block.model.ModelResourceLocation
-import net.minecraft.creativetab.CreativeTabs
 import net.minecraft.item.Item
-import net.minecraft.item.ItemBlock
-import net.minecraft.item.ItemStack
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.SoundEvent
@@ -65,13 +41,13 @@ import net.minecraft.init.Items as VItems
  * Main entry point for Vanilla Immersion
  */
 @Mod(modid = VanillaImmersion.MODID,
-    name = VanillaImmersion.MOD_NAME,
-    version = VanillaImmersion.VERSION,
-    acceptedMinecraftVersions = "*",
-    dependencies = "required-after:forgelin;required-after:forge",
-    updateJSON = "@UPDATE_URL@",
-    modLanguageAdapter = "net.shadowfacts.forgelin.KotlinAdapter",
-    guiFactory = "de.mineformers.vanillaimmersion.config.gui.GuiFactory")
+     name = VanillaImmersion.MOD_NAME,
+     version = VanillaImmersion.VERSION,
+     acceptedMinecraftVersions = "*",
+     dependencies = "required-after:forgelin;required-after:forge",
+     updateJSON = "@UPDATE_URL@",
+     modLanguageAdapter = "net.shadowfacts.forgelin.KotlinAdapter",
+     guiFactory = "de.mineformers.vanillaimmersion.config.gui.GuiFactory")
 object VanillaImmersion {
     const val MOD_NAME = "Vanilla Immersion"
     const val MODID = "vimmersion"
@@ -108,21 +84,25 @@ object VanillaImmersion {
     fun preInit(event: FMLPreInitializationEvent) {
         Configuration.load(event.modConfigurationDirectory, "vimmersion")
 
-        MinecraftForge.EVENT_BUS.register(CraftingHandler)
-        MinecraftForge.EVENT_BUS.register(EnchantingHandler)
+        if (!Configuration.shouldKeepVanilla("crafting_table")) {
+            MinecraftForge.EVENT_BUS.register(CraftingHandler)
+        }
+        if (!Configuration.shouldKeepVanilla("enchanting_table")) {
+            MinecraftForge.EVENT_BUS.register(EnchantingHandler)
+        }
         MinecraftForge.EVENT_BUS.register(SubSelectionHandler)
 
         // Register messages and handlers
         NETWORK.registerMessage(AnvilLock.Handler, AnvilLock.Message::class.java,
-            0, Side.CLIENT)
+                                0, Side.CLIENT)
         NETWORK.registerMessage(AnvilText.Handler, AnvilText.Message::class.java,
-            1, Side.SERVER)
+                                1, Side.SERVER)
         NETWORK.registerMessage(CraftingDrag.Handler, CraftingDrag.Message::class.java,
-            2, Side.SERVER)
+                                2, Side.SERVER)
         NETWORK.registerMessage(OpenGui.Handler, OpenGui.Message::class.java,
-            3, Side.SERVER)
+                                3, Side.SERVER)
         NETWORK.registerMessage(BeaconScroll.Handler, BeaconScroll.Message::class.java,
-            4, Side.SERVER)
+                                4, Side.SERVER)
         NetworkRegistry.INSTANCE.registerGuiHandler(this, GuiHandler())
 
         PROXY.preInit(event)
@@ -135,62 +115,42 @@ object VanillaImmersion {
      */
     object Blocks {
         /**
-         * Immersive Furnace
-         */
-        val FURNACE by lazy {
-            Furnace(false)
-        }
-        /**
-         * Immersive Furnace - Lit variant (required for Vanilla compatibility)
-         */
-        val LIT_FURNACE by lazy {
-            Furnace(true)
-        }
-        /**
-         * Immersive Crafting Table
-         */
-        val CRAFTING_TABLE by lazy {
-            CraftingTable()
-        }
-        /**
-         * Immersive Anvil
-         */
-        val ANVIL by lazy {
-            Anvil()
-        }
-        /**
-         * Immersive Enchantment Table
-         */
-        val ENCHANTING_TABLE by lazy {
-            EnchantingTable()
-        }
-        /**
-         * Immersive Brewing Stand
-         */
-        val BREWING_STAND by lazy {
-            BrewingStand()
-        }
-        /**
-         * Immersive Beacon
-         */
-        val BEACON by lazy {
-            Beacon()
-        }
-
-        /**
          * Initializes and registers blocks and related data
          */
         @SubscribeEvent
         fun init(event: RegistryEvent.Register<Block>) {
             // TODO: Unify interaction handling?
-            event.registry.registerAll(FURNACE, LIT_FURNACE, CRAFTING_TABLE, ANVIL, ENCHANTING_TABLE, BREWING_STAND, BEACON)
-
-            registerTileEntity(FurnaceLogic::class.java, "furnace")
-            registerTileEntity(CraftingTableLogic::class.java, "crafting_table")
-            registerTileEntity(AnvilLogic::class.java, "anvil")
-            registerTileEntity(EnchantingTableLogic::class.java, "enchanting_table")
-            registerTileEntity(BrewingStandLogic::class.java, "brewing_stand")
-            registerTileEntity(BeaconLogic::class.java, "beacon")
+            if (!Configuration.shouldKeepVanilla("furnace")) {
+                LOG.info("Overriding furnace with immersive version!")
+                event.registry.register(Furnace(false))
+                event.registry.register(Furnace(true))
+                registerTileEntity(FurnaceLogic::class.java, "furnace")
+            }
+            if (!Configuration.shouldKeepVanilla("crafting_table")) {
+                LOG.info("Overriding crafting table with immersive version!")
+                event.registry.register(CraftingTable())
+                registerTileEntity(CraftingTableLogic::class.java, "crafting_table")
+            }
+            if (!Configuration.shouldKeepVanilla("anvil")) {
+                LOG.info("Overriding anvil with immersive version!")
+                event.registry.register(Anvil())
+                registerTileEntity(AnvilLogic::class.java, "anvil")
+            }
+            if (!Configuration.shouldKeepVanilla("enchanting_table")) {
+                LOG.info("Overriding enchantment table with immersive version!")
+                event.registry.register(EnchantingTable())
+                registerTileEntity(EnchantingTableLogic::class.java, "enchanting_table")
+            }
+            if (!Configuration.shouldKeepVanilla("brewing_stand")) {
+                LOG.info("Overriding brewing stand with immersive version!")
+                event.registry.register(BrewingStand())
+                registerTileEntity(BrewingStandLogic::class.java, "brewing_stand")
+            }
+            if (!Configuration.shouldKeepVanilla("beacon")) {
+                LOG.info("Overriding beacon with immersive version!")
+                event.registry.register(Beacon())
+                registerTileEntity(BeaconLogic::class.java, "beacon")
+            }
         }
 
         @SubscribeEvent
@@ -267,21 +227,33 @@ object VanillaImmersion {
             // Initialize (i.e. compile) shaders now, removes delay on initial use later on
             Shaders.init()
 
-            // Register TESRs
-            ClientRegistry.bindTileEntitySpecialRenderer(FurnaceLogic::class.java, FurnaceRenderer())
-            ClientRegistry.bindTileEntitySpecialRenderer(CraftingTableLogic::class.java, CraftingTableRenderer())
-            ClientRegistry.bindTileEntitySpecialRenderer(AnvilLogic::class.java, AnvilRenderer())
-            ClientRegistry.bindTileEntitySpecialRenderer(EnchantingTableLogic::class.java, EnchantingTableRenderer())
-            ClientRegistry.bindTileEntitySpecialRenderer(BrewingStandLogic::class.java, BrewingStandRenderer())
-            ClientRegistry.bindTileEntitySpecialRenderer(BeaconLogic::class.java, BeaconRenderer())
+            // Register client-side block features
+            if (!Configuration.shouldKeepVanilla("furnace")) {
+                ClientRegistry.bindTileEntitySpecialRenderer(FurnaceLogic::class.java, FurnaceRenderer())
+            }
+            if (!Configuration.shouldKeepVanilla("crafting_table")) {
+                ClientRegistry.bindTileEntitySpecialRenderer(CraftingTableLogic::class.java, CraftingTableRenderer())
+                MinecraftForge.EVENT_BUS.register(CraftingDragHandler)
+            }
+            if (!Configuration.shouldKeepVanilla("anvil")) {
+                ClientRegistry.bindTileEntitySpecialRenderer(AnvilLogic::class.java, AnvilRenderer())
+            }
+            if (!Configuration.shouldKeepVanilla("enchanting_table")) {
+                ClientRegistry.bindTileEntitySpecialRenderer(EnchantingTableLogic::class.java, EnchantingTableRenderer())
+            }
+            if (!Configuration.shouldKeepVanilla("brewing_stand")) {
+                ClientRegistry.bindTileEntitySpecialRenderer(BrewingStandLogic::class.java, BrewingStandRenderer())
+            }
+            if (!Configuration.shouldKeepVanilla("beacon")) {
+                ClientRegistry.bindTileEntitySpecialRenderer(BeaconLogic::class.java, BeaconRenderer())
+                MinecraftForge.EVENT_BUS.register(BeaconHandler)
+            }
 
             // Register item models
             setItemModel(Items.HAMMER, 0, "$MODID:hammer")
 
             // Register client-specific event handlers
-            MinecraftForge.EVENT_BUS.register(CraftingDragHandler)
             MinecraftForge.EVENT_BUS.register(SubSelectionRenderer)
-            MinecraftForge.EVENT_BUS.register(BeaconHandler)
         }
 
         /**
@@ -290,8 +262,8 @@ object VanillaImmersion {
          */
         private fun setItemModel(item: Item, meta: Int, resource: String) {
             ModelLoader.setCustomModelResourceLocation(item,
-                meta,
-                ModelResourceLocation(resource, "normal"))
+                                                       meta,
+                                                       ModelResourceLocation(resource, "normal"))
         }
     }
 

@@ -50,9 +50,10 @@ class ConfigGui(parent: GuiScreen) :
         fun onChanged(event: ConfigChangedEvent.OnConfigChangedEvent) {
             // When our config was changed, save it
             if (event.modID == VanillaImmersion.MODID) {
-                for ((path, value) in configValues)
-                    Configuration.update(
-                        Configuration.withValue(path, fromAnyRef(value, Configuration.TEMPLATE[path]!!.comment)))
+                for ((path, value) in configValues) {
+                    val storedValue = if (value is Array<*>) value.toList() else value
+                    Configuration.update(Configuration.withValue(path, fromAnyRef(storedValue, Configuration.TEMPLATE[path]!!.comment)))
+                }
                 Configuration.save()
             }
         }
