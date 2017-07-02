@@ -1,8 +1,10 @@
 package de.mineformers.vanillaimmersion.tileentity
 
+import de.mineformers.vanillaimmersion.network.FakeServerNetHandler
 import de.mineformers.vanillaimmersion.util.*
 import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.entity.player.EntityPlayerMP
 import net.minecraft.inventory.*
 import net.minecraft.item.ItemStack
 import net.minecraft.item.crafting.CraftingManager
@@ -118,6 +120,7 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
                 // Check the "craftability" again and indicate failure if it was unsuccessful
                 if (!takeCraftingResult(null, extracted, simulate))
                     return ItemStack.EMPTY
+                return extracted
             }
             return super.extractItem(slot, amount, simulate)
         }
@@ -148,6 +151,9 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
      * The crafting table's orientation.
      */
     var facing: EnumFacing = EnumFacing.NORTH
+        set(value) {
+            field = value
+        }
     /**
      * The crafting table's rotation relative to a north facing.
      */
@@ -344,12 +350,10 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
         // Only take the result on the server and if it exists
         if (world.isRemote || result.isEmpty)
             return true
-        val tile = world.getTileEntity(pos)
-        if (tile !is CraftingTableLogic)
-            return false
+        val tile = world.getTileEntity(pos) as? CraftingTableLogic ?: return false
 
         // Use a fake player if the given one is null
-        val craftingPlayer = player ?: FakePlayerFactory.getMinecraft(world as WorldServer)
+        val craftingPlayer = player ?: createFakePlayer()
         // Create a crafting container and fill it with ingredients
         val container = tile.createContainer(craftingPlayer, simulate)
         val craftingSlot = container.getSlot(0)
@@ -368,6 +372,12 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
         // Try to craft a new item right away
         craft(player)
         return true
+    }
+
+    private fun createFakePlayer(): EntityPlayerMP {
+        val player = FakePlayerFactory.getMinecraft(world as WorldServer)
+        player.connection = FakeServerNetHandler(player)
+        return player
     }
 
     /**

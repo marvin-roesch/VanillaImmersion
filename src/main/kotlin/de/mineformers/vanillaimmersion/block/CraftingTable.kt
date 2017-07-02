@@ -55,7 +55,7 @@ open class CraftingTable : BlockWorkbench() {
      */
     override fun onBlockActivated(world: World, pos: BlockPos, state: IBlockState,
                                   player: EntityPlayer, hand: EnumHand,
-                                  side: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) = true
+                                  side: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) = false
 
     /**
      * Makes the crafting table face its placer.
@@ -134,18 +134,6 @@ open class CraftingTable : BlockWorkbench() {
         val tile = world.getTileEntity(pos) as? CraftingTableLogic ?: return super.getActualState(state, world, pos)
         return state.withProperty(FACING, tile.facing)
     }
-
-    /**
-     * Rotates the passed block state according to the indicated value.
-     */
-    override fun withRotation(state: IBlockState, rotation: Rotation) =
-        state.withProperty(FACING, rotation.rotate(state.getValue(FACING)))
-
-    /**
-     * Mirrors the passed block state according to the indicated value.
-     */
-    override fun withMirror(state: IBlockState, mirror: Mirror) =
-        state.withRotation(mirror.toRotation(state.getValue(FACING)))
 
     /**
      * We need to override this since the Vanilla table does not have a TileEntity.
