@@ -1,6 +1,5 @@
 package de.mineformers.vanillaimmersion.immersion
 
-import de.mineformers.vanillaimmersion.block.CraftingTable
 import de.mineformers.vanillaimmersion.client.CraftingDragHandler
 import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic
 import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic.Companion.Slot
@@ -30,14 +29,14 @@ object CraftingHandler {
             return
         val tile = event.world.getTileEntity(event.pos) as? CraftingTableLogic ?: return
         val hitVec = event.hitVec - event.pos
-        val (x, y) = getLocalPos(event.world, event.pos, hitVec)
+        val (x, y) = getLocalPos(tile, hitVec)
         if (x in 0..7 && y in 0..7) {
             if (event.world.isRemote)
                 CraftingDragHandler.onStartDragging()
             event.isCanceled = true
-        } else if (x in 9..11 && y in 6..8 && Loader.isModLoaded("jei")) {
+        } else if (!event.entityPlayer.isSneaking && x in 9..11 && y in 6..8 && Loader.isModLoaded("jei")) {
             if (event.world.isRemote)
-                CraftingDragHandler.openRecipeGui()
+                CraftingDragHandler.onStartClicking()
             event.isCanceled = true
         }
     }
@@ -57,13 +56,11 @@ object CraftingHandler {
         }
     }
 
-    fun getLocalPos(world: World, pos: BlockPos, hitVec: Vec3d): Pair<Int, Int> {
-        val state = world.getBlockState(pos)
-
+    fun getLocalPos(tile: CraftingTableLogic, hitVec: Vec3d): Pair<Int, Int> {
         // Rotate the hit vector of the game's ray tracing result to be able to ignore the block's rotation
         // Then, convert the vector to the "local" position on the table's face in the [0;15] (i.e. pixel)
         // coordinate space
-        val facing = state.getValue(CraftingTable.FACING)
+        val facing = tile.facing
         val angle = -Math.toRadians(180.0 - facing.horizontalAngle).toFloat()
         val rot = (-16 * ((hitVec - Vec3d(0.5, 0.0, 0.5)).rotateYaw(angle) - Vec3d(0.5, 0.0, 0.5))).blockPos
         // The crafting grid starts at (3|4)
@@ -79,7 +76,7 @@ object CraftingHandler {
         val tile = world.getTileEntity(pos) as? CraftingTableLogic ?: return false
 
         // Get the pixel position on the grid that was clicked
-        val (x, y) = getLocalPos(world, pos, hitVec)
+        val (x, y) = getLocalPos(tile, hitVec)
         // The grid covers a 11x7 pixel area (including the output)
         if (x !in 0..11 || y !in 0..7)
             return false

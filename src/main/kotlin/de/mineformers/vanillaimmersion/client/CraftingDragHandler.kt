@@ -1,7 +1,6 @@
 package de.mineformers.vanillaimmersion.client
 
 import de.mineformers.vanillaimmersion.VanillaImmersion
-import de.mineformers.vanillaimmersion.block.CraftingTable
 import de.mineformers.vanillaimmersion.client.renderer.Shaders
 import de.mineformers.vanillaimmersion.immersion.CraftingHandler
 import de.mineformers.vanillaimmersion.immersion.CraftingHandler.splitDrag
@@ -24,6 +23,7 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.RayTraceResult
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.entity.player.PlayerInteractEvent
+import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import org.lwjgl.input.Keyboard
@@ -59,6 +59,14 @@ object CraftingDragHandler {
      * A dictionary for looking up the amount each slot will hold after the dragging.
      */
     private val dragAmounts = mutableMapOf<Int, Int>()
+    /**
+     * Determines whether clicking (the question mark) is currently in progress.
+     */
+    private var clicking = false
+    /**
+     * The position currently clicked on the crafting grid.
+     */
+    private var clickPosition: Pair<Int, Int>? = null
 
     /**
      * Prevents Vanilla from handling right clicks if they happen to slip through.
@@ -76,9 +84,30 @@ object CraftingDragHandler {
         }
     }
 
+    /**
+     * Prevents Vanilla from handling right clicks if they happen to slip through, for JEI display only.
+     */
+    fun onStartClicking() {
+        if (clicking)
+            return
+        updateDragTarget()
+        if (clickPosition != null) {
+            val (x, y) = clickPosition!!
+            if (x in 9..11 && y in 6..8 && Loader.isModLoaded("jei")) {
+                clicking = true
+            }
+        }
+    }
+
+    @SubscribeEvent
+    fun onRightClick(event: PlayerInteractEvent.RightClickItem) {
+        if (dragging || clicking)
+            event.isCanceled = true
+    }
+
     @SubscribeEvent
     fun onRightClick(event: PlayerInteractEvent.RightClickBlock) {
-        if (dragging)
+        if (dragging || clicking)
             event.isCanceled = true
     }
 
@@ -101,11 +130,21 @@ object CraftingDragHandler {
             else
                 Keyboard.isKeyDown(key.keyCode)
         val wasDragging = dragging
+        val wasClicking = clicking
         val target = dragTarget
         updateDragTarget()
         val heldItem = Minecraft.getMinecraft().player.getHeldItem(EnumHand.MAIN_HAND)
         if (wasDragging && (dragTarget == null || !keyDown || dragStack != heldItem)) {
             stopDragging(target)
+        }
+        if (wasClicking && (dragTarget == null || !keyDown)) {
+            clicking = false
+            if (dragTarget != null && clickPosition != null) {
+                val (x, y) = clickPosition!!
+                if (x in 9..11 && y in 6..8 && Loader.isModLoaded("jei")) {
+                    openRecipeGui()
+                }
+            }
         }
         if (dragging && dragTarget != null && dragPosition != null && keyDown) {
             onDrag(dragPosition!!.first, dragPosition!!.second)
@@ -166,8 +205,8 @@ object CraftingDragHandler {
         val hovered = Minecraft.getMinecraft().objectMouseOver
         // We're only interested in blocks, although a crafting table entity might be interesting
         if (hovered != null && hovered.typeOfHit == RayTraceResult.Type.BLOCK) {
-            val state = world.getBlockState(hovered.blockPos)
-            if (state.block is CraftingTable) {
+            val tile = world.getTileEntity(hovered.blockPos) as? CraftingTableLogic
+            if (tile != null) {
                 if (dragTarget == null) {
                     // If the crafting process was just initiated, the block is definitely valid
                     dragTarget = hovered.blockPos
@@ -178,9 +217,10 @@ object CraftingDragHandler {
                 }
                 // Dragging may only work on the top face of the crafting table
                 if (hovered.sideHit == EnumFacing.UP) {
-                    val (x, y) = CraftingHandler.getLocalPos(world, dragTarget!!, hovered.hitVec - dragTarget!!)
+                    val (x, y) = CraftingHandler.getLocalPos(tile, hovered.hitVec - dragTarget!!)
                     if (x !in 0..7 || y !in 0..7) {
                         dragPosition = null
+                        clickPosition = x to y
                         return
                     }
                     val (slotX, modX) = Pair(x / 3, x % 3)
