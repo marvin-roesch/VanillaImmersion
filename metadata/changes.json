@@ -1,11 +1,12 @@
 {
     "additions": [
-        "Configuration options to disable immersive variants selectively"
+        "Acquiring an iron block or the anvil recipe will now unlock the hammer recipe"
     ],
     "changes": [
-        "The crafting table no longer uses metadata for storing its facing but the TileEntity"
+        "Update to latest Forge (14.21.1.2400)"
     ],
     "fixes": [
-        
+        "Fix hopper extraction crashing due to fake player networking",
+        "Fix crafting table interaction not working with special items like buckets"
     ]
 }
