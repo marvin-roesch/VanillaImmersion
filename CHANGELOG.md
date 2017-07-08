@@ -1,6 +1,16 @@
 Changelog
 =========
 
+### Version 1.1.2.0 for Minecraft 1.12
+**Note:** This version of the mod requires at least Forge version *1.12-14.21.1.2400*.
+  - **Additions**
+    - Acquiring an iron block or the anvil recipe will now unlock the hammer recipe
+  - **Changes**
+    - Update to latest Forge (14.21.1.2400)
+  - **Fixes**
+    - Fix hopper extraction crashing due to fake player networking
+    - Fix crafting table interaction not working with special items like buckets
+
 ### Version 1.1.1.0 for Minecraft 1.12
 **Note:** This version of the mod requires at least Forge version *1.12-14.21.0.2373*.
   - **Additions**
