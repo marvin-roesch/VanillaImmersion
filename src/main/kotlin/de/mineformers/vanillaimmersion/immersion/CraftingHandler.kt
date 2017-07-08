@@ -5,8 +5,10 @@ import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic
 import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic.Companion.Slot
 import de.mineformers.vanillaimmersion.util.*
 import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.item.EnumAction
 import net.minecraft.item.ItemStack
 import net.minecraft.stats.StatList
+import net.minecraft.util.EnumActionResult
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumHand
 import net.minecraft.util.math.BlockPos
@@ -33,10 +35,12 @@ object CraftingHandler {
         if (x in 0..7 && y in 0..7) {
             if (event.world.isRemote)
                 CraftingDragHandler.onStartDragging()
+            event.cancellationResult = EnumActionResult.SUCCESS
             event.isCanceled = true
         } else if (!event.entityPlayer.isSneaking && x in 9..11 && y in 6..8 && Loader.isModLoaded("jei")) {
             if (event.world.isRemote)
-                CraftingDragHandler.onStartClicking()
+                CraftingDragHandler.openRecipeGui()
+            event.cancellationResult = EnumActionResult.SUCCESS
             event.isCanceled = true
         }
     }

@@ -1,12 +1,9 @@
 {
     "additions": [
-        "Acquiring an iron block or the anvil recipe will now unlock the hammer recipe"
     ],
     "changes": [
-        "Update to latest Forge (14.21.1.2400)"
+        "Crafting handler uses the proper facilities for cancelling the events now"
     ],
     "fixes": [
-        "Fix hopper extraction crashing due to fake player networking",
-        "Fix crafting table interaction not working with special items like buckets"
     ]
 }
