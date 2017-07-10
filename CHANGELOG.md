@@ -1,6 +1,13 @@
 Changelog
 =========
 
+### Version 1.1.2.1 for Minecraft 1.12
+**Note:** This version of the mod requires at least Forge version *1.12-14.21.1.2400*.
+  - **Changes**
+    - Crafting handler uses the proper facilities for cancelling the events now
+  - **Fixes**
+    - Mod now usable on servers, still requires a fix from Forge, though
+
 ### Version 1.1.2.0 for Minecraft 1.12
 **Note:** This version of the mod requires at least Forge version *1.12-14.21.1.2400*.
   - **Additions**
