@@ -2,6 +2,8 @@ package de.mineformers.vanillaimmersion.config
 
 import com.typesafe.config.*
 import de.mineformers.vanillaimmersion.config.gui.KeepVanillaEntry
+import net.minecraftforge.fml.common.FMLCommonHandler
+import net.minecraftforge.fml.relauncher.Side
 import java.io.File
 import java.nio.file.Files
 import java.util.concurrent.TimeUnit
@@ -23,7 +25,8 @@ object Configuration : Config {
                     default = emptyList()
                     comment = "Specifies which blocks should retain Vanilla behaviour, none by default.\n" +
                         "Allowed values: [anvil, beacon, brewing_stand, crafting_table, enchanting_table, furnace]"
-                    guiClass = KeepVanillaEntry::class.java
+                    if (FMLCommonHandler.instance().side == Side.CLIENT)
+                        guiClass = KeepVanillaEntry::class.java
                     requiresGameRestart = true
                 }
                 category("enchantment-table") {

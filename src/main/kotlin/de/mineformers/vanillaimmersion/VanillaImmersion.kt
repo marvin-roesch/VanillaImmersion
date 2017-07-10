@@ -203,7 +203,7 @@ object VanillaImmersion {
          */
         @SubscribeEvent
         fun init(event: RegistryEvent.Register<SoundEvent>) {
-            event.registry.register(ENCHANTING_PAGE_TURN.setRegistryName(ENCHANTING_PAGE_TURN.soundName))
+            event.registry.register(ENCHANTING_PAGE_TURN.setRegistryName(ResourceLocation("$MODID:enchanting.page_turn")))
         }
     }
 
