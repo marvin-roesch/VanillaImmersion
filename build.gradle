@@ -70,7 +70,8 @@ minecraft {
 
     replace '@VERSION@', config.mod_version
     replace 'acceptedMinecraftVersions = "*",', """acceptedMinecraftVersions = "[${config.mc_version}]","""
-    replace 'required-after:forge', "required-after:forge@[${config.forge_version},)"
+    replace 'required-after:forgelin', "required-after:forgelin@[${config.forgelin_version},)"
+    replace 'required-after:forge;', "required-after:forge@[${config.forge_version},);"
     replace '@UPDATE_URL@', updateUrl
 
     replaceIn 'VanillaImmersion.kt'
@@ -115,6 +116,25 @@ tasks.build.dependsOn reobfShadowJar
 
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import net.minecraftforge.gradle.user.TaskSourceCopy
+
+// Mad hacks to make source replacements work for Kotlin
+for (set in sourceSets) {
+    def taskName = "source${set.name.capitalize()}Kotlin"
+    def dir = new File(project.getBuildDir(), "sources/${set.name}/kotlin")
+    task(taskName, type: TaskSourceCopy) {
+        source = set.getKotlin()
+        output = dir
+    }
+    def compileTask = tasks[set.getCompileTaskName("kotlin")]
+    compileTask.source = dir
+    compileTask.dependsOn taskName
+    def dirPath = dir.toPath()
+    compileKotlin.include {
+        return it.file.toPath().startsWith(dirPath)
+    }
+}
+sourceJar.from sourceSets.main.kotlin
 
 processResources {
     // this will ensure that this task is redone when the versions change.

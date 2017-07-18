@@ -4,6 +4,6 @@
     "changes": [
     ],
     "fixes": [
-        "Hammer model registers properly now, removes conflicts with other (buggy) mods"
+        "Properly include version information in main class"
     ]
 }

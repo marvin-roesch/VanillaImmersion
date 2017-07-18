@@ -45,7 +45,7 @@ import net.minecraft.init.Items as VItems
      name = VanillaImmersion.MOD_NAME,
      version = VanillaImmersion.VERSION,
      acceptedMinecraftVersions = "*",
-     dependencies = "required-after:forgelin;required-after:forge",
+     dependencies = "required-after:forge;required-after:forgelin",
      updateJSON = "@UPDATE_URL@",
      modLanguageAdapter = "net.shadowfacts.forgelin.KotlinAdapter",
      guiFactory = "de.mineformers.vanillaimmersion.config.gui.GuiFactory")
