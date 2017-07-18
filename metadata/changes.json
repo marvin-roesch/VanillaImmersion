@@ -2,9 +2,8 @@
     "additions": [
     ],
     "changes": [
-        "Crafting handler uses the proper facilities for cancelling the events now"
     ],
     "fixes": [
-        "Mod now usable on servers, still requires a fix from Forge, though"
+        "Hammer model registers properly now, removes conflicts with other (buggy) mods"
     ]
 }

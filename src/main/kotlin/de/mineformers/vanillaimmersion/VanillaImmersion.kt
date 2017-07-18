@@ -18,6 +18,7 @@ import net.minecraft.item.Item
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.SoundEvent
+import net.minecraftforge.client.event.ModelRegistryEvent
 import net.minecraftforge.client.model.ModelLoader
 import net.minecraftforge.client.model.obj.OBJLoader
 import net.minecraftforge.common.MinecraftForge
@@ -221,6 +222,7 @@ object VanillaImmersion {
      * The client proxy serves as client-specific interface for the mod.
      * Code that may only be accessed on the client should be put here.
      */
+    @Mod.EventBusSubscriber(Side.CLIENT, modid = MODID)
     class ClientProxy : Proxy {
         override fun preInit(event: FMLPreInitializationEvent) {
             OBJLoader.INSTANCE.addDomain(MODID) // We don't have OBJ models yet, but maybe in the future?
@@ -249,21 +251,16 @@ object VanillaImmersion {
                 MinecraftForge.EVENT_BUS.register(BeaconHandler)
             }
 
-            // Register item models
-            setItemModel(Items.HAMMER, 0, "$MODID:hammer")
-
             // Register client-specific event handlers
             MinecraftForge.EVENT_BUS.register(SubSelectionRenderer)
         }
 
-        /**
-         * Sets the model associated with an item.
-         * Assumes the default variant is to be used ("inventory").
-         */
-        private fun setItemModel(item: Item, meta: Int, resource: String) {
-            ModelLoader.setCustomModelResourceLocation(item,
-                                                       meta,
-                                                       ModelResourceLocation(resource, "normal"))
+        companion object {
+            @JvmStatic
+            @SubscribeEvent
+            fun registerModels(event: ModelRegistryEvent) {
+                ModelLoader.setCustomModelResourceLocation(Items.HAMMER, 0, ModelResourceLocation("$MODID:hammer", "inventory"))
+            }
         }
     }
 
