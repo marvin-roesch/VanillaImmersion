@@ -1,6 +1,11 @@
 Changelog
 =========
 
+### Version 1.1.2.3 for Minecraft 1.12
+**Note:** This version of the mod requires at least Forge version *1.12-14.21.1.2400*.
+  - **Fixes**
+    - Properly include version information in main class
+
 ### Version 1.1.2.2 for Minecraft 1.12
 **Note:** This version of the mod requires at least Forge version *1.12-14.21.1.2400*.
   - **Fixes**

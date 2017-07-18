@@ -11,7 +11,8 @@
         "1.1.1.0": "Addition: Configuration options to disable immersive variants selectively\nChange: The crafting table no longer uses metadata for storing its facing but the TileEntity",
         "1.1.2.0": "Addition: Acquiring an iron block or the anvil recipe will now unlock the hammer recipe\nChange: Update to latest Forge (14.21.1.2400)\nFix: Fix hopper extraction crashing due to fake player networking\nFix: Fix crafting table interaction not working with special items like buckets",
         "1.1.2.1": "Change: Crafting handler uses the proper facilities for cancelling the events now\nFix: Mod now usable on servers, still requires a fix from Forge, though",
-        "1.1.2.2": "Fix: Hammer model registers properly now, removes conflicts with other (buggy) mods"
+        "1.1.2.2": "Fix: Hammer model registers properly now, removes conflicts with other (buggy) mods",
+        "1.1.2.3": "Fix: Properly include version information in main class"
     },
     "1.9.4": {
         "0.0.0.1": "Initial alpha release",
@@ -29,7 +30,7 @@
     "homepage": "http://minecraft.curseforge.com/projects/vanilla-immersion",
     "promos": {
         "1.10.2-latest": "0.0.9.0",
-        "1.12-latest": "1.1.2.2",
+        "1.12-latest": "1.1.2.3",
         "1.9.4-latest": "0.0.6.0"
     }
 }
