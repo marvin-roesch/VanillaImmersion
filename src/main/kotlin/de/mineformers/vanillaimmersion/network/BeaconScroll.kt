@@ -8,7 +8,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext
 
 /**
- * Message and handler for notifying the client that is has acquired the lock on an anvil.
+ * Message and handler for notifying the server that the player has scrolled on a beacon.
  */
 object BeaconScroll {
     /**
@@ -30,7 +30,9 @@ object BeaconScroll {
         override fun onMessage(msg: Message, ctx: MessageContext): IMessage? {
             val player = ctx.serverHandler.player
             // We interact with the world, hence schedule our action
-            player.serverWorld.addScheduledTask {
+            player.serverWorld.addScheduledTask task@ {
+                if (!player.world.isBlockLoaded(msg.pos))
+                    return@task
                 val tile = player.world.getTileEntity(msg.pos)
                 // Ensure the player can interact and "show" them the text "GUI" to insert some text
                 if (tile is BeaconLogic) {

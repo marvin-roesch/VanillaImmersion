@@ -4,6 +4,6 @@
     "changes": [
     ],
     "fixes": [
-        "Properly include version information in main class"
+        "Prevent arbitrary chunk generation through the server"
     ]
 }
