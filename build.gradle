@@ -82,7 +82,7 @@ repositories {
         url "http://dvs1.progwml6.com/files/maven"
     }
     maven {
-        url "http://mvn.rx14.co.uk/shadowfacts/"
+        url "http://maven.shadowfacts.net"
     }
     maven {
         name = "CurseForge"
@@ -98,7 +98,7 @@ configurations {
 }
 
 dependencies {
-    compile "shadowfacts-forgelin:Forgelin:${config.forgelin_version}"
+    compile "net.shadowfacts:Forgelin:${config.forgelin_version}"
     deobfCompile "mezz.jei:jei_${config.mc_version}:${config.jei_version}"
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
 }
