@@ -70,7 +70,7 @@ minecraft {
 
     replace '@VERSION@', config.mod_version
     replace 'acceptedMinecraftVersions = "*",', """acceptedMinecraftVersions = "[${config.mc_version}]","""
-    replace 'required-after:forgelin', "required-after:forgelin@[${config.forgelin_version},)"
+//    replace 'required-after:forgelin', "required-after:forgelin@[${config.forgelin_version},)" NOTE: Needs to be fixed on Forgelin's side
     replace 'required-after:forge;', "required-after:forge@[${config.forge_version},);"
     replace '@UPDATE_URL@', updateUrl
 

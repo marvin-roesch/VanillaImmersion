@@ -4,6 +4,7 @@
     "changes": [
     ],
     "fixes": [
-        "Prevent arbitrary chunk generation through the server"
+        "Prevent arbitrary chunk generation through the server",
+        "Don't depend on a version of Forgelin, just the mod"
     ]
 }
