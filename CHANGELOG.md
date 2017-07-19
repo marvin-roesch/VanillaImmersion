@@ -1,6 +1,12 @@
 Changelog
 =========
 
+### Version 1.1.2.4 for Minecraft 1.12
+**Note:** This version of the mod requires at least Forge version *1.12-14.21.1.2400*.
+  - **Fixes**
+    - Prevent arbitrary chunk generation through the server
+    - Don't depend on a version of Forgelin, just the mod
+
 ### Version 1.1.2.3 for Minecraft 1.12
 **Note:** This version of the mod requires at least Forge version *1.12-14.21.1.2400*.
   - **Fixes**
