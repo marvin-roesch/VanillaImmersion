@@ -4,7 +4,6 @@
     "changes": [
     ],
     "fixes": [
-        "Prevent arbitrary chunk generation through the server",
-        "Don't depend on a version of Forgelin, just the mod"
+        "Furnace uses Vanilla methods to ensure items don't drop on state changes now, fixes issues with external heater etc."
     ]
 }

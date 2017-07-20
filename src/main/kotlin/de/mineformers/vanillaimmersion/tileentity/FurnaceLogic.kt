@@ -5,7 +5,6 @@ import net.minecraft.block.BlockFurnace
 import net.minecraft.block.BlockFurnace.FACING
 import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.init.Blocks
 import net.minecraft.item.ItemStack
 import net.minecraft.item.crafting.FurnaceRecipes
 import net.minecraft.nbt.NBTTagCompound
@@ -43,12 +42,6 @@ open class FurnaceLogic : TileEntityFurnace(), SubSelections {
              */
             OUTPUT
         }
-
-        /**
-         * Copied from Vanilla, notifies the block that it should keep its inventory when broken.
-         * Required for swapping of lit and unlit furnace.
-         */
-        internal var KEEP_INVENTORY = false
 
         val INPUT_SELECTION =
             selectionBox(AxisAlignedBB(3 * 0.0625, 9 * 0.0625, 0.0625,
@@ -281,35 +274,8 @@ open class FurnaceLogic : TileEntityFurnace(), SubSelections {
      * Updates the furnace block according to its burning state.
      */
     private fun updateState() {
-        val state = world.getBlockState(pos)
-        val tile = world.getTileEntity(pos)
-
-        // Vanilla hacks
-        KEEP_INVENTORY = true
-        // Swap between lit and unlit variant
-        if (isBurning) {
-            world.setBlockState(pos, getLitState(state), 3)
-        } else {
-            world.setBlockState(pos, getDefaultState(state), 3)
-        }
-        KEEP_INVENTORY = false
-
-        // More Vanilla hacks
-        if (tile != null) {
-            tile.validate()
-            world.setTileEntity(pos, tile)
-        }
+        BlockFurnace.setState(isBurning, world, pos)
     }
-
-    /**
-     * Converts a given state into one of the default (unlit) furnace.
-     */
-    open fun getDefaultState(state: IBlockState) = Blocks.FURNACE.defaultState.withProperty(FACING, state.getValue(FACING))
-
-    /**
-     * Converts a given state into one of the lit furnace.
-     */
-    open fun getLitState(state: IBlockState) = Blocks.LIT_FURNACE.defaultState.withProperty(FACING, state.getValue(FACING))
 
     /**
      * Composes a tag for updates of the TE (both initial chunk data and later updates).

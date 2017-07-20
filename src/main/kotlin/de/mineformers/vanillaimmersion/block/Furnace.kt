@@ -76,20 +76,4 @@ open class Furnace(val lit: Boolean) : BlockFurnace(lit) {
                             false)
         }
     }
-
-    /**
-     * Drops the furnace's contents when it's broken.
-     */
-    override fun breakBlock(world: World, pos: BlockPos, state: IBlockState) {
-        // Mad hax: Keep the inventory when the furnace just changes state from unlit to lit
-        // TODO: Evaluate whether this could be handled through TileEntity.shouldRefresh
-        if (!FurnaceLogic.KEEP_INVENTORY) {
-            val tile = world.getTileEntity(pos)
-            if (tile is TileEntityFurnace) {
-                InventoryHelper.dropInventoryItems(world, pos, tile)
-                world.updateComparatorOutputLevel(pos, this)
-            }
-        }
-        world.removeTileEntity(pos)
-    }
 }
