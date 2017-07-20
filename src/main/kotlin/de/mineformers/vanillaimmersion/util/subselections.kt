@@ -310,8 +310,7 @@ object SubSelectionRenderer {
                 !(box.rendering.hoveredOnly && hovered != box) &&
                 (box.slot == null ||
                     (tile.hasCapability(ITEM_HANDLER_CAPABILITY, null) &&
-                        (box.slot.renderFilled ||
-                            itemHandler!!.getStackInSlot(box.slot.id).isEmpty)))
+                        (box.slot.renderFilled || itemHandler!!.getStackInSlot(box.slot.id).isEmpty)))
 
         pushMatrix()
         enableBlend()

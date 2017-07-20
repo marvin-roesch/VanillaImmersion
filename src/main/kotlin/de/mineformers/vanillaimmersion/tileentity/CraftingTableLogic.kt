@@ -1,10 +1,8 @@
 package de.mineformers.vanillaimmersion.tileentity
 
-import de.mineformers.vanillaimmersion.network.FakeServerNetHandler
 import de.mineformers.vanillaimmersion.util.*
 import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.entity.player.EntityPlayerMP
 import net.minecraft.inventory.*
 import net.minecraft.item.ItemStack
 import net.minecraft.item.crafting.CraftingManager
@@ -17,11 +15,11 @@ import net.minecraft.util.EnumFacing.*
 import net.minecraft.util.NonNullList
 import net.minecraft.util.Rotation
 import net.minecraft.util.math.AxisAlignedBB
+import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
-import net.minecraft.world.WorldServer
+import net.minecraft.world.World
 import net.minecraftforge.common.capabilities.Capability
 import net.minecraftforge.common.util.Constants
-import net.minecraftforge.common.util.FakePlayerFactory
 import net.minecraftforge.items.CapabilityItemHandler.ITEM_HANDLER_CAPABILITY
 import net.minecraftforge.items.ItemStackHandler
 import net.minecraftforge.items.wrapper.RangedWrapper
@@ -95,7 +93,8 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
                             renderOptions {
                                 hoverColor = Vec3d(.1, .1, .1)
                             }
-                        })
+                        }
+                    )
                 }
             builder.toList()
         }
@@ -113,23 +112,13 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
         }
 
         override fun extractItem(slot: Int, amount: Int, simulate: Boolean): ItemStack {
-            // Items may only be extracted from the output slot if the recipe does not require any player data etc.
-            if (slot == Slot.OUTPUT.ordinal) {
-                // Simulate the extraction first to get the likely result
-                val extracted = super.extractItem(slot, amount, true)
-                // Check the "craftability" again and indicate failure if it was unsuccessful
-                if (!takeCraftingResult(null, extracted, simulate))
-                    return ItemStack.EMPTY
-                return extracted
-            }
+            // Do not allow extraction from output slot, fixes conflicts between automation and real players
+            if (slot == Slot.OUTPUT.ordinal)
+                return ItemStack.EMPTY
             return super.extractItem(slot, amount, simulate)
         }
 
         override fun onContentsChanged(slot: Int) {
-            // Update the crafting result if the output slot was affected (i.e. the output was extracted)
-            if (slot == Slot.OUTPUT.ordinal) {
-                craft(null)
-            }
             // Sync any inventories to the client
             markDirty()
             sync()
@@ -198,12 +187,6 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
     private val middleInventory by lazy {
         RangedWrapper(inventory, 5, 6)
     }
-    /**
-     * A wrapper around the inventory to access the [output][Slot.OUTPUT] slot.
-     */
-    private val outputInventory by lazy {
-        RangedWrapper(inventory, 0, 1)
-    }
 
     inner class CraftingTableContainer(player: EntityPlayer, simulate: Boolean) :
         ContainerWorkbench(player.inventory, world, pos) {
@@ -247,7 +230,7 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
 
                     override fun removeStackFromSlot(index: Int): ItemStack {
                         val result = this@CraftingTableLogic.inventory.getStackInSlot(0)
-                        this@CraftingTableLogic.inventory.contents[0] = null
+                        this@CraftingTableLogic.inventory.contents[0] = ItemStack.EMPTY
                         this@CraftingTableLogic.markDirty()
                         sync()
                         return result
@@ -280,6 +263,10 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
                     this.addSlotToContainer(Slot(player.inventory, slot, 8 + slot * 18, 142))
                 }
                 onCraftMatrixChanged(craftMatrix)
+            } else {
+                for (i in 0..8) {
+                    craftMatrix.setInventorySlotContents(i, this@CraftingTableLogic.inventory.getStackInSlot(i + 1))
+                }
             }
         }
 
@@ -316,26 +303,14 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
     /**
      * Tries to perform a crafting operation.
      */
-    open fun craft(player: EntityPlayer?) {
+    open fun craft(player: EntityPlayer) {
         // Crafting only happens server-side
         if (world.isRemote)
             return
 
         // Initialize the crafting matrix, either via a real crafting container if there is a player or
         // via a dummy inventory if there is none
-        val matrix =
-            if (player != null)
-                createContainer(player, false).craftMatrix
-            else {
-                val container = object : Container() {
-                    override fun canInteractWith(playerIn: EntityPlayer?) = true
-                }
-                val inventory = InventoryCrafting(container, 3, 3)
-                // Fill the matrix with ingredients
-                for (i in 1..(this.inventory.slots - 1))
-                    inventory.setInventorySlotContents(i - 1, this.inventory.getStackInSlot(i))
-                inventory
-            }
+        val matrix = createContainer(player, false).craftMatrix
         val result = CraftingManager.findMatchingResult(matrix, world)
         // There is no need to craft if there already is the same result
         if (this[Slot.OUTPUT].equal(result))
@@ -346,38 +321,26 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
     /**
      * Takes the crafting result from a crafting table, optionally with a player.
      */
-    fun takeCraftingResult(player: EntityPlayer?, result: ItemStack, simulate: Boolean): Boolean {
+    fun takeCraftingResult(player: EntityPlayer, result: ItemStack, simulate: Boolean): Boolean {
         // Only take the result on the server and if it exists
         if (world.isRemote || result.isEmpty)
             return true
-        val tile = world.getTileEntity(pos) as? CraftingTableLogic ?: return false
-
-        // Use a fake player if the given one is null
-        val craftingPlayer = player ?: createFakePlayer()
         // Create a crafting container and fill it with ingredients
-        val container = tile.createContainer(craftingPlayer, simulate)
+        val container = createContainer(player, simulate)
         val craftingSlot = container.getSlot(0)
-        if (craftingSlot.stack == null)
+        if (craftingSlot.stack.isEmpty) {
             return false
+        }
         // Imitate a player picking up an item from the output slot
-        craftingSlot.onTake(craftingPlayer, result)
+        craftingSlot.onTake(player, result)
         // Only manipulate the table's inventory when we're not simulating the action
         if (!simulate) {
             // Grant the player the result
-            if (player != null) {
-                dropResult(player, result)
-                tile[Slot.OUTPUT] = ItemStack.EMPTY
-            }
+            dropResult(player, result)
+            this[Slot.OUTPUT] = ItemStack.EMPTY
         }
-        // Try to craft a new item right away
         craft(player)
         return true
-    }
-
-    private fun createFakePlayer(): EntityPlayerMP {
-        val player = FakePlayerFactory.getMinecraft(world as WorldServer)
-        player.connection = FakeServerNetHandler(player)
-        return player
     }
 
     /**
@@ -425,11 +388,17 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
     }
 
     /**
+     * Determines whether the TileEntity should be replaced by a new instance upon block updates.
+     */
+    override fun shouldRefresh(world: World, pos: BlockPos, oldState: IBlockState, newState: IBlockState) =
+        oldState.block != newState.block
+
+    /**
      * Checks whether the crafting table has a capability attached to the given side.
      * Will definitely return `true` for the item handler capability
      */
     override fun hasCapability(capability: Capability<*>, side: EnumFacing?): Boolean {
-        return capability == ITEM_HANDLER_CAPABILITY || super.hasCapability(capability, side)
+        return (side != DOWN && capability == ITEM_HANDLER_CAPABILITY) || super.hasCapability(capability, side)
     }
 
     /**
@@ -441,8 +410,6 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
             // Return the appropriate inventory for the vertical sides
             if (side == UP)
                 return middleInventory as T
-            else if (side == DOWN)
-                return outputInventory as T
 
             // Transform the passed side into one that's relative to the crafting table's orientation
             val relativeSide =

@@ -56,6 +56,7 @@ object CraftingHandler {
         val hitVec = event.hitVec - event.pos
         // Prevent Vanilla behaviour if ours was successful
         if (handleClick(event.world, event.pos, event.entityPlayer, hitVec)) {
+            event.cancellationResult = EnumActionResult.SUCCESS
             event.isCanceled = true
         }
     }
@@ -94,10 +95,10 @@ object CraftingHandler {
             return true
         // Special case for the output
         if (slotX == 3 && slotY == 1) {
+            val result = tile[Slot.OUTPUT].copy()
             tile.takeCraftingResult(player, tile[Slot.OUTPUT], false)
             // If the player is sneaking, try to extract as many crafting results from the table as possible
             if (player.isSneaking && !world.isRemote) {
-                val result = tile[Slot.OUTPUT]
                 while (!result.isEmpty && result.equal(tile[Slot.OUTPUT])) {
                     tile.takeCraftingResult(player, tile[Slot.OUTPUT], false)
                 }
