@@ -5,6 +5,7 @@
         "Automatic extraction out of the crafting table no longer works, since automation and players were too indistinguishable code-wise. Insertion still works."
     ],
     "fixes": [
-        "Furnace uses Vanilla methods to ensure items don't drop on state changes now, fixes issues with external heater etc."
+        "Furnace uses Vanilla methods to ensure items don't drop on state changes now, fixes issues with external heater etc.",
+        "Anvil doesn't ignore its empty state anymore"
     ]
 }

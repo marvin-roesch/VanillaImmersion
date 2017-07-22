@@ -1,6 +1,14 @@
 Changelog
 =========
 
+### Version 2.0.0.0 for Minecraft 1.12
+**Note:** This version of the mod requires at least Forge version *1.12-14.21.1.2415*.
+  - **Changes**
+    - Automatic extraction out of the crafting table no longer works, since automation and players were too indistinguishable code-wise. Insertion still works.
+  - **Fixes**
+    - Furnace uses Vanilla methods to ensure items don't drop on state changes now, fixes issues with external heater etc.
+    - Anvil doesn't ignore its empty state anymore
+
 ### Version 1.1.2.4 for Minecraft 1.12
 **Note:** This version of the mod requires at least Forge version *1.12-14.21.1.2400*.
   - **Fixes**
