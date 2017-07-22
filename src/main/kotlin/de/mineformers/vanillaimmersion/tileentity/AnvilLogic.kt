@@ -297,7 +297,9 @@ open class AnvilLogic : TileEntity(), SubSelections {
         objectSlot.putStack(tile[Slot.INPUT_OBJECT])
         materialSlot.putStack(tile[Slot.INPUT_MATERIAL])
         container.updateItemName(tile.itemName)
-        val result = outputSlot.stack ?: return null
+        val result = outputSlot.stack
+        if (outputSlot.stack.isEmpty)
+            return null
         if (!simulate) {
             val oldLevel = player.experienceLevel
             outputSlot.onTake(player, result)

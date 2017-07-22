@@ -10,10 +10,7 @@ import net.minecraft.client.renderer.Tessellator
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
-import net.minecraft.util.EnumFacing
-import net.minecraft.util.EnumHand
-import net.minecraft.util.ResourceLocation
-import net.minecraft.util.Rotation
+import net.minecraft.util.*
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.RayTraceResult
@@ -253,8 +250,10 @@ object SubSelectionHandler {
         val face = box.rotation.inverse.rotate(ray.sideHit)
         val hitVec = ((ray.hitVec - pos) - Vec3d(.5, .5, .5)).rotateY(box.rotation.inverse) +
             Vec3d(.5, .5, .5) - box.bounds.min
-        if (tile.onRightClickBox(box, player, hand, stack, face, hitVec))
+        if (tile.onRightClickBox(box, player, hand, stack, face, hitVec)) {
             event.isCanceled = true
+            event.cancellationResult = EnumActionResult.SUCCESS
+        }
     }
 
     @SubscribeEvent
@@ -280,8 +279,9 @@ object SubSelectionHandler {
         val face = box.rotation.inverse.rotate(ray.sideHit)
         val hitVec = ((ray.hitVec - pos) - Vec3d(.5, .5, .5)).rotateY(box.rotation.inverse) +
             Vec3d(.5, .5, .5) - box.bounds.min
-        if (tile.onLeftClickBox(box, player, hand, stack, face, hitVec))
+        if (tile.onLeftClickBox(box, player, hand, stack, face, hitVec)) {
             event.isCanceled = true
+        }
     }
 }
 
@@ -343,7 +343,7 @@ object SubSelectionRenderer {
             color(1f, 1f, 1f, 0.4f)
             tryBlendFuncSeparate(SourceFactor.SRC_ALPHA, DestFactor.ONE,
                                  SourceFactor.ONE, DestFactor.ZERO)
-            for ((originalBox, rotation, rendering, slot) in tile.boxes.filter(::renderFilter)) {
+            for ((originalBox, rotation, rendering, _) in tile.boxes.filter(::renderFilter)) {
                 if (rendering!!.icon == null)
                     continue
                 val box = originalBox.rotateY(rotation).offset(pos)
