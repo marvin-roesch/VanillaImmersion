@@ -1,6 +1,13 @@
 Changelog
 =========
 
+### Version 2.0.1.0 for Minecraft 1.12
+**Note:** This version of the mod requires at least Forge version *1.12-14.21.1.2426*.
+  - **Changes**
+    - Properly depend on versioned Forgelin
+    - Updated to newest Forge, addresses most issues with VI on servers
+    - Override use of Vanilla state mappers with custom ones to prevent issues with resource packs
+
 ### Version 2.0.0.0 for Minecraft 1.12
 **Note:** This version of the mod requires at least Forge version *1.12-14.21.1.2415*.
   - **Changes**
