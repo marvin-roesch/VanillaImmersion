@@ -13,7 +13,10 @@ import de.mineformers.vanillaimmersion.tileentity.*
 import de.mineformers.vanillaimmersion.util.SubSelectionHandler
 import de.mineformers.vanillaimmersion.util.SubSelectionRenderer
 import net.minecraft.block.Block
+import net.minecraft.block.state.IBlockState
 import net.minecraft.client.renderer.block.model.ModelResourceLocation
+import net.minecraft.client.renderer.block.statemap.StateMapperBase
+import net.minecraft.init.Blocks
 import net.minecraft.item.Item
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.ResourceLocation
@@ -33,10 +36,10 @@ import net.minecraftforge.fml.common.network.NetworkRegistry
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper
 import net.minecraftforge.fml.common.registry.ForgeRegistries
 import net.minecraftforge.fml.common.registry.GameRegistry
+import net.minecraftforge.fml.common.registry.GameRegistry.ObjectHolder
 import net.minecraftforge.fml.relauncher.Side
+import net.minecraftforge.registries.IForgeRegistryEntry
 import org.apache.logging.log4j.LogManager
-import net.minecraft.init.Blocks as VBlocks
-import net.minecraft.init.Items as VItems
 
 /**
  * Main entry point for Vanilla Immersion
@@ -73,7 +76,7 @@ object VanillaImmersion {
     }
 
     init {
-        MinecraftForge.EVENT_BUS.register(Blocks)
+        MinecraftForge.EVENT_BUS.register(BlockRegistration)
         MinecraftForge.EVENT_BUS.register(Items)
         MinecraftForge.EVENT_BUS.register(Sounds)
     }
@@ -111,10 +114,8 @@ object VanillaImmersion {
 
     /**
      * Holder object for all blocks introduced by this mod.
-     * Due to be reworked once MinecraftForge's substitutions are fixed.
-     * Blocks utilize lazy initialization to guarantee they're not created before first access in [Blocks.init]
      */
-    object Blocks {
+    object BlockRegistration {
         /**
          * Initializes and registers blocks and related data
          */
@@ -170,16 +171,16 @@ object VanillaImmersion {
         /**
          * Hammer for interaction with Anvil
          */
-        val HAMMER by lazy {
-            Hammer()
-        }
+        @JvmStatic
+        @ObjectHolder("vimmersion:hammer")
+        lateinit var HAMMER: Item
 
         /**
          * Initializes and registers blocks and related data
          */
         @SubscribeEvent
         fun init(event: RegistryEvent.Register<Item>) {
-            event.registry.register(HAMMER)
+            event.registry.register(Hammer())
         }
 
         @SubscribeEvent
@@ -256,10 +257,38 @@ object VanillaImmersion {
         }
 
         companion object {
+            private object OverrideStateMapper : StateMapperBase() {
+                override fun getModelResourceLocation(state: IBlockState) =
+                    ModelResourceLocation(ResourceLocation(MODID, state.block.registryName!!.resourcePath), getPropertyString(state.properties))
+            }
+
+            inline fun <T : IForgeRegistryEntry<T>> ifOwner(entry: IForgeRegistryEntry<T>, action: (T) -> Unit) {
+                //TODO: Add proper override owner support
+            }
+
             @JvmStatic
             @SubscribeEvent
             fun registerModels(event: ModelRegistryEvent) {
                 ModelLoader.setCustomModelResourceLocation(Items.HAMMER, 0, ModelResourceLocation("$MODID:hammer", "inventory"))
+                if (!Configuration.shouldKeepVanilla("furnace")) {
+                    ModelLoader.setCustomStateMapper(Blocks.FURNACE, OverrideStateMapper)
+                    ModelLoader.setCustomStateMapper(Blocks.LIT_FURNACE, OverrideStateMapper)
+                }
+                if (!Configuration.shouldKeepVanilla("crafting_table")) {
+                    ModelLoader.setCustomStateMapper(Blocks.CRAFTING_TABLE, OverrideStateMapper)
+                }
+                if (!Configuration.shouldKeepVanilla("anvil")) {
+                    ModelLoader.setCustomStateMapper(Blocks.ANVIL, OverrideStateMapper)
+                }
+                if (!Configuration.shouldKeepVanilla("enchanting_table")) {
+                    ModelLoader.setCustomStateMapper(Blocks.ENCHANTING_TABLE, OverrideStateMapper)
+                }
+                if (!Configuration.shouldKeepVanilla("brewing_stand")) {
+                    ModelLoader.setCustomStateMapper(Blocks.BREWING_STAND, OverrideStateMapper)
+                }
+                if (!Configuration.shouldKeepVanilla("beacon")) {
+                    ModelLoader.setCustomStateMapper(Blocks.BEACON, OverrideStateMapper)
+                }
             }
         }
     }
