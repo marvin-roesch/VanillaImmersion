@@ -30,6 +30,7 @@ import net.minecraftforge.fml.client.registry.ClientRegistry
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.Mod.EventHandler
 import net.minecraftforge.fml.common.SidedProxy
+import net.minecraftforge.fml.common.event.FMLFingerprintViolationEvent
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.network.NetworkRegistry
@@ -51,7 +52,8 @@ import org.apache.logging.log4j.LogManager
      dependencies = "required-after:forge;required-after:forgelin",
      updateJSON = "@UPDATE_URL@",
      modLanguageAdapter = "net.shadowfacts.forgelin.KotlinAdapter",
-     guiFactory = "de.mineformers.vanillaimmersion.config.gui.GuiFactory")
+     guiFactory = "de.mineformers.vanillaimmersion.config.gui.GuiFactory",
+     certificateFingerprint = "6c67ec97cb96c64a0bbd82a3cb1ec48cbde61bb2")
 object VanillaImmersion {
     const val MOD_NAME = "Vanilla Immersion"
     const val MODID = "vimmersion"
@@ -110,6 +112,15 @@ object VanillaImmersion {
         NetworkRegistry.INSTANCE.registerGuiHandler(this, GuiHandler())
 
         PROXY.preInit(event)
+    }
+
+    /**
+     * Verifies the JAR signature and logs a major warning if it is not present or invalid.
+     * Note that this is *not* a viable security measure and only serves for users to verify the files they've downloaded.
+     */
+    @EventHandler
+    fun onFingerprintViolation(event: FMLFingerprintViolationEvent) {
+        LOG.warn("Vanilla Immersion is running with an invalid JAR fingerprint, the version of the mod you're using may have been tampered with by third parties!")
     }
 
     /**

@@ -71,7 +71,7 @@ minecraft {
     replace '@VERSION@', config.mod_version
     replace 'acceptedMinecraftVersions = "*",', """acceptedMinecraftVersions = "[${config.mc_version}]","""
     replace 'required-after:forgelin', "required-after:forgelin@[${config.forgelin_version},)"
-    replace 'required-after:forge;', "required-after:forge@[${config.forge_version},);"
+//    replace 'required-after:forge;', "required-after:forge@[${config.forge_version},);"
     replace '@UPDATE_URL@', updateUrl
 
     replaceIn 'VanillaImmersion.kt'
@@ -150,6 +150,30 @@ processResources {
     // copy everything else other than the mcmod.info
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
+    }
+}
+
+def signingKeyStore = privateConfig ? priv.signing_key_store : System.getenv("PROJECT_SIGNING_KEY_STORE")
+def signingKeyAlias = privateConfig ? priv.signing_key_alias : System.getenv("PROJECT_SIGNING_KEY_ALIAS")
+def signingKeyStorePass = privateConfig ? priv.signing_key_store_pass : System.getenv("PROJECT_SIGNING_KEY_STORE_PASS")
+def signingKeyPass = privateConfig ? priv.signing_key_pass : System.getenv("PROJECT_SIGNING_KEY_PASS")
+
+if (signingKeyStore != null) {
+    task signJar(type: SignJar, dependsOn: reobfShadowJar) {
+        keyStore = signingKeyStore
+        alias = signingKeyAlias
+        storePass = signingKeyStorePass
+        keyPass = signingKeyPass
+        inputFile = jar.archivePath
+        outputFile = jar.archivePath
+    }
+
+    if (isRelease()) {
+        afterEvaluate {
+            curseforge.curseProjects.each { tasks["curseforge${it.id}"].dependsOn signJar }
+        }
+    } else {
+        bintrayUpload.dependsOn signJar
     }
 }
 
