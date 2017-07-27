@@ -71,7 +71,7 @@ minecraft {
     replace '@VERSION@', config.mod_version
     replace 'acceptedMinecraftVersions = "*",', """acceptedMinecraftVersions = "[${config.mc_version}]","""
     replace 'required-after:forgelin', "required-after:forgelin@[${config.forgelin_version},)"
-//    replace 'required-after:forge;', "required-after:forge@[${config.forge_version},);"
+    replace 'required-after:forge;', "required-after:forge@[${config.forge_version},);"
     replace '@UPDATE_URL@', updateUrl
 
     replaceIn 'VanillaImmersion.kt'
@@ -168,13 +168,7 @@ if (signingKeyStore != null) {
         outputFile = jar.archivePath
     }
 
-    if (isRelease()) {
-        afterEvaluate {
-            curseforge.curseProjects.each { tasks["curseforge${it.id}"].dependsOn signJar }
-        }
-    } else {
-        bintrayUpload.dependsOn signJar
-    }
+    check.dependsOn signJar
 }
 
 def bintrayApi = privateConfig ? priv.bintray_api : System.getenv("PROJECT_BINTRAY_API")
