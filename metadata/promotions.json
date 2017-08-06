@@ -36,11 +36,12 @@
         "1.10.2-latest": "0.0.9.0",
         "1.12-latest": "2.0.2.0",
         "1.9.4-latest": "0.0.6.0",
-        "1.12.1-latest": "2.0.3.2"
+        "1.12.1-latest": "2.0.3.3"
     },
     "1.12.1": {
         "2.0.3.0": "Change: Update to version 1.12.1 of Minecraft/Forge\nFix: Sub box interaction no longer uses client-only methods anymore, fixes usage on server",
         "2.0.3.1": "Change: Update to version 1.12.1 of Minecraft/Forge\nFix: Sub box interaction no longer uses client-only methods anymore, fixes usage on server",
-        "2.0.3.2": "Change: Update to version 1.12.1 of Minecraft/Forge\nFix: Sub box interaction no longer uses client-only methods anymore, fixes usage on server"
+        "2.0.3.2": "Change: Update to version 1.12.1 of Minecraft/Forge\nFix: Sub box interaction no longer uses client-only methods anymore, fixes usage on server",
+        "2.0.3.3": "Change: Update to version 1.12.1 of Minecraft/Forge\nFix: Sub box interaction no longer uses client-only methods anymore, fixes usage on server"
     }
 }
