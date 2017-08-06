@@ -1,6 +1,7 @@
 {
     "additions": [],
     "changes": [
+        "Update to version 1.12.1 of Minecraft/Forge"
     ],
     "fixes": [
         "Sub box interaction no longer uses client-only methods anymore, fixes usage on server"
