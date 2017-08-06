@@ -3,6 +3,6 @@
     "changes": [
     ],
     "fixes": [
-        "Sub box interaction no longer uses client-only methods anymore, fixes usage on server"
+        "Update URL points at correct branch now"
     ]
 }

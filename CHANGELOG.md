@@ -1,6 +1,11 @@
 Changelog
 =========
 
+### Version 2.0.2.3 for Minecraft 1.12
+**Note:** This version of the mod requires at least Forge version *1.12-14.21.1.2426*.
+  - **Fixes**
+    - Update URL points at correct branch now
+
 ### Version 2.0.2.2 for Minecraft 1.12
 **Note:** This version of the mod requires at least Forge version *1.12-14.21.1.2426*.
   - **Fixes**

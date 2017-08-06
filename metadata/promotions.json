@@ -18,7 +18,8 @@
         "2.0.1.0": "Change: Properly depend on versioned Forgelin\nChange: Updated to newest Forge, addresses most issues with VI on servers\nChange: Override use of Vanilla state mappers with custom ones to prevent issues with resource packs",
         "2.0.2.0": "Addition: The mod JAR is signed now, official channels will only be distributing signed artifacts, check the repo for the signature to look out for",
         "2.0.2.1": "Fix: Sub box interaction no longer uses client-only methods anymore, fixes usage on server",
-        "2.0.2.2": "Fix: Sub box interaction no longer uses client-only methods anymore, fixes usage on server"
+        "2.0.2.2": "Fix: Sub box interaction no longer uses client-only methods anymore, fixes usage on server",
+        "2.0.2.3": "Fix: Update URL points at correct branch now"
     },
     "1.9.4": {
         "0.0.0.1": "Initial alpha release",
@@ -36,7 +37,7 @@
     "homepage": "http://minecraft.curseforge.com/projects/vanilla-immersion",
     "promos": {
         "1.10.2-latest": "0.0.9.0",
-        "1.12-latest": "2.0.2.2",
+        "1.12-latest": "2.0.2.3",
         "1.9.4-latest": "0.0.6.0"
     }
 }
