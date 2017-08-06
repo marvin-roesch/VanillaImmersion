@@ -38,8 +38,10 @@ fun AxisAlignedBB.rotate(axis: Vec3d, rotation: Rotation): AxisAlignedBB {
         else -> .0
     }
     val offset = this.offset(-.5, -.5, -.5)
-    return AxisAlignedBB(offset.min.rotate(axis, angle),
-                         offset.max.rotate(axis, angle)).offset(.5, .5, .5)
+    val rotatedMin = offset.min.rotate(axis, angle)
+    val rotatedMax = offset.max.rotate(axis, angle)
+    return AxisAlignedBB(rotatedMin.x, rotatedMin.y, rotatedMin.z,
+                         rotatedMax.x, rotatedMax.y, rotatedMax.z).offset(.5, .5, .5)
 }
 
 val Vec3d.blockPos: BlockPos

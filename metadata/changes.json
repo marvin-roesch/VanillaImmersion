@@ -1,9 +1,8 @@
 {
-    "additions": [
-        "The mod JAR is signed now, official channels will only be distributing signed artifacts, check the repo for the signature to look out for"
-    ],
+    "additions": [],
     "changes": [
     ],
     "fixes": [
+        "Sub box interaction no longer uses client-only methods anymore, fixes usage on server"
     ]
 }
