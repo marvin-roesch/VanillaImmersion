@@ -6,6 +6,10 @@ jdk:
 sudo: required
 dist: trusty
 
+branches:
+  except:
+    - /^v[0-9.]+-[0-9.]+/
+
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
