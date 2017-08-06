@@ -52,7 +52,7 @@ def isRelease() { return project.gitTag == "v${project.version}" && System.geten
 
 def forgeVersion = "${config.mc_version}-${config.forge_version}${config.forge_branch != '' ? '-' : ''}${config.forge_branch}"
 
-def updateUrl = "https://raw.githubusercontent.com/PaleoCrafter/VanillaImmersion/master/metadata/promotions.json"
+def updateUrl = "https://raw.githubusercontent.com/PaleoCrafter/VanillaImmersion/${config.mc_version}/metadata/promotions.json"
 version = "${config.mc_version}-${config.mod_version}"
 if (System.getenv("TRAVIS_BUILD_NUMBER") != null && !isRelease()) {
     version = "$version+b${System.getenv("TRAVIS_BUILD_NUMBER")}"
