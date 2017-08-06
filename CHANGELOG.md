@@ -1,6 +1,11 @@
 Changelog
 =========
 
+### Version 2.0.2.2 for Minecraft 1.12
+**Note:** This version of the mod requires at least Forge version *1.12-14.21.1.2426*.
+  - **Fixes**
+    - Sub box interaction no longer uses client-only methods anymore, fixes usage on server
+
 ### Version 2.0.2.1 for Minecraft 1.12
 **Note:** This version of the mod requires at least Forge version *1.12-14.21.1.2426*.
   - **Fixes**
