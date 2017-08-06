@@ -47,6 +47,7 @@ if (privateConfig)
     ext.priv = parseConfig(file('private.properties'))
 def tagMatcher = "git tag --contains HEAD".execute().text =~ /v[-\d.]+/
 ext["gitTag"] = tagMatcher.count > 0 ? tagMatcher[0] : null
+println(project.gitTag)
 
 def isRelease() { return project.gitTag == "v${project.version}" && System.getenv("CI") == "true" }
 
