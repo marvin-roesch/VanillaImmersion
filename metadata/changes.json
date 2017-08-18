@@ -3,6 +3,6 @@
     "changes": [
     ],
     "fixes": [
-        "Update URL points at correct branch now"
+        "Properly simulate crafting results in order to enable specific on-crafting behaviour of items (map scaling, for example)"
     ]
 }

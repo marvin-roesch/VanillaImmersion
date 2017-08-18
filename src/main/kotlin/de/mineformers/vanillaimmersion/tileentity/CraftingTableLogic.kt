@@ -328,15 +328,16 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
         // Create a crafting container and fill it with ingredients
         val container = createContainer(player, simulate)
         val craftingSlot = container.getSlot(0)
-        if (craftingSlot.stack.isEmpty) {
+        val dropped = craftingSlot.decrStackSize(result.count)
+        if (dropped.isEmpty) {
             return false
         }
         // Imitate a player picking up an item from the output slot
-        craftingSlot.onTake(player, result)
+        craftingSlot.onTake(player, dropped)
         // Only manipulate the table's inventory when we're not simulating the action
         if (!simulate) {
             // Grant the player the result
-            dropResult(player, result)
+            dropResult(player, dropped)
             this[Slot.OUTPUT] = ItemStack.EMPTY
         }
         craft(player)
