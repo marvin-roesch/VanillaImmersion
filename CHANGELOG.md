@@ -1,6 +1,11 @@
 Changelog
 =========
 
+### Version 2.0.2.4 for Minecraft 1.12
+**Note:** This version of the mod requires at least Forge version *1.12-14.21.1.2426*.
+  - **Fixes**
+    - Properly simulate crafting results in order to enable specific on-crafting behaviour of items (map scaling, for example)
+
 ### Version 2.0.2.3 for Minecraft 1.12
 **Note:** This version of the mod requires at least Forge version *1.12-14.21.1.2426*.
   - **Fixes**

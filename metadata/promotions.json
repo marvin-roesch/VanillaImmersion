@@ -19,7 +19,8 @@
         "2.0.2.0": "Addition: The mod JAR is signed now, official channels will only be distributing signed artifacts, check the repo for the signature to look out for",
         "2.0.2.1": "Fix: Sub box interaction no longer uses client-only methods anymore, fixes usage on server",
         "2.0.2.2": "Fix: Sub box interaction no longer uses client-only methods anymore, fixes usage on server",
-        "2.0.2.3": "Fix: Update URL points at correct branch now"
+        "2.0.2.3": "Fix: Update URL points at correct branch now",
+        "2.0.2.4": "Fix: Properly simulate crafting results in order to enable specific on-crafting behaviour of items (map scaling, for example)"
     },
     "1.9.4": {
         "0.0.0.1": "Initial alpha release",
@@ -37,7 +38,7 @@
     "homepage": "http://minecraft.curseforge.com/projects/vanilla-immersion",
     "promos": {
         "1.10.2-latest": "0.0.9.0",
-        "1.12-latest": "2.0.2.3",
+        "1.12-latest": "2.0.2.4",
         "1.9.4-latest": "0.0.6.0"
     }
 }
