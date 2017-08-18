@@ -54,7 +54,9 @@ def forgeVersion = "${config.forge_mc_version}-${config.forge_version}${config.f
 
 def updateUrl = "https://raw.githubusercontent.com/PaleoCrafter/VanillaImmersion/${config.mc_version}/metadata/promotions.json"
 version = "${config.mc_version}-${config.mod_version}"
-if (System.getenv("TRAVIS_BUILD_NUMBER") != null && !isRelease()) {
+if (System.getenv("TRAVIS_BUILD_NUMBER") != null && System.getenv("TRAVIS_BRANCH") != config.mc_version) {
+    version = "$version+${System.getenv("TRAVIS_BRANCH")}.b${System.getenv("TRAVIS_BUILD_NUMBER")}"
+} else if (System.getenv("TRAVIS_BUILD_NUMBER") != null && !isRelease()) {
     version = "$version+b${System.getenv("TRAVIS_BUILD_NUMBER")}"
 }
 group = 'de.mineformers.vimmersion'
