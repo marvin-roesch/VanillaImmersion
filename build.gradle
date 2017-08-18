@@ -50,7 +50,7 @@ ext["gitTag"] = tagMatcher.count > 0 ? tagMatcher[0] : null
 
 def isRelease() { return project.gitTag == "v${project.version}" && System.getenv("CI") == "true" }
 
-def forgeVersion = "${config.mc_version}-${config.forge_version}${config.forge_branch != '' ? '-' : ''}${config.forge_branch}"
+def forgeVersion = "${config.forge_mc_version}-${config.forge_version}${config.forge_branch != '' ? '-' : ''}${config.forge_branch}"
 
 def updateUrl = "https://raw.githubusercontent.com/PaleoCrafter/VanillaImmersion/${config.mc_version}/metadata/promotions.json"
 version = "${config.mc_version}-${config.mod_version}"
