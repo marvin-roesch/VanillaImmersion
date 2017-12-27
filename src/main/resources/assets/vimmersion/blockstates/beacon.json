@@ -1,21 +1,15 @@
 {
-  "forge_marker": 1,
-  "defaults": {
-    "model": "beacon",
-    "textures": {
-      "beacon": "vimmersion:blocks/beacon"
-    }
-  },
-  "variants": {
-    "editing_stage": {
-      "0": {
-        "textures": {
-          "beacon": "blocks/beacon"
+    "forge_marker": 1,
+    "defaults": {
+        "model": "beacon",
+        "textures": { "beacon": "vimmersion:blocks/beacon" }
+    },
+    "variants": {
+        "editing_stage": {
+            "0": { "textures": { "beacon": "blocks/beacon" } },
+            "1": { },
+            "2": { },
+            "3": { }
         }
-      },
-      "1": {},
-      "2": {},
-      "3": {}
     }
-  }
 }

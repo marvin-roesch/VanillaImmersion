@@ -1,19 +1,13 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "pattern": [
-    " X#",
-    " #X",
-    "#  "
-  ],
-  "key": {
-    "#": {
-      "item": "minecraft:stick"
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " X#",
+        " #X",
+        "#  "
+    ],
+    "key": {
+        "#": { "item": "minecraft:stick" },
+        "X": { "item": "minecraft:iron_ingot" }
     },
-    "X": {
-      "item": "minecraft:iron_ingot"
-    }
-  },
-  "result": {
-    "item": "vimmersion:hammer"
-  }
+    "result": { "item": "vimmersion:hammer" }
 }
