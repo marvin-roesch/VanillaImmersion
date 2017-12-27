@@ -5,7 +5,29 @@ import net.minecraft.util.ResourceLocation
 import net.minecraft.util.math.Vec3d
 import org.lwjgl.opengl.GL11.GL_TRUE
 import org.lwjgl.opengl.GL11.glGetInteger
-import org.lwjgl.opengl.GL20.*
+import org.lwjgl.opengl.GL20.GL_CURRENT_PROGRAM
+import org.lwjgl.opengl.GL20.GL_FRAGMENT_SHADER
+import org.lwjgl.opengl.GL20.GL_LINK_STATUS
+import org.lwjgl.opengl.GL20.GL_VERTEX_SHADER
+import org.lwjgl.opengl.GL20.glAttachShader
+import org.lwjgl.opengl.GL20.glCompileShader
+import org.lwjgl.opengl.GL20.glCreateProgram
+import org.lwjgl.opengl.GL20.glCreateShader
+import org.lwjgl.opengl.GL20.glDeleteShader
+import org.lwjgl.opengl.GL20.glGetProgrami
+import org.lwjgl.opengl.GL20.glGetUniformLocation
+import org.lwjgl.opengl.GL20.glLinkProgram
+import org.lwjgl.opengl.GL20.glShaderSource
+import org.lwjgl.opengl.GL20.glUniform1f
+import org.lwjgl.opengl.GL20.glUniform1i
+import org.lwjgl.opengl.GL20.glUniform2f
+import org.lwjgl.opengl.GL20.glUniform2i
+import org.lwjgl.opengl.GL20.glUniform3f
+import org.lwjgl.opengl.GL20.glUniform3i
+import org.lwjgl.opengl.GL20.glUniform4f
+import org.lwjgl.opengl.GL20.glUniform4i
+import org.lwjgl.opengl.GL20.glUseProgram
+import org.lwjgl.opengl.GL20.glValidateProgram
 import scala.io.Source
 
 /**
@@ -19,20 +41,17 @@ import scala.io.Source
  */
 class Shader(vertex: ResourceLocation?, fragment: ResourceLocation?) {
     private val varLocations = TObjectIntHashMap<String>()
-    private var lastProgram: Int = 0
-    private var initialised: Boolean = false
-    private var supported: Boolean = false
-    private val program: Int
+    private var lastProgram = 0
+    private var initialised = false
+    private var supported = false
+    private val program = glCreateProgram()
 
     init {
-        program = glCreateProgram()
         if (vertex != null) {
-            addShader("/assets/" + vertex.resourceDomain + "/shaders/" + vertex.resourcePath + ".vert",
-                      GL_VERTEX_SHADER)
+            addShader("/assets/" + vertex.resourceDomain + "/shaders/" + vertex.resourcePath + ".vert", GL_VERTEX_SHADER)
         }
         if (fragment != null) {
-            addShader("/assets/" + fragment.resourceDomain + "/shaders/" + fragment.resourcePath + ".frag",
-                      GL_FRAGMENT_SHADER)
+            addShader("/assets/" + fragment.resourceDomain + "/shaders/" + fragment.resourcePath + ".frag", GL_FRAGMENT_SHADER)
         }
     }
 
@@ -104,8 +123,7 @@ class Shader(vertex: ResourceLocation?, fragment: ResourceLocation?) {
         try {
             shader = glCreateShader(type)
             if (shader == 0) return 0
-            glShaderSource(shader,
-                           Source.fromInputStream(Shader::class.java.getResourceAsStream(source), "UTF-8").mkString())
+            glShaderSource(shader, Source.fromInputStream(Shader::class.java.getResourceAsStream(source), "UTF-8").mkString())
             glCompileShader(shader)
             return shader
         } catch (e: Exception) {

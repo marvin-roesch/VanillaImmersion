@@ -3,7 +3,14 @@ package de.mineformers.vanillaimmersion.client.renderer
 import de.mineformers.vanillaimmersion.tileentity.BrewingStandLogic
 import de.mineformers.vanillaimmersion.tileentity.BrewingStandLogic.Companion.Slot
 import net.minecraft.client.Minecraft
-import net.minecraft.client.renderer.GlStateManager.*
+import net.minecraft.client.renderer.GlStateManager.color
+import net.minecraft.client.renderer.GlStateManager.disableRescaleNormal
+import net.minecraft.client.renderer.GlStateManager.enableRescaleNormal
+import net.minecraft.client.renderer.GlStateManager.popMatrix
+import net.minecraft.client.renderer.GlStateManager.pushMatrix
+import net.minecraft.client.renderer.GlStateManager.rotate
+import net.minecraft.client.renderer.GlStateManager.scale
+import net.minecraft.client.renderer.GlStateManager.translate
 import net.minecraft.client.renderer.OpenGlHelper
 import net.minecraft.client.renderer.RenderHelper
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms
@@ -43,11 +50,11 @@ open class BrewingStandRenderer : TileEntitySpecialRenderer<BrewingStandLogic>()
         popMatrix()
 
         // Render all input/output bottles
-        renderItem(te, Slot.BOTTLE1, 0.25 + 0.0625 / 4, .0)
+        renderItem(te, Slot.BOTTLE1, 0.28125 + 0.0625 / 4, .0)
         rotate(135f, 0f, 1f, 0f)
-        renderItem(te, Slot.BOTTLE2, 0.25 + 0.0625 / 4, .0)
+        renderItem(te, Slot.BOTTLE2, 0.28125 + 0.0625 / 4, .0)
         rotate(90f, 0f, 1f, 0f)
-        renderItem(te, Slot.BOTTLE3, 0.25 + 0.0625 / 4, .0)
+        renderItem(te, Slot.BOTTLE3, 0.28125 + 0.0625 / 4, .0)
 
         RenderHelper.disableStandardItemLighting()
         disableRescaleNormal()

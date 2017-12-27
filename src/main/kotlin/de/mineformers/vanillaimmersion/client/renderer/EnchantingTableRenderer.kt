@@ -3,11 +3,23 @@ package de.mineformers.vanillaimmersion.client.renderer
 import de.mineformers.vanillaimmersion.block.EnchantingTable
 import de.mineformers.vanillaimmersion.tileentity.EnchantingTableLogic
 import de.mineformers.vanillaimmersion.tileentity.EnchantingTableLogic.Companion.Slot
+import de.mineformers.vanillaimmersion.util.nonEmpty
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.Gui
 import net.minecraft.client.model.ModelBook
 import net.minecraft.client.model.ModelRenderer
-import net.minecraft.client.renderer.GlStateManager.*
+import net.minecraft.client.renderer.GlStateManager.color
+import net.minecraft.client.renderer.GlStateManager.depthMask
+import net.minecraft.client.renderer.GlStateManager.disableLighting
+import net.minecraft.client.renderer.GlStateManager.disableRescaleNormal
+import net.minecraft.client.renderer.GlStateManager.enableCull
+import net.minecraft.client.renderer.GlStateManager.enableLighting
+import net.minecraft.client.renderer.GlStateManager.enableRescaleNormal
+import net.minecraft.client.renderer.GlStateManager.popMatrix
+import net.minecraft.client.renderer.GlStateManager.pushMatrix
+import net.minecraft.client.renderer.GlStateManager.rotate
+import net.minecraft.client.renderer.GlStateManager.scale
+import net.minecraft.client.renderer.GlStateManager.translate
 import net.minecraft.client.renderer.OpenGlHelper
 import net.minecraft.client.renderer.RenderHelper
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType.FIXED
@@ -22,7 +34,7 @@ import net.minecraft.util.ResourceLocation
 import net.minecraft.util.math.MathHelper
 import net.minecraft.util.text.TextFormatting
 import net.minecraftforge.fml.relauncher.ReflectionHelper
-import java.util.*
+import java.util.Random
 
 /**
  * Renders the items on top of a crafting table as well as the book "GUI".
@@ -62,7 +74,7 @@ open class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
         fun generateRandomLore(length: IntRange): String {
             // The string length is a random integer in the given range
             val l = rand.nextInt(length.endInclusive - length.start + 1) + length.start
-            return (1..l).map { nameParts[rand.nextInt(nameParts.size)] }.joinToString(" ")
+            return (1..l).joinToString(" ") { nameParts[rand.nextInt(nameParts.size)] }
         }
 
         private fun init() {
@@ -174,17 +186,9 @@ open class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
         val bobTicks = if (te.result.isEmpty) te.tickCount + partialTicks else te.bobStop
         val bob = MathHelper.sin((bobTicks + bobRand) / 10.0f) * 0.1 + 0.1
         // Only perform the upwards animation if there is a result
-        val t =
-            if (te.result.isEmpty)
-                0.0
-            else
-                Math.min(te.progress + partialTicks, 40f) / 40.0
+        val t = if (te.result.isEmpty) 0.0 else Math.min(te.progress + partialTicks, 40f) / 40.0
         // Only perform the upwards animation if there is a result
-        val inputAnim =
-            if (!te.result.isEmpty)
-                bob + (0.3 - bob) * t
-            else
-                0.0
+        val inputAnim = if (!te.result.isEmpty) bob + (0.3 - bob) * t else 0.0
         renderItem(te, Slot.OBJECT, 0.0, bob + inputAnim, 0.0)
 
         // Get the offsets for each modifier's animation before they are used
@@ -275,18 +279,19 @@ open class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
 
         // We may use GUI methods from here since we have applied transformations that let us move in its local space
         Gui.drawRect(0, 0, 94, 125, 0xFFF3F3F3.toInt())
-        if (te.page == -1) {
-            // No actual page visible: Draw a bunch of nonsense
-            drawWrappedText("~fa" + generateRandomLore(30..40), 4, 4, 86, 0x685E4A, 125 / 9 - 1)
-        } else if (te.page == 0) {
-            // The TE only holds the reference to the left page
-            // Left page 0 means right page 1
-            // Page 1 shows the first available enchantment
-            renderEnchantmentPage(te, 0, lapis)
-        } else if (te.page == 2) {
-            // See above why page 3
-            // Page 3 shows the third available enchantment
-            renderEnchantmentPage(te, 2, lapis)
+        when {
+            te.page == -1 ->
+                // No actual page visible: Draw a bunch of nonsense
+                drawWrappedText("~fa" + generateRandomLore(30..40), 4, 4, 86, 0x685E4A, 125 / 9 - 1)
+            te.page == 0 ->
+                // The TE only holds the reference to the left page
+                // Left page 0 means right page 1
+                // Page 1 shows the first available enchantment
+                renderEnchantmentPage(te, 0, lapis)
+            te.page == 2 ->
+                // See above why page 3
+                // Page 3 shows the third available enchantment
+                renderEnchantmentPage(te, 2, lapis)
         }
         popMatrix()
 
@@ -334,7 +339,7 @@ open class EnchantingTableRenderer : TileEntityEnchantmentTableRenderer() {
         drawWrappedText(information, 4, 76, 86, 0x685E4A, 2)
 
         // When there is a result, don't draw the "Enchant" button
-        if (!te.result.isEmpty)
+        if (te.result.nonEmpty)
             return
         // Draw the "Enchant" button
         val buttonOffset = if (index % 2 == 1) 5 else -5

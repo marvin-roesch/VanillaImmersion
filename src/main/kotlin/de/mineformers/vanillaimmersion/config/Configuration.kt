@@ -1,6 +1,14 @@
 package de.mineformers.vanillaimmersion.config
 
-import com.typesafe.config.*
+import com.typesafe.config.Config
+import com.typesafe.config.ConfigFactory
+import com.typesafe.config.ConfigList
+import com.typesafe.config.ConfigMergeable
+import com.typesafe.config.ConfigObject
+import com.typesafe.config.ConfigOrigin
+import com.typesafe.config.ConfigRenderOptions
+import com.typesafe.config.ConfigResolveOptions
+import com.typesafe.config.ConfigValue
 import de.mineformers.vanillaimmersion.config.gui.KeepVanillaEntry
 import net.minecraftforge.fml.common.FMLCommonHandler
 import net.minecraftforge.fml.relauncher.Side
@@ -52,11 +60,15 @@ object Configuration : Config {
             .withFallback(fallback)
             .getConfig("vanilla-immersion")
         if (!file!!.exists())
-            Files.write(file!!.toPath(),
-                        fallback.root().render(ConfigRenderOptions
-                                                   .defaults()
-                                                   .setOriginComments(false)
-                                                   .setJson(false)).lines())
+            Files.write(
+                file!!.toPath(),
+                fallback.root().render(
+                    ConfigRenderOptions
+                        .defaults()
+                        .setOriginComments(false)
+                        .setJson(false)
+                ).lines()
+            )
         impl = cfg
         save()
     }
@@ -72,12 +84,16 @@ object Configuration : Config {
      * Saves the configuration to disk.
      */
     fun save() {
-        Files.write(file!!.toPath(),
-                    ConfigFactory.empty().withValue(TEMPLATE.name, root()).root()
-                        .render(ConfigRenderOptions
-                                    .defaults()
-                                    .setOriginComments(false)
-                                    .setJson(false)).lines())
+        Files.write(
+            file!!.toPath(),
+            ConfigFactory.empty().withValue(TEMPLATE.name, root()).root()
+                .render(
+                    ConfigRenderOptions
+                        .defaults()
+                        .setOriginComments(false)
+                        .setJson(false)
+                ).lines()
+        )
     }
 
     // Auto-generated delegates

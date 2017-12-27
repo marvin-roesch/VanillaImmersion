@@ -1,7 +1,11 @@
 package de.mineformers.vanillaimmersion.immersion
 
 import de.mineformers.vanillaimmersion.tileentity.EnchantingTableLogic
-import de.mineformers.vanillaimmersion.util.*
+import de.mineformers.vanillaimmersion.util.Rays
+import de.mineformers.vanillaimmersion.util.Rendering
+import de.mineformers.vanillaimmersion.util.div
+import de.mineformers.vanillaimmersion.util.minus
+import de.mineformers.vanillaimmersion.util.plus
 import net.minecraft.client.Minecraft
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.util.EnumHand
@@ -48,8 +52,7 @@ object EnchantingHandler {
      */
     private fun onInteract(event: PlayerInteractEvent, hovered: Vec3d) {
         val player = event.entityPlayer
-        val surroundingBlocks = BlockPos.getAllInBox(player.position - BlockPos(3, 3, 3),
-                                                     player.position + BlockPos(3, 3, 3))
+        val surroundingBlocks = BlockPos.getAllInBox(player.position - BlockPos(3, 3, 3), player.position + BlockPos(3, 3, 3))
         // Filter all enchantment tables out of the surrounding blocks and sort them by distance to the player
         // The sorting is required because otherwise an enchantment table further away might be prioritized.
         val enchantingTables =
@@ -89,8 +92,10 @@ object EnchantingHandler {
     private fun tryHit(te: EnchantingTableLogic,
                        player: EntityPlayer, origin: Vec3d, direction: Vec3d, hoverDistance: Double,
                        partialTicks: Float, right: Boolean): Boolean {
-        val quad = listOf(Vec3d(.0, .0, .0), Vec3d(6 * 0.0625, .0, .0),
-                          Vec3d(6 * 0.0625, 8 * 0.0625, .0), Vec3d(.0, 8 * 0.0625, .0))
+        val quad = listOf(
+            Vec3d(.0, .0, .0), Vec3d(6 * 0.0625, .0, .0),
+            Vec3d(6 * 0.0625, 8 * 0.0625, .0), Vec3d(.0, 8 * 0.0625, .0)
+        )
         val matrix = calculateMatrix(te, partialTicks, right)
         val hit = Rays.rayTraceQuad(origin, direction, quad, matrix)
         val distanceCheck =

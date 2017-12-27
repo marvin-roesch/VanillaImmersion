@@ -20,9 +20,9 @@ val AxisAlignedBB.max: Vec3d
     get() = Vec3d(this.maxX, this.maxY, this.maxZ)
 
 fun Vec3d.partOf(box: AxisAlignedBB) =
-    x in box.minX..box.maxX &&
-        y in box.minY..box.maxY &&
-        z in box.minZ..box.maxZ
+    box.minX <= x && x <= box.maxX &&
+        box.minY <= y && y <= box.maxY &&
+        box.minZ <= z && z <= box.maxZ
 
 fun AxisAlignedBB.rotateX(rotation: Rotation) = rotate(Vec3d(1.0, .0, .0), rotation)
 
@@ -41,7 +41,7 @@ fun AxisAlignedBB.rotate(axis: Vec3d, rotation: Rotation): AxisAlignedBB {
     val rotatedMin = offset.min.rotate(axis, angle)
     val rotatedMax = offset.max.rotate(axis, angle)
     return AxisAlignedBB(rotatedMin.x, rotatedMin.y, rotatedMin.z,
-                         rotatedMax.x, rotatedMax.y, rotatedMax.z).offset(.5, .5, .5)
+        rotatedMax.x, rotatedMax.y, rotatedMax.z).offset(.5, .5, .5)
 }
 
 val Vec3d.blockPos: BlockPos

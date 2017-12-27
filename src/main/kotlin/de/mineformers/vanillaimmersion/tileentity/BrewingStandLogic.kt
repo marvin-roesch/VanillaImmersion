@@ -1,7 +1,12 @@
 package de.mineformers.vanillaimmersion.tileentity
 
 import de.mineformers.vanillaimmersion.block.BrewingStand
-import de.mineformers.vanillaimmersion.util.*
+import de.mineformers.vanillaimmersion.util.Rays
+import de.mineformers.vanillaimmersion.util.SelectionBox
+import de.mineformers.vanillaimmersion.util.SubSelections
+import de.mineformers.vanillaimmersion.util.insertOrDrop
+import de.mineformers.vanillaimmersion.util.nonEmpty
+import de.mineformers.vanillaimmersion.util.selectionBox
 import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.item.EntityItem
 import net.minecraft.entity.player.EntityPlayer
@@ -52,8 +57,7 @@ open class BrewingStandLogic : TileEntityBrewingStand(), SubSelections {
         }
 
         val BOTTLE1_SELECTION =
-            selectionBox(AxisAlignedBB(10.0 * 0.0625, .0, 6 * 0.0625,
-                                       14.0 * 0.0625, 12 * 0.0625, 10 * 0.0625)) {
+            selectionBox(AxisAlignedBB(10.0 * 0.0625, .0, 6 * 0.0625, 14.0 * 0.0625, 12 * 0.0625, 10 * 0.0625)) {
                 slot(Slot.BOTTLE1.ordinal) {
                     renderFilled = true
                 }
@@ -63,8 +67,7 @@ open class BrewingStandLogic : TileEntityBrewingStand(), SubSelections {
                 }
             }
         val BOTTLE2_SELECTION =
-            selectionBox(AxisAlignedBB(3.0 * 0.0625, .0, 2 * 0.0625,
-                                       7.0 * 0.0625, 12 * 0.0625, 6 * 0.0625)) {
+            selectionBox(AxisAlignedBB(3.0 * 0.0625, .0, 2 * 0.0625, 7.0 * 0.0625, 12 * 0.0625, 6 * 0.0625)) {
                 slot(Slot.BOTTLE2.ordinal) {
                     renderFilled = true
                 }
@@ -74,8 +77,7 @@ open class BrewingStandLogic : TileEntityBrewingStand(), SubSelections {
                 }
             }
         val BOTTLE3_SELECTION =
-            selectionBox(AxisAlignedBB(3.0 * 0.0625, .0, 10 * 0.0625,
-                                       7.0 * 0.0625, 12 * 0.0625, 14 * 0.0625)) {
+            selectionBox(AxisAlignedBB(3.0 * 0.0625, .0, 10 * 0.0625, 7.0 * 0.0625, 12 * 0.0625, 14 * 0.0625)) {
                 slot(Slot.BOTTLE3.ordinal) {
                     renderFilled = true
                 }
@@ -85,8 +87,7 @@ open class BrewingStandLogic : TileEntityBrewingStand(), SubSelections {
                 }
             }
         val BOWL_SELECTION =
-            selectionBox(AxisAlignedBB(5.0 * 0.0625, 13.5 * 0.0625, 5 * 0.0625,
-                                       11.0 * 0.0625, 15.5 * 0.0625, 11 * 0.0625)) {
+            selectionBox(AxisAlignedBB(5.0 * 0.0625, 13.5 * 0.0625, 5 * 0.0625, 11.0 * 0.0625, 15.5 * 0.0625, 11 * 0.0625)) {
                 slot(Slot.INPUT_INGREDIENT.ordinal) {
                     renderFilled = true
                 }
@@ -141,7 +142,7 @@ open class BrewingStandLogic : TileEntityBrewingStand(), SubSelections {
             else
                 box.slot!!.id
         val existing = getStackInSlot(slot)
-        if (stack.isEmpty && existing != null) {
+        if (stack.isEmpty && existing.nonEmpty) {
             // Extract item
             val extracted = inventory.extractItem(slot, Int.MAX_VALUE, false)
             player.insertOrDrop(extracted)
@@ -214,10 +215,7 @@ open class BrewingStandLogic : TileEntityBrewingStand(), SubSelections {
     /**
      * Composes a tag for updates of the TE (both initial chunk data and later updates).
      */
-    override fun getUpdateTag(): NBTTagCompound? {
-        val compound = writeToNBT(NBTTagCompound())
-        return compound
-    }
+    override fun getUpdateTag() = writeToNBT(NBTTagCompound())
 
     /**
      * Creates a packet for updates of the tile entity at runtime.

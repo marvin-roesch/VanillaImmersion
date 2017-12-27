@@ -20,7 +20,7 @@ import net.minecraft.world.World
  */
 open class Beacon : BlockBeacon() {
     companion object {
-        val EDITING_STAGE = PropertyInteger.create("editing_stage", 0, 3)!!
+        val EDITING_STAGE = PropertyInteger.create("editing_stage", 0, 3)
     }
 
     init {
@@ -51,16 +51,12 @@ open class Beacon : BlockBeacon() {
                 if (beacon.stage != 3 && beacon.primary != null) {
                     // In the non-final stages, in- or decrease the stage accordingly
                     // Only allow the second stage to be displayed if the beacon has more than 3 levels
-                    if (beacon.stage == 1 && tile.levels > 3)
-                        tile.state = beacon.copy(secondary =
-                                                 if (beacon.secondary == beacon.primary ||
-                                                     beacon.secondary == MobEffects.REGENERATION)
-                                                     beacon.secondary
-                                                 else
-                                                     null,
-                                                 stage = 2)
-                    else
+                    if (beacon.stage == 1 && tile.levels > 3) {
+                        val hasSecondary = beacon.secondary == beacon.primary || beacon.secondary == MobEffects.REGENERATION
+                        tile.state = beacon.copy(secondary = if (hasSecondary) beacon.secondary else null, stage = 2)
+                    } else {
                         tile.state = beacon.copy(stage = if (player.isSneaking && beacon.stage == 2) 1 else 3)
+                    }
                 } else {
                     // If the player is sneaking and we're in the last stage,
                     // change the stage rather than completing the editing
@@ -70,17 +66,15 @@ open class Beacon : BlockBeacon() {
                     }
                     // If there was an effect selected, check whether the player has the required payment or
                     // whether he is in creative mode
-                    if (beacon.primary != null) {
-                        if ((stack.isEmpty || !stack.item.isBeaconPayment(stack)) &&
-                            !player.capabilities.isCreativeMode)
-                            return true
+                    if (beacon.primary != null && (stack.isEmpty || !stack.item.isBeaconPayment(stack)) && !player.capabilities.isCreativeMode) {
+                        return true
                     }
                     // Update effects and stop editing
                     tile.primaryEffect = beacon.primary
                     tile.secondaryEffect = if (beacon.primary != null) beacon.secondary else null
                     tile.state = null
                     // Take away the payment item
-                    if (stack != null && !player.capabilities.isCreativeMode) {
+                    if (!stack.isEmpty && !player.capabilities.isCreativeMode) {
                         stack.shrink(1)
                     }
                 }
@@ -91,7 +85,7 @@ open class Beacon : BlockBeacon() {
     }
 
     @Deprecated("Vanilla")
-    override fun getStateFromMeta(meta: Int) = defaultState!!
+    override fun getStateFromMeta(meta: Int) = defaultState
 
     @Deprecated("Vanilla")
     override fun getMetaFromState(state: IBlockState) = 0
@@ -104,7 +98,7 @@ open class Beacon : BlockBeacon() {
     override fun getActualState(state: IBlockState, world: IBlockAccess, pos: BlockPos): IBlockState {
         val tile = world.getTileEntity(pos)
         if (tile is BeaconLogic) {
-            return state.withProperty(EDITING_STAGE, tile.state?.stage ?: 0)
+            return state.withProperty(EDITING_STAGE, tile?.state?.stage ?: 0)
         }
         return state
     }

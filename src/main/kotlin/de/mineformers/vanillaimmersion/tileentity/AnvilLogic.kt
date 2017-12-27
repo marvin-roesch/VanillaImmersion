@@ -3,7 +3,11 @@ package de.mineformers.vanillaimmersion.tileentity
 import de.mineformers.vanillaimmersion.VanillaImmersion
 import de.mineformers.vanillaimmersion.VanillaImmersion.Items
 import de.mineformers.vanillaimmersion.network.AnvilLock
-import de.mineformers.vanillaimmersion.util.*
+import de.mineformers.vanillaimmersion.util.SelectionBox
+import de.mineformers.vanillaimmersion.util.SubSelections
+import de.mineformers.vanillaimmersion.util.clear
+import de.mineformers.vanillaimmersion.util.insertOrDrop
+import de.mineformers.vanillaimmersion.util.selectionBox
 import net.minecraft.block.BlockAnvil
 import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.player.EntityPlayer
@@ -16,7 +20,13 @@ import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.network.NetworkManager
 import net.minecraft.network.play.server.SPacketUpdateTileEntity
 import net.minecraft.tileentity.TileEntity
-import net.minecraft.util.*
+import net.minecraft.util.EnumFacing
+import net.minecraft.util.EnumHand
+import net.minecraft.util.EnumParticleTypes
+import net.minecraft.util.NonNullList
+import net.minecraft.util.ResourceLocation
+import net.minecraft.util.Rotation
+import net.minecraft.util.SoundCategory
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
@@ -28,7 +38,8 @@ import net.minecraftforge.common.util.Constants
 import net.minecraftforge.items.CapabilityItemHandler.ITEM_HANDLER_CAPABILITY
 import net.minecraftforge.items.ItemStackHandler
 import net.minecraftforge.items.wrapper.RangedWrapper
-import java.util.*
+import java.util.Random
+import java.util.UUID
 
 /**
  * Implements all logic and data storage for the anvil.
@@ -75,10 +86,12 @@ open class AnvilLogic : TileEntity(), SubSelections {
                 slot(Slot.HAMMER.ordinal)
                 renderOptions {
                     icon = ResourceLocation(VanillaImmersion.MODID, "textures/icons/hammer.png")
-                    uvs = listOf(Vec3d(.0, .0, .0),
-                                 Vec3d(.0, .0, .6875),
-                                 Vec3d(.25, .0, 0.6875),
-                                 Vec3d(.25, .0, .0))
+                    uvs = listOf(
+                        Vec3d(.0, .0, .0),
+                        Vec3d(.0, .0, .6875),
+                        Vec3d(.25, .0, 0.6875),
+                        Vec3d(.25, .0, .0)
+                    )
                 }
             }
         val BLOCK_SELECTION =
@@ -272,8 +285,7 @@ open class AnvilLogic : TileEntity(), SubSelections {
             // Insert the item
             val remaining = tile.inventory.insertItem(slot.ordinal, stack, false)
             if (remaining != stack)
-                world.playSound(null, pos.x + 0.5, pos.y + 0.5, pos.z + 0.5,
-                                SoundEvents.BLOCK_ANVIL_HIT, SoundCategory.BLOCKS, 1f, 1f)
+                world.playSound(null, pos.x + 0.5, pos.y + 0.5, pos.z + 0.5, SoundEvents.BLOCK_ANVIL_HIT, SoundCategory.BLOCKS, 1f, 1f)
             player.setHeldItem(EnumHand.MAIN_HAND, remaining)
             return true
         }
@@ -333,8 +345,7 @@ open class AnvilLogic : TileEntity(), SubSelections {
         val simulated = tryRepair(world, pos, player, true)
         // Block interaction when the player does not have the required experience
         if (simulated == null || (player.experienceLevel <= 0 && !player.capabilities.isCreativeMode)) {
-            world.playSound(null, pos.x + 0.5, pos.y + 0.5, pos.z + 0.5,
-                            SoundEvents.ENTITY_ITEM_BREAK, SoundCategory.BLOCKS, 0.5f, 0.2f)
+            world.playSound(null, pos.x + 0.5, pos.y + 0.5, pos.z + 0.5, SoundEvents.ENTITY_ITEM_BREAK, SoundCategory.BLOCKS, 0.5f, 0.2f)
             return
         }
         val world = this.world as WorldServer
@@ -350,10 +361,12 @@ open class AnvilLogic : TileEntity(), SubSelections {
             val mZ = rand.nextGaussian() * 0.002
             val material = this[Slot.INPUT_MATERIAL]
             val item = if (!material.isEmpty && rand.nextBoolean()) material.item else this[Slot.INPUT_OBJECT].item
-            world.spawnParticle(EnumParticleTypes.ITEM_CRACK,
-                                pos.x + 0.5 + dX, pos.y + 1.2 + dY, pos.z + 0.5 + dZ, 1,
-                                mX, mY, mZ, .0,
-                                Item.getIdFromItem(item))
+            world.spawnParticle(
+                EnumParticleTypes.ITEM_CRACK,
+                pos.x + 0.5 + dX, pos.y + 1.2 + dY, pos.z + 0.5 + dZ, 1,
+                mX, mY, mZ, .0,
+                Item.getIdFromItem(item)
+            )
         }
         if (!player.capabilities.isCreativeMode) {
             player.addExperienceLevel(-1)
@@ -367,8 +380,7 @@ open class AnvilLogic : TileEntity(), SubSelections {
             hammerCount = 0
             player.insertOrDrop(output.output.copy())
         } else {
-            world.playSound(null, pos.x + 0.5, pos.y + 0.5, pos.z + 0.5,
-                            SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 0.5f, 1f)
+            world.playSound(null, pos.x + 0.5, pos.y + 0.5, pos.z + 0.5, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 0.5f, 1f)
         }
     }
 
@@ -427,11 +439,7 @@ open class AnvilLogic : TileEntity(), SubSelections {
         val compound = pkt.nbtCompound
         readFromNBT(compound)
         itemName = compound.getString("ItemName")
-        playerLock =
-            if (compound.hasUniqueId("Lock"))
-                compound.getUniqueId("Lock")
-            else
-                null
+        playerLock = if (compound.hasUniqueId("Lock")) compound.getUniqueId("Lock") else null
     }
 
     /**

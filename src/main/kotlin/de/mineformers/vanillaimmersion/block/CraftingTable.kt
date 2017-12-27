@@ -10,7 +10,9 @@ import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
-import net.minecraft.util.*
+import net.minecraft.util.EnumFacing
+import net.minecraft.util.EnumHand
+import net.minecraft.util.ResourceLocation
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.IBlockAccess
@@ -83,7 +85,7 @@ open class CraftingTable : BlockWorkbench() {
         val tile = world.getTileEntity(pos)
 
         if (tile is CraftingTableLogic) {
-            tile.inventory.spill(world, pos, 1..tile.inventory.slots - 1)
+            tile.inventory.spill(world, pos, 1 until tile.inventory.slots)
             world.updateComparatorOutputLevel(pos, this)
         }
         super.breakBlock(world, pos, state)
@@ -125,7 +127,7 @@ open class CraftingTable : BlockWorkbench() {
     }
 
     @Deprecated("Vanilla")
-    override fun getStateFromMeta(meta: Int) = defaultState!!
+    override fun getStateFromMeta(meta: Int) = defaultState
 
     @Deprecated("Vanilla")
     override fun getMetaFromState(state: IBlockState) = 0

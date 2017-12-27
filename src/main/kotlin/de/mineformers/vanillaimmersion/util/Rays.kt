@@ -20,8 +20,8 @@ object Rays {
      */
     fun rayTraceBoxes(entity: Entity, boxes: List<AxisAlignedBB>) =
         rayTraceBoxes(Rendering.getEyePosition(entity, Rendering.partialTicks),
-                      entity.getLook(Rendering.partialTicks),
-                      boxes)
+            entity.getLook(Rendering.partialTicks),
+            boxes)
 
     /**
      * Performs a ray trace on a collection of boxes, returns the index of the first one hit, `-1` otherwise.
@@ -36,8 +36,8 @@ object Rays {
      */
     fun rayTraceBox(entity: Entity, box: AxisAlignedBB) =
         rayTraceBox(Rendering.getEyePosition(entity, Rendering.partialTicks),
-                    entity.getLook(Rendering.partialTicks),
-                    box)
+            entity.getLook(Rendering.partialTicks),
+            box)
 
     /**
      * Fast Ray-Box Intersection
@@ -93,7 +93,7 @@ object Rays {
      */
     fun rayTraceQuad(entity: Entity, vertices: List<Vec3d>, transformations: Matrix4f? = null, epsilon: Double = 1e-6) =
         rayTraceQuad(Rendering.getEyePosition(entity, Rendering.partialTicks), entity.getLook(Rendering.partialTicks),
-                     vertices, transformations, epsilon)
+            vertices, transformations, epsilon)
 
     /**
      * Sends a ray though a quad, optionally applying some transformations to it beforehand.
@@ -135,8 +135,8 @@ object Rays {
      */
     fun moellerTrumbore(entity: Entity, v1: Vec3d, v2: Vec3d, v3: Vec3d, epsilon: Double = 1e-6) =
         moellerTrumbore(Rendering.getEyePosition(entity, Rendering.partialTicks),
-                        entity.getLook(Rendering.partialTicks),
-                        v1, v2, v3, epsilon)
+            entity.getLook(Rendering.partialTicks),
+            v1, v2, v3, epsilon)
 
     /**
      * Performs a Möller-Trumbore intersection on a triangle and returns the position on the triangle that was hit,

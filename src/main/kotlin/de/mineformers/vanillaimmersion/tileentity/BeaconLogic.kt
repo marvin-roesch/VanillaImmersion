@@ -46,13 +46,10 @@ open class BeaconLogic : TileEntityBeacon() {
      * Determines all available effects for the current levels of the beacon.
      */
     open fun availableEffects(secondary: Boolean): List<Potion> {
-        if (!secondary) {
-            return EFFECTS_LIST.take(Math.min(levels, 3)).flatMap { it.toList() }
-        } else {
-            return if (state == null || state!!.primary == null)
-                emptyList()
-            else
-                EFFECTS_LIST.drop(3).flatMap { it.toList() } + state!!.primary!!
+        return when {
+            !secondary -> EFFECTS_LIST.take(Math.min(levels, 3)).flatMap { it.toList() }
+            state == null || state!!.primary == null -> emptyList()
+            else -> EFFECTS_LIST.drop(3).flatMap { it.toList() } + state!!.primary!!
         }
     }
 
@@ -105,8 +102,8 @@ open class BeaconLogic : TileEntityBeacon() {
         if (state != null) {
             val state = NBTTagCompound()
             state.setInteger("Stage", this.state!!.stage)
-            state.setInteger("Primary", Potion.getIdFromPotion(this.state!!.primary))
-            state.setInteger("Secondary", Potion.getIdFromPotion(this.state!!.secondary))
+            state.setInteger("Primary", Potion.getIdFromPotion(this.state!!.primary!!))
+            state.setInteger("Secondary", Potion.getIdFromPotion(this.state!!.secondary!!))
             result.setTag("EditingState", state)
         }
         return result
@@ -116,9 +113,11 @@ open class BeaconLogic : TileEntityBeacon() {
         super.readFromNBT(compound)
         if (compound.hasKey("EditingState")) {
             val state = compound.getCompoundTag("EditingState")
-            this.state = BeaconState(Potion.getPotionById(state.getInteger("Primary")),
-                                     Potion.getPotionById(state.getInteger("Secondary")),
-                                     state.getInteger("Stage"))
+            this.state = BeaconState(
+                Potion.getPotionById(state.getInteger("Primary")),
+                Potion.getPotionById(state.getInteger("Secondary")),
+                state.getInteger("Stage")
+            )
         } else {
             this.state = null
         }

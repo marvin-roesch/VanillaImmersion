@@ -9,7 +9,13 @@ import net.minecraft.init.Items
 import net.minecraft.item.ItemStack
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.text.TextFormatting
-import net.minecraftforge.fml.client.config.*
+import net.minecraftforge.fml.client.config.GuiButtonExt
+import net.minecraftforge.fml.client.config.GuiConfig
+import net.minecraftforge.fml.client.config.GuiConfigEntries
+import net.minecraftforge.fml.client.config.GuiEditArray
+import net.minecraftforge.fml.client.config.GuiEditArrayEntries
+import net.minecraftforge.fml.client.config.GuiUtils
+import net.minecraftforge.fml.client.config.IConfigElement
 import net.minecraftforge.fml.common.registry.ForgeRegistries
 
 class KeepVanillaEntry(owningScreen: GuiConfig, owningEntryList: GuiConfigEntries, configElement: IConfigElement)
@@ -28,9 +34,7 @@ class KeepVanillaEntry(owningScreen: GuiConfig, owningEntryList: GuiConfigEntrie
         if (currentValues.isEmpty()) {
             btnValue.displayString = I18n.format("config.vimmersion.labels.none")
         } else {
-            btnValue.displayString = currentValues.map {
-                getLabel(it.toString())
-            }.joinToString(", ")
+            btnValue.displayString = currentValues.joinToString(", ") { getLabel(it.toString()) }
         }
     }
 
@@ -114,7 +118,7 @@ class KeepVanillaEntry(owningScreen: GuiConfig, owningEntryList: GuiConfigEntrie
 
                 override fun mousePressed(slotIndex: Int, x: Int, y: Int, mouseEvent: Int, relativeX: Int, relativeY: Int): Boolean {
                     if (this.btnValue.mousePressed(owningEntryList.mc, x, y)) {
-                        btnValue.playPressSound(owningEntryList.mc.getSoundHandler())
+                        btnValue.playPressSound(owningEntryList.mc.soundHandler)
                         value = !value
                         isChanged = value != startValue
                         recalculateState()

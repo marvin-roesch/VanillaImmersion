@@ -8,8 +8,19 @@ import de.mineformers.vanillaimmersion.network.CraftingDrag
 import de.mineformers.vanillaimmersion.network.OpenGui
 import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic
 import de.mineformers.vanillaimmersion.util.minus
+import isDown
 import net.minecraft.client.Minecraft
-import net.minecraft.client.renderer.GlStateManager.*
+import net.minecraft.client.renderer.GlStateManager.color
+import net.minecraft.client.renderer.GlStateManager.disableBlend
+import net.minecraft.client.renderer.GlStateManager.disableRescaleNormal
+import net.minecraft.client.renderer.GlStateManager.enableBlend
+import net.minecraft.client.renderer.GlStateManager.enableRescaleNormal
+import net.minecraft.client.renderer.GlStateManager.popMatrix
+import net.minecraft.client.renderer.GlStateManager.pushMatrix
+import net.minecraft.client.renderer.GlStateManager.rotate
+import net.minecraft.client.renderer.GlStateManager.scale
+import net.minecraft.client.renderer.GlStateManager.translate
+import net.minecraft.client.renderer.GlStateManager.tryBlendFuncSeparate
 import net.minecraft.client.renderer.OpenGlHelper
 import net.minecraft.client.renderer.RenderHelper
 import net.minecraft.client.renderer.RenderHelper.enableStandardItemLighting
@@ -100,11 +111,7 @@ object CraftingDragHandler {
             return
         }
         val key = Minecraft.getMinecraft().gameSettings.keyBindUseItem
-        val keyDown =
-            if (key.keyCode < 0)
-                Mouse.isButtonDown(key.keyCode + 100)
-            else
-                Keyboard.isKeyDown(key.keyCode)
+        val keyDown = key.isDown
         val wasDragging = dragging
         val target = dragTarget
         updateDragTarget()
@@ -211,7 +218,7 @@ object CraftingDragHandler {
         if (!dragging || dragSlots.isEmpty()) {
             return
         }
-        val te = Minecraft.getMinecraft().world.getTileEntity(dragTarget) as CraftingTableLogic
+        val te = Minecraft.getMinecraft().world.getTileEntity(dragTarget) as? CraftingTableLogic ?: return
 
         // The camera is the origin when this event is called, get its position to translate to the world origin
         val camera = Minecraft.getMinecraft().renderViewEntity ?: return

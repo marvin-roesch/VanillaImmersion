@@ -1,9 +1,19 @@
 package de.mineformers.vanillaimmersion.tileentity
 
-import de.mineformers.vanillaimmersion.util.*
+import de.mineformers.vanillaimmersion.util.SelectionBox
+import de.mineformers.vanillaimmersion.util.SubSelections
+import de.mineformers.vanillaimmersion.util.clear
+import de.mineformers.vanillaimmersion.util.equal
+import de.mineformers.vanillaimmersion.util.insertOrDrop
+import de.mineformers.vanillaimmersion.util.nonEmpty
+import de.mineformers.vanillaimmersion.util.selectionBox
 import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.inventory.*
+import net.minecraft.inventory.ContainerWorkbench
+import net.minecraft.inventory.InventoryCraftResult
+import net.minecraft.inventory.InventoryCrafting
+import net.minecraft.inventory.Slot
+import net.minecraft.inventory.SlotCrafting
 import net.minecraft.item.ItemStack
 import net.minecraft.item.crafting.CraftingManager
 import net.minecraft.nbt.NBTTagCompound
@@ -11,7 +21,12 @@ import net.minecraft.network.NetworkManager
 import net.minecraft.network.play.server.SPacketUpdateTileEntity
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.EnumFacing
-import net.minecraft.util.EnumFacing.*
+import net.minecraft.util.EnumFacing.DOWN
+import net.minecraft.util.EnumFacing.EAST
+import net.minecraft.util.EnumFacing.NORTH
+import net.minecraft.util.EnumFacing.SOUTH
+import net.minecraft.util.EnumFacing.UP
+import net.minecraft.util.EnumFacing.WEST
 import net.minecraft.util.NonNullList
 import net.minecraft.util.Rotation
 import net.minecraft.util.math.AxisAlignedBB
@@ -82,9 +97,12 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
                     if (x == 3 && y != 1)
                         continue
                     builder.add(
-                        selectionBox(AxisAlignedBB((13 - x * 3) * .0625, .8751, (12 - y * 3) * .0625,
-                                                   (13 - x * 3 - 2) * .0625, .89, (12 - y * 3 - 2) * .0625)
-                                         .shrink(0.004)) {
+                        selectionBox(
+                            AxisAlignedBB(
+                                (13 - x * 3) * .0625, .8751, (12 - y * 3) * .0625,
+                                (13 - x * 3 - 2) * .0625, .89, (12 - y * 3 - 2) * .0625
+                            ).shrink(0.004)
+                        ) {
                             rightClicks = false
                             leftClicks = false
 
@@ -140,9 +158,6 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
      * The crafting table's orientation.
      */
     var facing: EnumFacing = EnumFacing.NORTH
-        set(value) {
-            field = value
-        }
     /**
      * The crafting table's rotation relative to a north facing.
      */
@@ -273,7 +288,7 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
         override fun onContainerClosed(player: EntityPlayer) {
             val inventory = player.inventory
 
-            if (inventory.itemStack != null) {
+            if (inventory.itemStack.nonEmpty) {
                 player.dropItem(inventory.itemStack, false)
                 inventory.itemStack = ItemStack.EMPTY
             }

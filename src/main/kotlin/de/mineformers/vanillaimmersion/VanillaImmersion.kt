@@ -1,15 +1,36 @@
 package de.mineformers.vanillaimmersion
 
-import de.mineformers.vanillaimmersion.block.*
+import de.mineformers.vanillaimmersion.block.Anvil
+import de.mineformers.vanillaimmersion.block.Beacon
+import de.mineformers.vanillaimmersion.block.BrewingStand
+import de.mineformers.vanillaimmersion.block.CraftingTable
+import de.mineformers.vanillaimmersion.block.EnchantingTable
+import de.mineformers.vanillaimmersion.block.Furnace
 import de.mineformers.vanillaimmersion.client.BeaconHandler
 import de.mineformers.vanillaimmersion.client.CraftingDragHandler
-import de.mineformers.vanillaimmersion.client.renderer.*
+import de.mineformers.vanillaimmersion.client.renderer.AnvilRenderer
+import de.mineformers.vanillaimmersion.client.renderer.BeaconRenderer
+import de.mineformers.vanillaimmersion.client.renderer.BrewingStandRenderer
+import de.mineformers.vanillaimmersion.client.renderer.CraftingTableRenderer
+import de.mineformers.vanillaimmersion.client.renderer.EnchantingTableRenderer
+import de.mineformers.vanillaimmersion.client.renderer.FurnaceRenderer
+import de.mineformers.vanillaimmersion.client.renderer.Shaders
 import de.mineformers.vanillaimmersion.config.Configuration
 import de.mineformers.vanillaimmersion.immersion.CraftingHandler
 import de.mineformers.vanillaimmersion.immersion.EnchantingHandler
 import de.mineformers.vanillaimmersion.item.Hammer
-import de.mineformers.vanillaimmersion.network.*
-import de.mineformers.vanillaimmersion.tileentity.*
+import de.mineformers.vanillaimmersion.network.AnvilLock
+import de.mineformers.vanillaimmersion.network.AnvilText
+import de.mineformers.vanillaimmersion.network.BeaconScroll
+import de.mineformers.vanillaimmersion.network.CraftingDrag
+import de.mineformers.vanillaimmersion.network.GuiHandler
+import de.mineformers.vanillaimmersion.network.OpenGui
+import de.mineformers.vanillaimmersion.tileentity.AnvilLogic
+import de.mineformers.vanillaimmersion.tileentity.BeaconLogic
+import de.mineformers.vanillaimmersion.tileentity.BrewingStandLogic
+import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic
+import de.mineformers.vanillaimmersion.tileentity.EnchantingTableLogic
+import de.mineformers.vanillaimmersion.tileentity.FurnaceLogic
 import de.mineformers.vanillaimmersion.util.SubSelectionHandler
 import de.mineformers.vanillaimmersion.util.SubSelectionRenderer
 import net.minecraft.block.Block
@@ -46,14 +67,14 @@ import org.apache.logging.log4j.LogManager
  * Main entry point for Vanilla Immersion
  */
 @Mod(modid = VanillaImmersion.MODID,
-     name = VanillaImmersion.MOD_NAME,
-     version = VanillaImmersion.VERSION,
-     acceptedMinecraftVersions = "*",
-     dependencies = "required-after:forge;required-after:forgelin",
-     updateJSON = "@UPDATE_URL@",
-     modLanguageAdapter = "net.shadowfacts.forgelin.KotlinAdapter",
-     guiFactory = "de.mineformers.vanillaimmersion.config.gui.GuiFactory",
-     certificateFingerprint = "6c67ec97cb96c64a0bbd82a3cb1ec48cbde61bb2")
+    name = VanillaImmersion.MOD_NAME,
+    version = VanillaImmersion.VERSION,
+    acceptedMinecraftVersions = "*",
+    dependencies = "required-after:forge;required-after:forgelin",
+    updateJSON = "@UPDATE_URL@",
+    modLanguageAdapter = "net.shadowfacts.forgelin.KotlinAdapter",
+    guiFactory = "de.mineformers.vanillaimmersion.config.gui.GuiFactory",
+    certificateFingerprint = "6c67ec97cb96c64a0bbd82a3cb1ec48cbde61bb2")
 object VanillaImmersion {
     const val MOD_NAME = "Vanilla Immersion"
     const val MODID = "vimmersion"
@@ -100,15 +121,15 @@ object VanillaImmersion {
 
         // Register messages and handlers
         NETWORK.registerMessage(AnvilLock.Handler, AnvilLock.Message::class.java,
-                                0, Side.CLIENT)
+            0, Side.CLIENT)
         NETWORK.registerMessage(AnvilText.Handler, AnvilText.Message::class.java,
-                                1, Side.SERVER)
+            1, Side.SERVER)
         NETWORK.registerMessage(CraftingDrag.Handler, CraftingDrag.Message::class.java,
-                                2, Side.SERVER)
+            2, Side.SERVER)
         NETWORK.registerMessage(OpenGui.Handler, OpenGui.Message::class.java,
-                                3, Side.SERVER)
+            3, Side.SERVER)
         NETWORK.registerMessage(BeaconScroll.Handler, BeaconScroll.Message::class.java,
-                                4, Side.SERVER)
+            4, Side.SERVER)
         NetworkRegistry.INSTANCE.registerGuiHandler(this, GuiHandler())
 
         PROXY.preInit(event)

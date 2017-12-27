@@ -17,10 +17,13 @@ import net.minecraft.world.World
 import net.minecraftforge.items.IItemHandler
 import net.minecraftforge.items.IItemHandlerModifiable
 
+val ItemStack.nonEmpty
+    get() = !isEmpty
+
 fun IItemHandler.extract(vararg slots: Pair<Int, Int>): ItemStack {
     for ((slot, amount) in slots) {
         val extracted = this.extractItem(slot, amount, false)
-        if (!extracted.isEmpty)
+        if (extracted.nonEmpty)
             return extracted
     }
     return ItemStack.EMPTY
@@ -76,7 +79,7 @@ fun World.spawn(pos: BlockPos, side: EnumFacing, stack: ItemStack) {
     this.spawnEntity(entity)
     // Play the drop sound
     this.playSound(null, offset.x, offset.y, offset.z, SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.BLOCKS, 0.2f,
-                   ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7f + 1.0f) * 2.0f)
+        ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7f + 1.0f) * 2.0f)
 }
 
 /**
@@ -97,8 +100,8 @@ fun EntityPlayer.insertOrDrop(stack: ItemStack) {
         InventoryHelper.spawnItemStack(this.world, this.posX, this.posY, this.posZ, stack)
     else
         this.world.playSound(null, this.posX, this.posY, this.posZ,
-                             SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS,
-                             .2f, ((this.rng.nextFloat() - this.rng.nextFloat()) * .7f + 1f) * 2f)
+            SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS,
+            .2f, ((this.rng.nextFloat() - this.rng.nextFloat()) * .7f + 1f) * 2f)
 }
 
 /**

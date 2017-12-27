@@ -2,6 +2,7 @@ package de.mineformers.vanillaimmersion.block
 
 import de.mineformers.vanillaimmersion.client.particle.BubbleParticle
 import de.mineformers.vanillaimmersion.tileentity.BrewingStandLogic
+import de.mineformers.vanillaimmersion.util.nonEmpty
 import net.minecraft.block.BlockBrewingStand
 import net.minecraft.block.state.IBlockState
 import net.minecraft.client.Minecraft
@@ -17,7 +18,7 @@ import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.IBlockAccess
 import net.minecraft.world.World
-import java.util.*
+import java.util.Random
 
 /**
  * Immersive Brewing Stand implementation.
@@ -25,8 +26,10 @@ import java.util.*
  */
 open class BrewingStand : BlockBrewingStand() {
     companion object {
-        val BOWL_AABB = AxisAlignedBB(5.0 * 0.0625, 13.5 * 0.0625, 5 * 0.0625,
-                                      11.0 * 0.0625, 15.5 * 0.0625, 11 * 0.0625)
+        val BOWL_AABB = AxisAlignedBB(
+            5.0 * 0.0625, 13.5 * 0.0625, 5 * 0.0625,
+            11.0 * 0.0625, 15.5 * 0.0625, 11 * 0.0625
+        )
     }
 
     init {
@@ -60,15 +63,18 @@ open class BrewingStand : BlockBrewingStand() {
                 val x = pos.x + 0.5
                 val y = pos.y + 1.0
                 val z = pos.z + 0.5
-                if (tile.getStackInSlot(0) != null)
+                if (tile.getStackInSlot(0).nonEmpty)
                     Minecraft.getMinecraft().effectRenderer.addEffect(
-                        BubbleParticle(world, x + 4.5 * 0.0625, y, z, .0, .0, .0))
-                if (tile.getStackInSlot(1) != null)
+                        BubbleParticle(world, x + 4.5 * 0.0625, y, z, .0, .0, .0)
+                    )
+                if (tile.getStackInSlot(1).nonEmpty)
                     Minecraft.getMinecraft().effectRenderer.addEffect(
-                        BubbleParticle(world, x - 3.25 * 0.0625, y, z - 3.25 * 0.0625, .0, .0, .0))
-                if (tile.getStackInSlot(2) != null)
+                        BubbleParticle(world, x - 3.25 * 0.0625, y, z - 3.25 * 0.0625, .0, .0, .0)
+                    )
+                if (tile.getStackInSlot(2).nonEmpty)
                     Minecraft.getMinecraft().effectRenderer.addEffect(
-                        BubbleParticle(world, x - 3.25 * 0.0625, y, z + 3.25 * 0.0625, .0, .0, .0))
+                        BubbleParticle(world, x - 3.25 * 0.0625, y, z + 3.25 * 0.0625, .0, .0, .0)
+                    )
             }
             // If there is fuel, smoke a little bit
             if (tile.getField(1) > 0) {
@@ -85,8 +91,7 @@ open class BrewingStand : BlockBrewingStand() {
                                        collidingBoxes: MutableList<AxisAlignedBB>, entity: Entity?, isActualState: Boolean) {
         super.addCollisionBoxToList(state, world, pos, mask, collidingBoxes, entity, isActualState)
         // Add the bowl for correct collisions
-        addCollisionBoxToList(pos, mask, collidingBoxes,
-                              BOWL_AABB.grow(.0, -0.0625 * 0.5, .0).offset(.0, -0.0625 * 0.5, .0))
+        addCollisionBoxToList(pos, mask, collidingBoxes, BOWL_AABB.grow(.0, -0.0625 * 0.5, .0).offset(.0, -0.0625 * 0.5, .0))
     }
 
     @Deprecated("Vanilla")

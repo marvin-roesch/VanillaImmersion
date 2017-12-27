@@ -208,9 +208,7 @@ sealed class MutEntry(val name: String, val type: ConfigGuiType) {
          */
         var guiClass: Class<out GuiConfigEntries.IConfigEntry>? = null
 
-        override fun freeze() =
-            ConfigEntry.Property(name, type, languageKey, comment,
-                                 default, requiresWorldRestart, requiresGameRestart, validValues)
+        override fun freeze() = ConfigEntry.Property(name, type, languageKey, comment, default, requiresWorldRestart, requiresGameRestart, validValues)
     }
 
     /**
@@ -232,9 +230,11 @@ sealed class MutEntry(val name: String, val type: ConfigGuiType) {
         var entryGuiClass: Class<out GuiEditArrayEntries.IArrayEntry>? = null
 
         override fun freeze() =
-            ConfigEntry.ListProperty(name, type, languageKey, comment,
-                                     default, requiresWorldRestart, requiresGameRestart, validValues, guiClass,
-                                     maxLength, fixedLength, entryGuiClass)
+            ConfigEntry.ListProperty(
+                name, type, languageKey, comment,
+                default, requiresWorldRestart, requiresGameRestart, validValues, guiClass,
+                maxLength, fixedLength, entryGuiClass
+            )
     }
 
     /**
@@ -247,9 +247,7 @@ sealed class MutEntry(val name: String, val type: ConfigGuiType) {
         var pattern: Pattern? = null
 
         override fun freeze() =
-            ConfigEntry.ValidatedProperty(name, type, languageKey, comment,
-                                          default, requiresWorldRestart, requiresGameRestart, validValues, guiClass,
-                                          pattern)
+            ConfigEntry.ValidatedProperty(name, type, languageKey, comment, default, requiresWorldRestart, requiresGameRestart, validValues, guiClass, pattern)
     }
 
     /**
@@ -266,9 +264,7 @@ sealed class MutEntry(val name: String, val type: ConfigGuiType) {
         var maximum: T? = null
 
         override fun freeze() =
-            ConfigEntry.RangedProperty(name, type, languageKey, comment,
-                                       default, requiresWorldRestart, requiresGameRestart, validValues, guiClass,
-                                       minimum, maximum)
+            ConfigEntry.RangedProperty(name, type, languageKey, comment, default, requiresWorldRestart, requiresGameRestart, validValues, guiClass, minimum, maximum)
     }
 }
 

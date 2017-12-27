@@ -2,7 +2,12 @@ package de.mineformers.vanillaimmersion.integration.jei
 
 import de.mineformers.vanillaimmersion.VanillaImmersion
 import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic.CraftingTableContainer
-import mezz.jei.api.*
+import mezz.jei.api.IIngredientListOverlay
+import mezz.jei.api.IJeiRuntime
+import mezz.jei.api.IModPlugin
+import mezz.jei.api.IModRegistry
+import mezz.jei.api.IRecipeRegistry
+import mezz.jei.api.JEIPlugin
 import mezz.jei.api.gui.IRecipeLayout
 import mezz.jei.api.recipe.VanillaRecipeCategoryUid
 import mezz.jei.api.recipe.transfer.IRecipeTransferError
@@ -47,8 +52,7 @@ object JEIProxy {
     @Optional.Method(modid = "jei")
     private fun focusSearchImpl() {
         val overlay = JEIIntegration.ingredientListOverlay
-        if (overlay is IngredientListOverlay)
-            overlay.setKeyboardFocus(true)
+        (overlay as? IngredientListOverlay)?.setKeyboardFocus(true)
     }
 }
 

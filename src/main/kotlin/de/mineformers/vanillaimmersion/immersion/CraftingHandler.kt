@@ -3,9 +3,12 @@ package de.mineformers.vanillaimmersion.immersion
 import de.mineformers.vanillaimmersion.client.CraftingDragHandler
 import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic
 import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic.Companion.Slot
-import de.mineformers.vanillaimmersion.util.*
+import de.mineformers.vanillaimmersion.util.blockPos
+import de.mineformers.vanillaimmersion.util.equal
+import de.mineformers.vanillaimmersion.util.insertOrDrop
+import de.mineformers.vanillaimmersion.util.minus
+import de.mineformers.vanillaimmersion.util.times
 import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.item.EnumAction
 import net.minecraft.item.ItemStack
 import net.minecraft.stats.StatList
 import net.minecraft.util.EnumActionResult
@@ -125,8 +128,7 @@ object CraftingHandler {
         if (stack.isEmpty)
             return
         // Calculate the amount of consumed items
-        val consumed = slots.fold(0) {
-            acc, slot ->
+        val consumed = slots.fold(0) { acc, slot ->
             // Gather the consumed amount for the current slot and add it to the crafting table
             val amount = splitDrag(table, player, stack, slots, slot)
             if (amount < 0) {

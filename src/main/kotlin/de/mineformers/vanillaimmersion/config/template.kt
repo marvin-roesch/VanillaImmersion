@@ -11,7 +11,7 @@ import net.minecraftforge.fml.client.config.GuiEditArrayEntries
 import net.minecraftforge.fml.relauncher.ReflectionHelper
 import java.lang.reflect.Constructor
 import java.lang.reflect.Method
-import java.util.*
+import java.util.ArrayList
 import java.util.regex.Pattern
 
 /**
@@ -21,8 +21,7 @@ sealed class ConfigEntry(val name: String, val type: ConfigGuiType, val language
     /**
      * A configuration category holding onto other entries. Children may be a mix of categories and properties.
      */
-    class Category(name: String, type: ConfigGuiType, languageKey: String?, comment: String?,
-                   val elements: List<ConfigEntry>) :
+    class Category(name: String, type: ConfigGuiType, languageKey: String?, comment: String?, val elements: List<ConfigEntry>) :
         ConfigEntry(name, type, languageKey, comment) {
         /**
          * Mad reflection hax because TypeSafe Config is a little too strict with its immutability.
@@ -53,22 +52,18 @@ sealed class ConfigEntry(val name: String, val type: ConfigGuiType, val language
                 val fromMapModeClass = Class.forName("com.typesafe.config.impl.FromMapMode")
                 val originClass = Class.forName("com.typesafe.config.impl.SimpleConfigOrigin")
                 val listClass = Class.forName("com.typesafe.config.impl.SimpleConfigList")
-                CONFIG_FROM_ANY_REF = ReflectionHelper.findMethod(ConfigImpl::class.java as Class<Any?>,
-                                                                  "fromAnyRef",
-                                                                  "fromAnyRef",
-                                                                  Any::class.java,
-                                                                  ConfigOrigin::class.java,
-                                                                  fromMapModeClass)
+                CONFIG_FROM_ANY_REF = ReflectionHelper.findMethod(
+                    ConfigImpl::class.java, "fromAnyRef", "fromAnyRef",
+                    Any::class.java, ConfigOrigin::class.java, fromMapModeClass
+                )
                 CONFIG_FROM_ANY_REF.isAccessible = true
-                SET_ORIGIN_COMMENT = ReflectionHelper.findMethod(originClass as Class<Any?>,
-                                                                 "setComments",
-                                                                 "setComments",
-                                                                 List::class.java)
+                SET_ORIGIN_COMMENT = ReflectionHelper.findMethod(
+                    originClass, "setComments", "setComments",
+                    List::class.java
+                )
                 SET_ORIGIN_COMMENT.isAccessible = true
-                KEYS_ARE_KEYS = ReflectionHelper.getPrivateValue(fromMapModeClass as Class<Any?>, null,
-                                                                 "KEYS_ARE_KEYS")
-                DEFAULT_ORIGIN = ReflectionHelper.getPrivateValue(ConfigImpl::class.java as Class<Any?>, null,
-                                                                  "defaultValueOrigin")
+                KEYS_ARE_KEYS = ReflectionHelper.getPrivateValue(fromMapModeClass as Class<Any?>, null, "KEYS_ARE_KEYS")
+                DEFAULT_ORIGIN = ReflectionHelper.getPrivateValue(ConfigImpl::class.java as Class<Any?>, null, "defaultValueOrigin")
                 SIMPLE_CONFIG_LIST_CONSTRUCTOR = listClass.getDeclaredConstructor(ConfigOrigin::class.java, java.util.List::class.java)
                 SIMPLE_CONFIG_LIST_CONSTRUCTOR.isAccessible = true
             }
@@ -107,10 +102,10 @@ sealed class ConfigEntry(val name: String, val type: ConfigGuiType, val language
         operator fun get(path: String): ConfigEntry? {
             fun get(keys: List<String>, cat: Category): ConfigEntry? {
                 val elem = cat.elements.find { it.name == keys.first() }
-                if (keys.size == 1)
-                    return elem
+                return if (keys.size == 1)
+                    elem
                 else
-                    return when (elem) {
+                    when (elem) {
                         is Category -> get(keys.drop(1), elem)
                         else -> null
                     }
@@ -134,8 +129,7 @@ sealed class ConfigEntry(val name: String, val type: ConfigGuiType, val language
          * Converts this category into a TypeSafe Config config value.
          */
         fun toConfig(): ConfigValue =
-            elements.fold(fromAnyRef(emptyMap<String, Any>(), comment) as ConfigObject, {
-                acc, entry ->
+            elements.fold(fromAnyRef(emptyMap<String, Any>(), comment) as ConfigObject, { acc, entry ->
                 acc.withValue(entry.name, when (entry) {
                     is Category -> entry.toConfig()
                     is Property<*> -> fromAnyRef(entry.default, entry.comment)
@@ -158,8 +152,7 @@ sealed class ConfigEntry(val name: String, val type: ConfigGuiType, val language
                           default: List<T>?, requiresWorldRestart: Boolean, requiresGameRestart: Boolean,
                           validValues: List<String>?, guiClass: Class<out GuiConfigEntries.IConfigEntry>? = null,
                           val maxLength: Int, val fixedLength: Boolean, val entryGuiClass: Class<out GuiEditArrayEntries.IArrayEntry>?) :
-        Property<List<T>>(name, type, languageKey, comment,
-                          default, requiresWorldRestart, requiresGameRestart, validValues, guiClass)
+        Property<List<T>>(name, type, languageKey, comment, default, requiresWorldRestart, requiresGameRestart, validValues, guiClass)
 
     /**
      * A configuration property to be validated with a [Pattern].
@@ -168,8 +161,7 @@ sealed class ConfigEntry(val name: String, val type: ConfigGuiType, val language
                                default: T?, requiresWorldRestart: Boolean, requiresGameRestart: Boolean,
                                validValues: List<String>?, guiClass: Class<out GuiConfigEntries.IConfigEntry>? = null,
                                val pattern: Pattern?) :
-        Property<T>(name, type, languageKey, comment,
-                    default, requiresWorldRestart, requiresGameRestart, validValues, guiClass)
+        Property<T>(name, type, languageKey, comment, default, requiresWorldRestart, requiresGameRestart, validValues, guiClass)
 
     /**
      * A configuration property with a minimum and maximum value.
@@ -178,7 +170,6 @@ sealed class ConfigEntry(val name: String, val type: ConfigGuiType, val language
                             default: T?, requiresWorldRestart: Boolean, requiresGameRestart: Boolean,
                             validValues: List<String>?, guiClass: Class<out GuiConfigEntries.IConfigEntry>? = null,
                             val minimum: T?, val maximum: T?) :
-        Property<T>(name, type, languageKey, comment,
-                    default, requiresWorldRestart, requiresGameRestart, validValues, guiClass)
+        Property<T>(name, type, languageKey, comment, default, requiresWorldRestart, requiresGameRestart, validValues, guiClass)
 }
 

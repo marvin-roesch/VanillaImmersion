@@ -5,5 +5,8 @@
         "New Forgelin dependency: 1.6.0 (Kotlin 1.2)"
     ],
     "fixes": [
+        "Brewing Stand model doesn't have empty spots anymore",
+        "Bottles on brewing stand are rendered in the correct location",
+        "Non-empty item stacks should be properly handled everywhere now"
     ]
 }

@@ -3,7 +3,11 @@ package de.mineformers.vanillaimmersion.tileentity
 import de.mineformers.vanillaimmersion.VanillaImmersion
 import de.mineformers.vanillaimmersion.client.particle.EnchantingParticle
 import de.mineformers.vanillaimmersion.config.Configuration
-import de.mineformers.vanillaimmersion.util.*
+import de.mineformers.vanillaimmersion.util.Rendering
+import de.mineformers.vanillaimmersion.util.clear
+import de.mineformers.vanillaimmersion.util.insertOrDrop
+import de.mineformers.vanillaimmersion.util.plus
+import de.mineformers.vanillaimmersion.util.spawn
 import net.minecraft.client.Minecraft
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.inventory.ContainerEnchantment
@@ -51,12 +55,11 @@ open class EnchantingTableLogic : TileEntityEnchantmentTable() {
         val lapis = OreDictionary.getOres("gemLapis")
 
         override fun getStackLimit(slot: Int, stack: ItemStack) =
-            if (slot == Slot.OBJECT.ordinal)
-                1 // The input slot may only take 1 item
-            else if (lapis.any { OreDictionary.itemMatches(it, stack, false) })
-                3 // The modifiers slot may only take 3 "lapis lazuli"-like items
-            else
-                0
+            when {
+                slot == Slot.OBJECT.ordinal -> 1 // The input slot may only take 1 item
+                lapis.any { OreDictionary.itemMatches(it, stack, false) } -> 3 // The modifiers slot may only take 3 "lapis lazuli"-like items
+                else -> 0
+            }
 
         override fun onContentsChanged(slot: Int) {
             // Update the output if the inputs were modified
@@ -252,7 +255,7 @@ open class EnchantingTableLogic : TileEntityEnchantmentTable() {
             // Page 0 contains the "Cancel" button
             if (page == 0) {
                 // Drop all items and update the enchantment data
-                for (i in 0..(inventory.slots - 1)) {
+                for (i in 0 until inventory.slots) {
                     val extracted = inventory.extractItem(i, Int.MAX_VALUE, false)
                     player.insertOrDrop(extracted)
                 }

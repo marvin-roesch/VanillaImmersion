@@ -4,13 +4,29 @@ import de.mineformers.vanillaimmersion.client.renderer.Shaders
 import de.mineformers.vanillaimmersion.util.SelectionBox.Companion.RenderOptions
 import de.mineformers.vanillaimmersion.util.SelectionBox.Companion.SlotOptions
 import net.minecraft.client.Minecraft
-import net.minecraft.client.renderer.GlStateManager.*
+import net.minecraft.client.renderer.GlStateManager.DestFactor
+import net.minecraft.client.renderer.GlStateManager.SourceFactor
+import net.minecraft.client.renderer.GlStateManager.color
+import net.minecraft.client.renderer.GlStateManager.depthMask
+import net.minecraft.client.renderer.GlStateManager.disableBlend
+import net.minecraft.client.renderer.GlStateManager.disableTexture2D
+import net.minecraft.client.renderer.GlStateManager.enableBlend
+import net.minecraft.client.renderer.GlStateManager.enableTexture2D
+import net.minecraft.client.renderer.GlStateManager.glLineWidth
+import net.minecraft.client.renderer.GlStateManager.popMatrix
+import net.minecraft.client.renderer.GlStateManager.pushMatrix
+import net.minecraft.client.renderer.GlStateManager.translate
+import net.minecraft.client.renderer.GlStateManager.tryBlendFuncSeparate
 import net.minecraft.client.renderer.RenderGlobal.drawSelectionBoundingBox
 import net.minecraft.client.renderer.Tessellator
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
-import net.minecraft.util.*
+import net.minecraft.util.EnumActionResult
+import net.minecraft.util.EnumFacing
+import net.minecraft.util.EnumHand
+import net.minecraft.util.ResourceLocation
+import net.minecraft.util.Rotation
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.RayTraceResult
@@ -20,7 +36,7 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.items.CapabilityItemHandler.ITEM_HANDLER_CAPABILITY
 import org.lwjgl.opengl.GL11
-import java.util.*
+import java.util.Collections
 
 /**
  * TileEntities inheriting from this interface will have a preview/highlight drawn for each slot if it is not occupied.
@@ -114,9 +130,9 @@ class SelectionBoxBuilder(var bounds: AxisAlignedBB) {
 class RenderOptionsBuilder {
     var icon: ResourceLocation? = null
     var uvs: List<Vec3d> = listOf(Vec3d(.0, .0, .0),
-                                  Vec3d(.0, .0, 1.0),
-                                  Vec3d(1.0, .0, 1.0),
-                                  Vec3d(1.0, .0, .0))
+        Vec3d(.0, .0, 1.0),
+        Vec3d(1.0, .0, 1.0),
+        Vec3d(1.0, .0, .0))
     var hoveredOnly: Boolean = false
     var hoverColor: Vec3d? = null
 
@@ -183,9 +199,9 @@ data class SelectionBox(val bounds: AxisAlignedBB,
          */
         data class RenderOptions(val icon: ResourceLocation? = null,
                                  val uvs: List<Vec3d> = listOf(Vec3d(.0, .0, .0),
-                                                               Vec3d(.0, .0, 1.0),
-                                                               Vec3d(1.0, .0, 1.0),
-                                                               Vec3d(1.0, .0, .0)),
+                                     Vec3d(.0, .0, 1.0),
+                                     Vec3d(1.0, .0, 1.0),
+                                     Vec3d(1.0, .0, .0)),
                                  val hoveredOnly: Boolean = false,
                                  val hoverColor: Vec3d? = null)
 
@@ -327,7 +343,7 @@ object SubSelectionRenderer {
             // Draw highlight boxes
             disableTexture2D()
             tryBlendFuncSeparate(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA,
-                                 SourceFactor.ONE, DestFactor.ZERO)
+                SourceFactor.ONE, DestFactor.ZERO)
 
             for (box in tile.boxes.filter(::renderFilter)) {
                 val hoverColor = box.rendering?.hoverColor ?: Vec3d.ZERO
@@ -335,14 +351,14 @@ object SubSelectionRenderer {
                 color(color.x.toFloat(), color.y.toFloat(), color.z.toFloat(), 0.4f)
                 val rotated = box.bounds.rotateY(box.rotation).offset(pos)
                 drawSelectionBoundingBox(rotated.grow(0.002),
-                                         color.x.toFloat(), color.y.toFloat(), color.z.toFloat(), 0.4f)
+                    color.x.toFloat(), color.y.toFloat(), color.z.toFloat(), 0.4f)
             }
 
             // Draw highlight icons
             enableTexture2D()
             color(1f, 1f, 1f, 0.4f)
             tryBlendFuncSeparate(SourceFactor.SRC_ALPHA, DestFactor.ONE,
-                                 SourceFactor.ONE, DestFactor.ZERO)
+                SourceFactor.ONE, DestFactor.ZERO)
             for ((originalBox, rotation, rendering, _) in tile.boxes.filter(::renderFilter)) {
                 if (rendering!!.icon == null)
                     continue
@@ -374,7 +390,7 @@ object SubSelectionRenderer {
         disableBlend()
         popMatrix()
         tryBlendFuncSeparate(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA,
-                             SourceFactor.ONE, DestFactor.ZERO)
+            SourceFactor.ONE, DestFactor.ZERO)
 
         if (hovered != null && tile.cancelsVanillaSelectionRendering())
             event.isCanceled = true
