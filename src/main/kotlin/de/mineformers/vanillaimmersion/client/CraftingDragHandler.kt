@@ -7,8 +7,8 @@ import de.mineformers.vanillaimmersion.immersion.CraftingHandler.splitDrag
 import de.mineformers.vanillaimmersion.network.CraftingDrag
 import de.mineformers.vanillaimmersion.network.OpenGui
 import de.mineformers.vanillaimmersion.tileentity.CraftingTableLogic
+import de.mineformers.vanillaimmersion.util.isDown
 import de.mineformers.vanillaimmersion.util.minus
-import isDown
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.GlStateManager.color
 import net.minecraft.client.renderer.GlStateManager.disableBlend
