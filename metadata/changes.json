@@ -1,8 +1,9 @@
 {
     "additions": [],
     "changes": [
+        "Update to MC 1.12.2 as base",
+        "New Forgelin dependency: 1.6.0 (Kotlin 1.2)"
     ],
     "fixes": [
-        "Properly simulate crafting results in order to enable specific on-crafting behaviour of items (map scaling, for example)"
     ]
 }
