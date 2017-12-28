@@ -7,6 +7,7 @@
     "fixes": [
         "Brewing Stand model doesn't have empty spots anymore",
         "Bottles on brewing stand are rendered in the correct location",
-        "Non-empty item stacks should be properly handled everywhere now"
+        "Non-empty item stacks should be properly handled everywhere now",
+        "Right clicking blocks no longer causes random crashes"
     ]
 }
