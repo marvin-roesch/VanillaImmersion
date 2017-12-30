@@ -32,9 +32,9 @@ object OpenGui {
         override fun onMessage(msg: Message, ctx: MessageContext): IMessage? {
             val player = ctx.serverHandler.player
             // We interact with the world, hence schedule our action
-            player.serverWorld.addScheduledTask task@ {
+            player.serverWorld.addScheduledTask  {
                 if (!player.world.isBlockLoaded(msg.pos))
-                    return@task
+                    return@addScheduledTask
                 player.openGui(VanillaImmersion, msg.id, player.world, msg.pos.x, msg.pos.y, msg.pos.z)
             }
             return null

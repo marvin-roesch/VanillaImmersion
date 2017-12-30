@@ -35,9 +35,9 @@ object AnvilText {
         override fun onMessage(msg: Message, ctx: MessageContext): IMessage? {
             val player = ctx.serverHandler.player
             // We interact with the world, hence schedule our action
-            player.serverWorld.addScheduledTask task@ {
+            player.serverWorld.addScheduledTask {
                 if (!player.world.isBlockLoaded(msg.pos))
-                    return@task
+                    return@addScheduledTask
                 val tile = player.world.getTileEntity(msg.pos)
                 // Ensure the player has acquired the lock on the anvil
                 if (tile is AnvilLogic && tile.canInteract(player)) {
