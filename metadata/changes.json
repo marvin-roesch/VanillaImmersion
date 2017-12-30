@@ -2,7 +2,8 @@
     "additions": [],
     "changes": [
         "Update to MC 1.12.2 as base",
-        "New Forgelin dependency: 1.6.0 (Kotlin 1.2)"
+        "New Forgelin dependency: 1.6.0 (Kotlin 1.2)",
+        "Brewing stands now always accept fuel when clicking the rod"
     ],
     "fixes": [
         "Brewing Stand model doesn't have empty spots anymore",

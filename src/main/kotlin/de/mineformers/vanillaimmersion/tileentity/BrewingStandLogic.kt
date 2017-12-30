@@ -98,7 +98,13 @@ open class BrewingStandLogic : TileEntityBrewingStand(), SubSelections {
             }
         val ROD_SELECTION =
             selectionBox(AxisAlignedBB(0.4375, 0.0, 0.4375, 0.5625, 0.875, 0.5625)) {
-                rightClicks = false
+                slot(Slot.INPUT_POWDER.ordinal) {
+                    renderFilled = true
+                }
+
+                renderOptions {
+                    hoveredOnly = true
+                }
             }
         val SELECTIONS = listOf(BOTTLE1_SELECTION, BOTTLE2_SELECTION, BOTTLE3_SELECTION, BOWL_SELECTION, ROD_SELECTION)
     }
@@ -131,7 +137,7 @@ open class BrewingStandLogic : TileEntityBrewingStand(), SubSelections {
 
     override fun onRightClickBox(box: SelectionBox, player: EntityPlayer, hand: EnumHand, stack: ItemStack,
                                  side: EnumFacing, hitVec: Vec3d): Boolean {
-        if (hand == EnumHand.OFF_HAND || box == ROD_SELECTION)
+        if (hand == EnumHand.OFF_HAND)
             return false
         if (world.isRemote)
             return true
@@ -188,8 +194,7 @@ open class BrewingStandLogic : TileEntityBrewingStand(), SubSelections {
         if (!existingIngredient.isEmpty && existingIngredient.item === stack.item)
             return existingIngredient.count == existingIngredient.maxStackSize
         // Only allow insertion if there is no fuel already or there is more space
-        return existingFuel.isEmpty ||
-            (existingFuel.item === stack.item && existingFuel.count != existingFuel.maxStackSize)
+        return existingFuel.isEmpty || (existingFuel.item === stack.item && existingFuel.count != existingFuel.maxStackSize)
     }
 
     /**
