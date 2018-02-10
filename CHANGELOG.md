@@ -1,6 +1,19 @@
 Changelog
 =========
 
+### Version 2.0.3.0 for Minecraft 1.12.2
+**Note:** This version of the mod requires at least Forge version *1.12.2-14.23.1.2582*.
+  - **Changes**
+    - Update to MC 1.12.2 as base
+    - New Forgelin dependency: 1.6.0 (Kotlin 1.2)
+    - Brewing stands now always accept fuel when clicking the rod
+  - **Fixes**
+    - Brewing Stand model doesn't have empty spots anymore
+    - Bottles on brewing stand are rendered in the correct location
+    - Non-empty item stacks should be properly handled everywhere now
+    - Right clicking blocks no longer causes random crashes
+    - Hammering the anvil no longer crashes on servers due to failed particle sending
+
 ### Version 2.0.2.4 for Minecraft 1.12
 **Note:** This version of the mod requires at least Forge version *1.12-14.21.1.2426*.
   - **Fixes**
