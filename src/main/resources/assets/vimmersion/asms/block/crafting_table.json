@@ -1,0 +1,38 @@
+{
+    "parameters": {
+        "end_anim": [ "compose", [ "+", 0.8 ], "#click_time" ],
+        "trigger_anim": [ "-", "#end_anim" ],
+        "progress": [ "-*/", "#click_time", 0.9, 0.8 ]
+    },
+    "clips": {
+        "open_clip": "vimmersion:block/crafting_table_drawer@open",
+        "close_clip": "vimmersion:block/crafting_table_drawer@close",
+        "closed": "vimmersion:block/crafting_table_drawer@closed",
+        "opening": [
+            "trigger_positive",
+            [ "apply", "#open_clip", "#progress" ],
+            "#trigger_anim",
+            "!transition:open"
+        ],
+        "open": "vimmersion:block/crafting_table_drawer@opened",
+        "closing": [
+            "trigger_positive",
+            [ "apply", "#close_clip", "#progress" ],
+            "#trigger_anim",
+            "!transition:closed"
+        ]
+    },
+    "states": [
+        "closed",
+        "opening",
+        "open",
+        "closing"
+    ],
+    "transitions": {
+        "closed": [ "closed", "open", "opening", "closing" ],
+        "opening": [ "open", "closed", "closing" ],
+        "open": [ "open", "closed", "closing", "opening" ],
+        "closing": [ "closed", "open", "opening" ]
+    },
+    "start_state": "closed"
+}

@@ -1,12 +1,18 @@
 package de.mineformers.vanillaimmersion.tileentity
 
+import de.mineformers.vanillaimmersion.VanillaImmersion
+import de.mineformers.vanillaimmersion.block.CraftingDrawer
+import de.mineformers.vanillaimmersion.network.CraftingDrawerStartAnimation
 import de.mineformers.vanillaimmersion.util.SelectionBox
 import de.mineformers.vanillaimmersion.util.SubSelections
 import de.mineformers.vanillaimmersion.util.clear
 import de.mineformers.vanillaimmersion.util.equal
 import de.mineformers.vanillaimmersion.util.insertOrDrop
 import de.mineformers.vanillaimmersion.util.nonEmpty
+import de.mineformers.vanillaimmersion.util.plus
 import de.mineformers.vanillaimmersion.util.selectionBox
+import de.mineformers.vanillaimmersion.util.sendToAllWatching
+import de.mineformers.vanillaimmersion.util.vec3d
 import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.inventory.ContainerWorkbench
@@ -27,13 +33,18 @@ import net.minecraft.util.EnumFacing.NORTH
 import net.minecraft.util.EnumFacing.SOUTH
 import net.minecraft.util.EnumFacing.UP
 import net.minecraft.util.EnumFacing.WEST
+import net.minecraft.util.EnumHand
 import net.minecraft.util.NonNullList
 import net.minecraft.util.Rotation
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.World
+import net.minecraftforge.client.MinecraftForgeClient
+import net.minecraftforge.client.model.animation.Animation
+import net.minecraftforge.common.animation.TimeValues
 import net.minecraftforge.common.capabilities.Capability
+import net.minecraftforge.common.model.animation.CapabilityAnimation
 import net.minecraftforge.common.util.Constants
 import net.minecraftforge.items.CapabilityItemHandler.ITEM_HANDLER_CAPABILITY
 import net.minecraftforge.items.ItemStackHandler
@@ -114,6 +125,20 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
                         }
                     )
                 }
+            builder.add(
+                selectionBox(
+                    AxisAlignedBB(
+                        .9375, .625, 2 * .0625,
+                        1.0, .8125, 14 * .0625
+                    )
+                ) {
+                    leftClicks = false
+
+                    renderOptions {
+                        hoverColor = Vec3d(.1, .1, .1)
+                    }
+                }
+            )
             builder.toList()
         }
     }
@@ -202,6 +227,10 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
     private val middleInventory by lazy {
         RangedWrapper(inventory, 5, 6)
     }
+    internal var drawerOpened = false
+    internal var drawerChanging = false
+    internal val clickTime = TimeValues.VariableValue(Float.NEGATIVE_INFINITY)
+    private val animation = VanillaImmersion.PROXY.loadStateMachine("block/crafting_table", "click_time" to clickTime)
 
     inner class CraftingTableContainer(player: EntityPlayer, simulate: Boolean) :
         ContainerWorkbench(player.inventory, world, pos) {
@@ -312,8 +341,53 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
      */
     operator fun set(slot: Slot, stack: ItemStack) = inventory.setStackInSlot(slot.ordinal, stack)
 
+    private val drawerPos: BlockPos
+        get() = pos.offset(facing.rotateY())
+
     override val boxes: List<SelectionBox>
         get() = SELECTIONS.map { it.withRotation(rotation) }
+
+    override fun onRightClickBox(box: SelectionBox, player: EntityPlayer, hand: EnumHand, stack: ItemStack, side: EnumFacing, hitVec: Vec3d): Boolean {
+        val neighbor = world.getBlockState(drawerPos)
+        if (hand != EnumHand.MAIN_HAND || stack.nonEmpty || drawerChanging || !neighbor.block.isAir(neighbor, world, drawerPos)) {
+            return super.onRightClickBox(box, player, hand, stack, side, hitVec)
+        }
+        if (world.isRemote) {
+            return true
+        }
+        changeDrawer()
+        if (!drawerOpened) {
+            world.setBlockState(drawerPos, VanillaImmersion.Blocks.CRAFTING_DRAWER.defaultState.withProperty(CraftingDrawer.FACING, facing))
+        }
+        return true
+    }
+
+    fun changeDrawer() {
+        clickTime.setValue(Animation.getWorldTime(world))
+        VanillaImmersion.NETWORK.sendToAllWatching(world, pos, CraftingDrawerStartAnimation.Message(pos, clickTime.apply(0f), !drawerOpened))
+        drawerChanging = true
+        world.scheduleBlockUpdate(pos, getBlockType(), 17, 1000)
+    }
+
+    fun startAnimation(time: Float, opening: Boolean) {
+        clickTime.setValue(time)
+        animation?.transition(if (opening) "opening" else "closing")
+        drawerChanging = true
+    }
+
+    fun onDrawerChanged() {
+        breakDrawer()
+        drawerOpened = !drawerOpened
+        drawerChanging = false
+        sync()
+    }
+
+    fun breakDrawer() {
+        val state = world.getBlockState(drawerPos)
+        if (drawerOpened && state.block == VanillaImmersion.Blocks.CRAFTING_DRAWER && state.getValue(CraftingDrawer.FACING) == facing) {
+            world.setBlockToAir(drawerPos)
+        }
+    }
 
     /**
      * Tries to perform a crafting operation.
@@ -373,6 +447,7 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
         super.writeToNBT(compound)
         compound.setTag("Inventory", ITEM_HANDLER_CAPABILITY.writeNBT(inventory, null))
         compound.setInteger("Facing", facing.index)
+        compound.setBoolean("DrawerOpen", drawerOpened)
         return compound
     }
 
@@ -383,12 +458,22 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
         super.readFromNBT(compound)
         ITEM_HANDLER_CAPABILITY.readNBT(inventory, null, compound!!.getTagList("Inventory", Constants.NBT.TAG_COMPOUND))
         facing = EnumFacing.getFront(compound.getInteger("Facing"))
+        drawerOpened = compound.getBoolean("DrawerOpen")
+        if (compound.hasKey("DrawerChanging")) {
+            drawerChanging = compound.getBoolean("DrawerChanging")
+            if (!drawerChanging)
+                animation?.transition(if (drawerOpened) "open" else "closed")
+        }
     }
 
     /**
      * Composes a tag for updates of the TE (both initial chunk data and later updates).
      */
-    override fun getUpdateTag() = writeToNBT(NBTTagCompound())
+    override fun getUpdateTag(): NBTTagCompound {
+        val compound = writeToNBT(NBTTagCompound())
+        compound.setBoolean("DrawerChanging", drawerChanging)
+        return compound
+    }
 
     /**
      * Creates a packet for updates of the tile entity at runtime.
@@ -409,12 +494,22 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
     override fun shouldRefresh(world: World, pos: BlockPos, oldState: IBlockState, newState: IBlockState) =
         oldState.block != newState.block
 
+    override fun shouldRenderInPass(pass: Int) = true
+
+    override fun hasFastRenderer() = MinecraftForgeClient.getRenderPass() == 0
+
+    override fun getRenderBoundingBox(): AxisAlignedBB {
+        val p1 = drawerPos.vec3d
+        val p2 = pos.vec3d
+        return AxisAlignedBB(p1, p1 + Vec3d(1.0, 1.0, 1.0)).union(AxisAlignedBB(p2, p2 + Vec3d(1.0, 1.0, 1.0)))
+    }
+
     /**
      * Checks whether the crafting table has a capability attached to the given side.
      * Will definitely return `true` for the item handler capability
      */
     override fun hasCapability(capability: Capability<*>, side: EnumFacing?): Boolean {
-        return (side != DOWN && capability == ITEM_HANDLER_CAPABILITY) || super.hasCapability(capability, side)
+        return (side != DOWN && capability == ITEM_HANDLER_CAPABILITY) || capability == CapabilityAnimation.ANIMATION_CAPABILITY || super.hasCapability(capability, side)
     }
 
     /**
@@ -422,25 +517,30 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
      */
     override fun <T : Any?> getCapability(capability: Capability<T>, side: EnumFacing?): T? {
         @Suppress("UNCHECKED_CAST")
-        if (capability == ITEM_HANDLER_CAPABILITY) {
-            // Return the appropriate inventory for the vertical sides
-            if (side == UP)
-                return middleInventory as T
+        when (capability) {
+            ITEM_HANDLER_CAPABILITY -> {
+                // Return the appropriate inventory for the vertical sides
+                if (side == UP)
+                    return middleInventory as T
 
-            // Transform the passed side into one that's relative to the crafting table's orientation
-            val relativeSide =
-                if (side != null)
-                    EnumFacing.getHorizontal((facing.horizontalIndex + 2) % 4 + side.horizontalIndex)
-                else
-                    null
-            // Return the appropriate inventory
-            when (relativeSide) {
-                NORTH -> return bottomInventory as T
-                SOUTH -> return topInventory as T
-                WEST -> return rightInventory as T
-                EAST -> return leftInventory as T
-                null -> return inventory as T
-                else -> Unit
+                // Transform the passed side into one that's relative to the crafting table's orientation
+                val relativeSide =
+                    if (side != null)
+                        EnumFacing.getHorizontal((facing.horizontalIndex + 2) % 4 + side.horizontalIndex)
+                    else
+                        null
+                // Return the appropriate inventory
+                when (relativeSide) {
+                    NORTH -> return bottomInventory as T
+                    SOUTH -> return topInventory as T
+                    WEST -> return rightInventory as T
+                    EAST -> return leftInventory as T
+                    null -> return inventory as T
+                    else -> Unit
+                }
+            }
+            CapabilityAnimation.ANIMATION_CAPABILITY -> {
+                return animation as T
             }
         }
         return super.getCapability(capability, side)

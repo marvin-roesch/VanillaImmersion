@@ -5,7 +5,6 @@ import de.mineformers.vanillaimmersion.util.spill
 import net.minecraft.block.BlockHorizontal
 import net.minecraft.block.BlockWorkbench
 import net.minecraft.block.SoundType
-import net.minecraft.block.state.BlockStateContainer
 import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.player.EntityPlayer
@@ -17,6 +16,9 @@ import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.IBlockAccess
 import net.minecraft.world.World
+import net.minecraftforge.common.property.ExtendedBlockState
+import net.minecraftforge.common.property.Properties
+import java.util.Random
 
 /**
  * Immersive Crafting Table implementation.
@@ -86,6 +88,7 @@ open class CraftingTable : BlockWorkbench() {
 
         if (tile is CraftingTableLogic) {
             tile.inventory.spill(world, pos, 1 until tile.inventory.slots)
+            tile.breakDrawer()
             world.updateComparatorOutputLevel(pos, this)
         }
         super.breakBlock(world, pos, state)
@@ -97,6 +100,11 @@ open class CraftingTable : BlockWorkbench() {
      */
     override fun onBlockAdded(world: World, pos: BlockPos, state: IBlockState) {
         this.setDefaultFacing(world, pos, state)
+    }
+
+    override fun updateTick(world: World, pos: BlockPos, state: IBlockState, rand: Random) {
+        val tile = world.getTileEntity(pos) as? CraftingTableLogic ?: return
+        tile.onDrawerChanged()
     }
 
     /**
@@ -134,7 +142,7 @@ open class CraftingTable : BlockWorkbench() {
 
     override fun getActualState(state: IBlockState, world: IBlockAccess, pos: BlockPos): IBlockState {
         val tile = world.getTileEntity(pos) as? CraftingTableLogic ?: return super.getActualState(state, world, pos)
-        return state.withProperty(FACING, tile.facing)
+        return state.withProperty(FACING, tile.facing).withProperty(Properties.StaticProperty, true)
     }
 
     /**
@@ -150,5 +158,5 @@ open class CraftingTable : BlockWorkbench() {
     /**
      * Tells Minecraft that the [FACING] property belongs to the crafting table.
      */
-    override fun createBlockState() = BlockStateContainer(this, FACING)
+    override fun createBlockState() = ExtendedBlockState(this, arrayOf(FACING, Properties.StaticProperty), arrayOf(Properties.AnimationProperty))
 }

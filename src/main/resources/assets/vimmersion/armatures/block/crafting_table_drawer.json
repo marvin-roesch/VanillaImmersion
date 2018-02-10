@@ -1,0 +1,54 @@
+{
+    "joints": {
+        "drawer": { "0": [ 1.0 ], "1": [ 1.0 ], "2": [ 1.0 ], "3": [ 1.0 ], "4": [ 1.0 ], "5": [ 1.0 ], "6": [ 1.0 ], "7": [ 1.0 ] }
+    },
+    "clips": {
+        "closed": {
+            "loop": false,
+            "joint_clips": { },
+            "events": { }
+        },
+        "opened": {
+            "loop": false,
+            "joint_clips": {
+                "drawer": [
+                    {
+                        "variable": "offset_x",
+                        "type": "uniform",
+                        "interpolation": "nearest",
+                        "samples": [ 0.625 ]
+                    }
+                ]
+            },
+            "events": { }
+        },
+        "open": {
+            "loop": false,
+            "joint_clips": {
+                "drawer": [
+                    {
+                        "variable": "offset_x",
+                        "type": "uniform",
+                        "interpolation": "linear",
+                        "samples": [ 0, 0.11875, 0.225, 0.31875, 0.4, 0.46875, 0.525, 0.56875, 0.6, 0.61875, 0.625 ]
+                    }
+                ]
+            },
+            "events": { }
+        },
+        "close": {
+            "loop": false,
+            "joint_clips": {
+                "drawer": [
+                    {
+                        "variable": "offset_x",
+                        "type": "uniform",
+                        "interpolation": "linear",
+                        "samples": [ 0.625, 0.61875, 0.6, 0.56875, 0.525, 0.46875, 0.4, 0.31875, 0.225, 0.11875, 0, 0 ]
+                    }
+                ]
+            },
+            "events": { }
+        }
+    }
+}

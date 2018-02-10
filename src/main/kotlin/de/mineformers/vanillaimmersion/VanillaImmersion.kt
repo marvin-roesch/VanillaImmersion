@@ -1,8 +1,10 @@
 package de.mineformers.vanillaimmersion
 
+import com.google.common.collect.ImmutableMap
 import de.mineformers.vanillaimmersion.block.Anvil
 import de.mineformers.vanillaimmersion.block.Beacon
 import de.mineformers.vanillaimmersion.block.BrewingStand
+import de.mineformers.vanillaimmersion.block.CraftingDrawer
 import de.mineformers.vanillaimmersion.block.CraftingTable
 import de.mineformers.vanillaimmersion.block.EnchantingTable
 import de.mineformers.vanillaimmersion.block.Furnace
@@ -23,6 +25,7 @@ import de.mineformers.vanillaimmersion.network.AnvilLock
 import de.mineformers.vanillaimmersion.network.AnvilText
 import de.mineformers.vanillaimmersion.network.BeaconScroll
 import de.mineformers.vanillaimmersion.network.CraftingDrag
+import de.mineformers.vanillaimmersion.network.CraftingDrawerStartAnimation
 import de.mineformers.vanillaimmersion.network.GuiHandler
 import de.mineformers.vanillaimmersion.network.OpenGui
 import de.mineformers.vanillaimmersion.tileentity.AnvilLogic
@@ -37,15 +40,17 @@ import net.minecraft.block.Block
 import net.minecraft.block.state.IBlockState
 import net.minecraft.client.renderer.block.model.ModelResourceLocation
 import net.minecraft.client.renderer.block.statemap.StateMapperBase
-import net.minecraft.init.Blocks
 import net.minecraft.item.Item
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.SoundEvent
 import net.minecraftforge.client.event.ModelRegistryEvent
 import net.minecraftforge.client.model.ModelLoader
+import net.minecraftforge.client.model.ModelLoaderRegistry
 import net.minecraftforge.client.model.obj.OBJLoader
 import net.minecraftforge.common.MinecraftForge
+import net.minecraftforge.common.animation.ITimeValue
+import net.minecraftforge.common.model.animation.IAnimationStateMachine
 import net.minecraftforge.event.RegistryEvent
 import net.minecraftforge.fml.client.registry.ClientRegistry
 import net.minecraftforge.fml.common.Mod
@@ -62,6 +67,7 @@ import net.minecraftforge.fml.common.registry.GameRegistry.ObjectHolder
 import net.minecraftforge.fml.relauncher.Side
 import net.minecraftforge.registries.IForgeRegistryEntry
 import org.apache.logging.log4j.LogManager
+import net.minecraft.init.Blocks as VBlocks
 
 /**
  * Main entry point for Vanilla Immersion
@@ -99,7 +105,7 @@ object VanillaImmersion {
     }
 
     init {
-        MinecraftForge.EVENT_BUS.register(BlockRegistration)
+        MinecraftForge.EVENT_BUS.register(Blocks)
         MinecraftForge.EVENT_BUS.register(Items)
         MinecraftForge.EVENT_BUS.register(Sounds)
     }
@@ -130,6 +136,8 @@ object VanillaImmersion {
             3, Side.SERVER)
         NETWORK.registerMessage(BeaconScroll.Handler, BeaconScroll.Message::class.java,
             4, Side.SERVER)
+        NETWORK.registerMessage(CraftingDrawerStartAnimation.Handler, CraftingDrawerStartAnimation.Message::class.java,
+            5, Side.CLIENT)
         NetworkRegistry.INSTANCE.registerGuiHandler(this, GuiHandler())
 
         PROXY.preInit(event)
@@ -147,12 +155,20 @@ object VanillaImmersion {
     /**
      * Holder object for all blocks introduced by this mod.
      */
-    object BlockRegistration {
+    object Blocks {
+        /**
+         * Drawer for crafting guide book
+         */
+        @JvmStatic
+        @ObjectHolder("vimmersion:drawer")
+        lateinit var CRAFTING_DRAWER: Block
+
         /**
          * Initializes and registers blocks and related data
          */
         @SubscribeEvent
         fun init(event: RegistryEvent.Register<Block>) {
+            event.registry.register(CraftingDrawer())
             // TODO: Unify interaction handling?
             if (!Configuration.shouldKeepVanilla("furnace")) {
                 LOG.info("Overriding furnace with immersive version!")
@@ -249,6 +265,8 @@ object VanillaImmersion {
          * Performs pre-initialization tasks for the proxy's side.
          */
         fun preInit(event: FMLPreInitializationEvent)
+
+        fun loadStateMachine(location: String, vararg parameters: Pair<String, ITimeValue>): IAnimationStateMachine?
     }
 
     /**
@@ -288,6 +306,9 @@ object VanillaImmersion {
             MinecraftForge.EVENT_BUS.register(SubSelectionRenderer)
         }
 
+        override fun loadStateMachine(location: String, vararg parameters: Pair<String, ITimeValue>): IAnimationStateMachine? =
+            ModelLoaderRegistry.loadASM(ResourceLocation(MODID, "asms/$location.json"), ImmutableMap.copyOf(mapOf(*parameters)))
+
         companion object {
             private object OverrideStateMapper : StateMapperBase() {
                 override fun getModelResourceLocation(state: IBlockState) =
@@ -303,23 +324,23 @@ object VanillaImmersion {
             fun registerModels(event: ModelRegistryEvent) {
                 ModelLoader.setCustomModelResourceLocation(Items.HAMMER, 0, ModelResourceLocation("$MODID:hammer", "inventory"))
                 if (!Configuration.shouldKeepVanilla("furnace")) {
-                    ModelLoader.setCustomStateMapper(Blocks.FURNACE, OverrideStateMapper)
-                    ModelLoader.setCustomStateMapper(Blocks.LIT_FURNACE, OverrideStateMapper)
+                    ModelLoader.setCustomStateMapper(VBlocks.FURNACE, OverrideStateMapper)
+                    ModelLoader.setCustomStateMapper(VBlocks.LIT_FURNACE, OverrideStateMapper)
                 }
                 if (!Configuration.shouldKeepVanilla("crafting_table")) {
-                    ModelLoader.setCustomStateMapper(Blocks.CRAFTING_TABLE, OverrideStateMapper)
+                    ModelLoader.setCustomStateMapper(VBlocks.CRAFTING_TABLE, OverrideStateMapper)
                 }
                 if (!Configuration.shouldKeepVanilla("anvil")) {
-                    ModelLoader.setCustomStateMapper(Blocks.ANVIL, OverrideStateMapper)
+                    ModelLoader.setCustomStateMapper(VBlocks.ANVIL, OverrideStateMapper)
                 }
                 if (!Configuration.shouldKeepVanilla("enchanting_table")) {
-                    ModelLoader.setCustomStateMapper(Blocks.ENCHANTING_TABLE, OverrideStateMapper)
+                    ModelLoader.setCustomStateMapper(VBlocks.ENCHANTING_TABLE, OverrideStateMapper)
                 }
                 if (!Configuration.shouldKeepVanilla("brewing_stand")) {
-                    ModelLoader.setCustomStateMapper(Blocks.BREWING_STAND, OverrideStateMapper)
+                    ModelLoader.setCustomStateMapper(VBlocks.BREWING_STAND, OverrideStateMapper)
                 }
                 if (!Configuration.shouldKeepVanilla("beacon")) {
-                    ModelLoader.setCustomStateMapper(Blocks.BEACON, OverrideStateMapper)
+                    ModelLoader.setCustomStateMapper(VBlocks.BEACON, OverrideStateMapper)
                 }
             }
         }
@@ -332,5 +353,7 @@ object VanillaImmersion {
     class ServerProxy : Proxy {
         override fun preInit(event: FMLPreInitializationEvent) {
         }
+
+        override fun loadStateMachine(location: String, vararg parameters: Pair<String, ITimeValue>): IAnimationStateMachine? = null
     }
 }
