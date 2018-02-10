@@ -9,6 +9,7 @@
         "Brewing Stand model doesn't have empty spots anymore",
         "Bottles on brewing stand are rendered in the correct location",
         "Non-empty item stacks should be properly handled everywhere now",
-        "Right clicking blocks no longer causes random crashes"
+        "Right clicking blocks no longer causes random crashes",
+        "Hammering the anvil no longer crashes on servers due to failed particle sending"
     ]
 }

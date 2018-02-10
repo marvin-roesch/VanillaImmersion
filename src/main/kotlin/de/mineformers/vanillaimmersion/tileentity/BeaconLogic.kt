@@ -94,8 +94,6 @@ open class BeaconLogic : TileEntityBeacon() {
             state = null
     }
 
-    override fun getRenderBoundingBox(): AxisAlignedBB = INFINITE_EXTENT_AABB // Required since base implementation does a block check
-
     override fun writeToNBT(compound: NBTTagCompound): NBTTagCompound {
         val result = super.writeToNBT(compound)
         // Write the editing state to NBT if in edit mode

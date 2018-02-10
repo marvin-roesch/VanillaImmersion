@@ -43,7 +43,6 @@ internal interface RenderingProxy {
      * Property holding the current partial ticks.
      */
     val partialTicks: Float
-        get
 
     /**
      * Gets the eye position of an entity in a safe manner.

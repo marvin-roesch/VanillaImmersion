@@ -360,12 +360,12 @@ open class AnvilLogic : TileEntity(), SubSelections {
             val mY = rand.nextGaussian() * 0.002
             val mZ = rand.nextGaussian() * 0.002
             val material = this[Slot.INPUT_MATERIAL]
-            val item = if (!material.isEmpty && rand.nextBoolean()) material.item else this[Slot.INPUT_OBJECT].item
+            val particleStack = if (!material.isEmpty && rand.nextBoolean()) material else this[Slot.INPUT_OBJECT]
             world.spawnParticle(
                 EnumParticleTypes.ITEM_CRACK,
                 pos.x + 0.5 + dX, pos.y + 1.2 + dY, pos.z + 0.5 + dZ, 1,
                 mX, mY, mZ, .0,
-                Item.getIdFromItem(item)
+                Item.getIdFromItem(particleStack.item), particleStack.metadata
             )
         }
         if (!player.capabilities.isCreativeMode) {

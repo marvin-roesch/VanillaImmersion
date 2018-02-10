@@ -227,10 +227,7 @@ object SubSelectionHandler {
      */
     fun rayTrace(player: EntityPlayer, pos: BlockPos, boxes: List<SelectionBox>): SelectionBox? {
         val result = Rays.rayTraceBoxes(player, boxes.map { it.bounds.rotateY(it.rotation).offset(pos) })
-        if (result == -1)
-            return null
-        else
-            return boxes[result]
+        return if (result == -1) null else boxes[result]
     }
 
     /**
