@@ -40,9 +40,10 @@
         "1.10.2-latest": "0.0.9.0",
         "1.12-latest": "2.0.2.4",
         "1.9.4-latest": "0.0.6.0",
-        "1.12.2-latest": "2.0.3.0"
+        "1.12.2-latest": "2.0.3.1"
     },
     "1.12.2": {
-        "2.0.3.0": "Change: Update to MC 1.12.2 as base\nChange: New Forgelin dependency: 1.6.0 (Kotlin 1.2)\nChange: Brewing stands now always accept fuel when clicking the rod\nFix: Brewing Stand model doesn't have empty spots anymore\nFix: Bottles on brewing stand are rendered in the correct location\nFix: Non-empty item stacks should be properly handled everywhere now\nFix: Right clicking blocks no longer causes random crashes\nFix: Hammering the anvil no longer crashes on servers due to failed particle sending"
+        "2.0.3.0": "Change: Update to MC 1.12.2 as base\nChange: New Forgelin dependency: 1.6.0 (Kotlin 1.2)\nChange: Brewing stands now always accept fuel when clicking the rod\nFix: Brewing Stand model doesn't have empty spots anymore\nFix: Bottles on brewing stand are rendered in the correct location\nFix: Non-empty item stacks should be properly handled everywhere now\nFix: Right clicking blocks no longer causes random crashes\nFix: Hammering the anvil no longer crashes on servers due to failed particle sending",
+        "2.0.3.1": "Change: Update to MC 1.12.2 as base\nChange: New Forgelin dependency: 1.6.0 (Kotlin 1.2)\nChange: Brewing stands now always accept fuel when clicking the rod\nFix: Brewing Stand model doesn't have empty spots anymore\nFix: Bottles on brewing stand are rendered in the correct location\nFix: Non-empty item stacks should be properly handled everywhere now\nFix: Right clicking blocks no longer causes random crashes\nFix: Hammering the anvil no longer crashes on servers due to failed particle sending"
     }
 }

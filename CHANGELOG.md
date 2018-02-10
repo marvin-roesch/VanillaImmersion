@@ -1,7 +1,7 @@
 Changelog
 =========
 
-### Version 2.0.3.0 for Minecraft 1.12.2
+### Version 2.0.3.1 for Minecraft 1.12.2
 **Note:** This version of the mod requires at least Forge version *1.12.2-14.23.1.2582*.
   - **Changes**
     - Update to MC 1.12.2 as base

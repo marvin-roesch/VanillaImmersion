@@ -250,7 +250,7 @@ if (cfApi != null) {
 
             relations {
                 requiredLibrary 'shadowfacts-forgelin'
-                optionalLibrary 'just-enough-items-jei'
+                optionalLibrary 'jei'
             }
 
             mainArtifact(shadowJar) {
