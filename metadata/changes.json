@@ -3,6 +3,7 @@
     "changes": [
     ],
     "fixes": [
-        "Player-dependent (e.g. RecipeStages) recipes should generally work now"
+        "Player-dependent (e.g. RecipeStages) recipes should generally work now",
+        "The anvil's max text length matches Vanilla now and longer strings don't cause crashes anymore"
     ]
 }
