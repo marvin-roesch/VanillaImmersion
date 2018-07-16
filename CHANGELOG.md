@@ -1,6 +1,14 @@
 Changelog
 =========
 
+### Version 2.0.3.2 for Minecraft 1.12.2
+**Note:** This version of the mod requires at least Forge version *1.12.2-14.23.1.2582*.
+  - **Fixes**
+    - Player-dependent (e.g. RecipeStages) recipes should generally work now
+    - The anvil's max text length matches Vanilla now and longer strings don't cause crashes anymore
+    - Toggling a block's config outside of a dev environment doesn't crash the game anymore
+    - Mods like Better with Mods and others that add overrides should now be (more) compatible
+
 ### Version 2.0.3.1 for Minecraft 1.12.2
 **Note:** This version of the mod requires at least Forge version *1.12.2-14.23.1.2582*.
   - **Changes**
