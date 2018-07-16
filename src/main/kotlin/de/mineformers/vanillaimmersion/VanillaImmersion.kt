@@ -187,13 +187,6 @@ object VanillaImmersion {
             }
         }
 
-        @SubscribeEvent
-        fun onMissingMappings(event: RegistryEvent.MissingMappings<Block>) {
-            for (mapping in event.mappings) {
-                mapping.remap(ForgeRegistries.BLOCKS.getValue(ResourceLocation("minecraft", mapping.key.resourcePath)))
-            }
-        }
-
         private fun <T : TileEntity> registerTileEntity(clazz: Class<T>, name: String) {
             GameRegistry.registerTileEntity(clazz, "minecraft:$name")
         }
@@ -213,13 +206,6 @@ object VanillaImmersion {
         @SubscribeEvent
         fun init(event: RegistryEvent.Register<Item>) {
             event.registry.register(Hammer())
-        }
-
-        @SubscribeEvent
-        fun onMissingMappings(event: RegistryEvent.MissingMappings<Item>) {
-            for (mapping in event.mappings) {
-                mapping.remap(ForgeRegistries.ITEMS.getValue(ResourceLocation("minecraft", mapping.key.resourcePath)))
-            }
         }
     }
 
