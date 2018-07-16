@@ -117,8 +117,8 @@ class KeepVanillaEntry(owningScreen: GuiConfig, owningEntryList: GuiConfigEntrie
                 override fun mouseClicked(x: Int, y: Int, mouseEvent: Int) = Unit
 
                 override fun mousePressed(slotIndex: Int, x: Int, y: Int, mouseEvent: Int, relativeX: Int, relativeY: Int): Boolean {
-                    if (this.btnValue.mousePressed(owningEntryList.mc, x, y)) {
-                        btnValue.playPressSound(owningEntryList.mc.soundHandler)
+                    if (this.btnValue.mousePressed(mc, x, y)) {
+                        btnValue.playPressSound(mc.soundHandler)
                         value = !value
                         isChanged = value != startValue
                         recalculateState()
