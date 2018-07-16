@@ -325,8 +325,11 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
 
         // Initialize the crafting matrix, either via a real crafting container if there is a player or
         // via a dummy inventory if there is none
-        val matrix = createContainer(player, false).craftMatrix
+        val container = createContainer(player, false)
+        player.openContainer = container
+        val matrix = container.craftMatrix
         val result = CraftingManager.findMatchingResult(matrix, world)
+        player.closeScreen()
         // There is no need to craft if there already is the same result
         if (this[Slot.OUTPUT].equal(result))
             return
@@ -342,9 +345,12 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
             return true
         // Create a crafting container and fill it with ingredients
         val container = createContainer(player, simulate)
+        player.openContainer = container
+        container.onCraftMatrixChanged(container.craftMatrix)
         val craftingSlot = container.getSlot(0)
         val dropped = craftingSlot.decrStackSize(result.count)
         if (dropped.isEmpty) {
+            player.closeScreen()
             return false
         }
         // Imitate a player picking up an item from the output slot
@@ -356,6 +362,7 @@ open class CraftingTableLogic : TileEntity(), SubSelections {
             this[Slot.OUTPUT] = ItemStack.EMPTY
         }
         craft(player)
+        player.closeScreen()
         return true
     }
 

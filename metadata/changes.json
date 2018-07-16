@@ -1,15 +1,8 @@
 {
     "additions": [],
     "changes": [
-        "Update to MC 1.12.2 as base",
-        "New Forgelin dependency: 1.6.0 (Kotlin 1.2)",
-        "Brewing stands now always accept fuel when clicking the rod"
     ],
     "fixes": [
-        "Brewing Stand model doesn't have empty spots anymore",
-        "Bottles on brewing stand are rendered in the correct location",
-        "Non-empty item stacks should be properly handled everywhere now",
-        "Right clicking blocks no longer causes random crashes",
-        "Hammering the anvil no longer crashes on servers due to failed particle sending"
+        "Player-dependent (e.g. RecipeStages) recipes should generally work now"
     ]
 }
