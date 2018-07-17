@@ -3,9 +3,6 @@
     "changes": [
     ],
     "fixes": [
-        "Player-dependent (e.g. RecipeStages) recipes should generally work now",
-        "The anvil's max text length matches Vanilla now and longer strings don't cause crashes anymore",
-        "Toggling a block's config outside of a dev environment doesn't crash the game anymore",
-        "Mods like Better with Mods and others that add overrides should now be (more) compatible"
+        "Make crafting table search GUI full height to prevent issues with JEI search bar centering"
     ]
 }

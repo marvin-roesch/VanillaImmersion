@@ -17,7 +17,7 @@ class CraftingTableGui(container: Container) : GuiContainer(container) {
         guiLeft = 0
         guiTop = 0
         xSize = 0
-        ySize = 0
+        ySize = height
     }
 
     override fun drawGuiContainerBackgroundLayer(partialTicks: Float, mouseX: Int, mouseY: Int) {
