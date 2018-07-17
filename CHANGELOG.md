@@ -1,6 +1,11 @@
 Changelog
 =========
 
+### Version 2.0.3.3 for Minecraft 1.12.2
+**Note:** This version of the mod requires at least Forge version *1.12.2-14.23.1.2582*.
+  - **Fixes**
+    - Make crafting table search GUI full height to prevent issues with JEI search bar centering
+
 ### Version 2.0.3.2 for Minecraft 1.12.2
 **Note:** This version of the mod requires at least Forge version *1.12.2-14.23.1.2582*.
   - **Fixes**
